@@ -22,10 +22,12 @@ public class FosUser
     public DateTime? LastLogin { get; set; }
     public string ConfirmationToken { get; set; }
     public DateTime? PasswordRequestedAt { get; set; }
+
     /// <summary>
-    /// (DC2Type:array)
+    ///     (DC2Type:array)
     /// </summary>
     public string Roles { get; set; }
+
     public string Name { get; set; }
     public int? FacultyId { get; set; }
     public int? PermissionId { get; set; }
