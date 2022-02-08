@@ -1,0 +1,23 @@
+﻿using LessonPlanningSystem.PlanGenerators.Enums;
+
+namespace LessonPlanningSystem.PlanGenerators.Models;
+
+public class Classroom
+{
+    public Classroom()
+    {
+        CourseVsRooms = new HashSet<CourseVsRoom>();
+        TimeTables = new HashSet<TimeTable>();
+    }
+
+    public int Id { get; set; }
+    public int Capacity { get; set; }
+    public int BuildingId { get; set; }
+    public int DepartmentId { get; set; }
+    public RoomType RoomType { get; set; }
+
+    public Building Building { get; set; }
+    public Department Department { get; set; }
+    public ICollection<CourseVsRoom> CourseVsRooms { get; set; }
+    public ICollection<TimeTable> TimeTables { get; set; }
+}
