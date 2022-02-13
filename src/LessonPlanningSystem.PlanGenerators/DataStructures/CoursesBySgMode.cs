@@ -12,10 +12,25 @@ public class CoursesBySgMode
     private readonly List<int> _specialCourses;
     private readonly List<int> _normalCourses;
     
+    /// <summary>
+    /// Courses ids with <see cref="SubgroupMode.Mode5"/> and <see cref="SubgroupMode.Mode6"/>
+    /// </summary>
     public IReadOnlyList<int> SubgroupMode5N6Courses => _subgroupMode5N6Courses;
+    /// <summary>
+    /// Courses ids with <see cref="SubgroupMode.Mode4"/>
+    /// </summary>
     public IReadOnlyList<int> SubgroupMode4Courses => _subgroupMode4Courses;
+    /// <summary>
+    /// Courses ids with <see cref="SubgroupMode.Mode3"/>
+    /// </summary>
     public IReadOnlyList<int> SubgroupMode3Courses => _subgroupMode3Courses;
+    /// <summary>
+    /// Courses ids that have special requirements for rooms
+    /// </summary>
     public IReadOnlyList<int> SpecialCourses => _specialCourses;
+    /// <summary>
+    /// Ordinary courses ids
+    /// </summary>
     public IReadOnlyList<int> NormalCourses => _normalCourses;
 
     public CoursesBySgMode()
@@ -51,7 +66,7 @@ public class CoursesBySgMode
             case SubgroupMode.Mode1:
             case SubgroupMode.Mode0:
             default: {
-                if (course.CourseVsRooms?.Count != null) _specialCourses.Add(course.Id);
+                if (course.CourseVsRooms != null && course.CourseVsRooms.Any()) _specialCourses.Add(course.Id);
                 else _normalCourses.Add(course.Id);
             } break;
         }

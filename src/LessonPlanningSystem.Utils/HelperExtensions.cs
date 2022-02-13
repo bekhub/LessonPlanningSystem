@@ -4,7 +4,8 @@ public static class HelperExtensions
 {
     /// <summary>
     /// <a href="https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle">Fisher–Yates shuffle</a> algorithm.
-    /// Shuffles a copy of a given list. Taken from <a href="https://stackoverflow.com/a/1262619/16976426">here</a>
+    /// Shuffles a copy of a given list. The method is thread-safe.
+    /// Taken from <a href="https://stackoverflow.com/a/1262619/16976426">here</a>
     /// </summary>
     /// <param name="items">list of items to shuffle</param>
     /// <typeparam name="TItem">generic item type</typeparam>
@@ -23,7 +24,8 @@ public static class HelperExtensions
     }
 
     /// <summary>
-    /// Shuffles a copy of a given list. Generates a full sequence of random indexes of list size.
+    /// Shuffles a copy of a given list. The method is thread-safe.
+    /// Generates a full sequence of random indexes of list size.
     /// </summary>
     /// <param name="items">list of items to shuffle</param>
     /// <typeparam name="TItem">generic item type</typeparam>

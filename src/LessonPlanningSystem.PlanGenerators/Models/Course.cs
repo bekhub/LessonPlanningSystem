@@ -2,7 +2,7 @@
 
 namespace LessonPlanningSystem.PlanGenerators.Models;
 
-public record Course
+public class Course
 {
     public int Id { get; init; }
     public int TheoryHours { get; init; }
@@ -26,4 +26,8 @@ public record Course
     public Teacher Teacher { get; init; }
     public Faculty Faculty { get; init; }
     public ICollection<CourseVsRoom> CourseVsRooms { get; init; }
+    
+    public List<int> GetRoomIdsForSpecialCourses(LessonType lessonType) {
+        return CourseVsRooms.Where(x => x.LessonType == lessonType).Select(x => x.ClassroomId).ToList();
+    }
 }
