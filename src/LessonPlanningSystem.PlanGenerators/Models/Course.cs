@@ -7,7 +7,7 @@ public class Course
     public int Id { get; init; }
     public int TheoryHours { get; init; }
     public int PracticeHours { get; init; }
-    public int MaxStudents { get; init; }
+    public int MaxStudentsNumber { get; init; }
     public string Code { get; init; }
     public int Credits { get; init; }
     public SubgroupMode SubgroupMode { get; init; }

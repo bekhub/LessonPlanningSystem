@@ -20,4 +20,14 @@ public class Classroom
     public Department Department { get; set; }
     public ICollection<CourseVsRoom> CourseVsRooms { get; set; }
     public ICollection<TimeTable> TimeTables { get; set; }
+
+    public int GetRoomTime(int hour)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetRoomTime(int hour, int lessonPlanCourseId)
+    {
+        throw new NotImplementedException();
+    }
 }

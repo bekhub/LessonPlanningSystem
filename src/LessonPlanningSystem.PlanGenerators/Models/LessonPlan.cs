@@ -7,7 +7,7 @@ public class LessonPlan
     public int CourseId { get; set; }
     public string EducationalYear { get; set; }
     public Semester Semester { get; set; }
-    public int? ClassroomId { get; set; }
+    public int ClassroomId { get; set; }
     public LessonType LessonType { get; set; }
     public int UnpositionedTheoryHours { get; set; }
     public int UnpositionedPracticeHours { get; set; }
@@ -32,5 +32,15 @@ public class LessonPlan
         UnpositionedPracticeHours += UnpositionedTheoryHours;
         UnpositionedTheoryHours = 0;
         return UnpositionedTheoryHours;
+    }
+
+    public int GetRoomId(int hour)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetCourseTime(int hour, int getRoomId)
+    {
+        throw new NotImplementedException();
     }
 }

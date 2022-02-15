@@ -11,4 +11,14 @@ public class Teacher
     public TeacherType TeacherType { get; set; }
     
     public bool IsFree() => false;
+
+    public int GetTeacherTime(int hour)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetTeacherTime(int hour, int courseId)
+    {
+        throw new NotImplementedException();
+    }
 }
