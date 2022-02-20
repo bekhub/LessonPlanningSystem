@@ -54,6 +54,7 @@ public class CoursesData
     {
         if (!_allCourses.TryAdd(course.Id, course)) return false;
 
+        
         switch(course.CourseType) {
             case CourseType.DepartmentMandatory when course.Teacher.TeacherType == TeacherType.LessonHourlyPaid:
                 DepartmentMandatoryCoursesLessonHourlyPaid.AddBySubgroupMode(course); break;
@@ -66,7 +67,7 @@ public class CoursesData
             case CourseType.GeneralMandatory: GeneralMandatoryCourses.AddBySubgroupMode(course); break;
             case CourseType.RemoteEducation: RemoteEducationCourses.AddBySubgroupMode(course); break;
             case CourseType.NonDepartmentalElective:
-            default: throw new Exception("Invalid course type!");
+            default: throw new ArgumentOutOfRangeException(nameof(course.CourseType), "Invalid course type!");
         }
 
         return true;

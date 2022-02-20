@@ -10,7 +10,7 @@ public static class HelperExtensions
     /// <param name="items">list of items to shuffle</param>
     /// <typeparam name="TItem">generic item type</typeparam>
     /// <returns>Shuffled copy of a given list</returns>
-    public static List<TItem> ShuffleOrdinary<TItem>(this IReadOnlyList<TItem> items)
+    public static List<TItem> ShuffleOrdinary<TItem>(this IReadOnlyCollection<TItem> items)
     {
         var itemsCopy = items.ToList();
         int currIdx = itemsCopy.Count;
@@ -30,7 +30,7 @@ public static class HelperExtensions
     /// <param name="items">list of items to shuffle</param>
     /// <typeparam name="TItem">generic item type</typeparam>
     /// <returns>Shuffled copy of a given list</returns>
-    public static List<TItem> FullShuffle<TItem>(this IReadOnlyList<TItem> items)
+    public static List<TItem> FullShuffle<TItem>(this IReadOnlyCollection<TItem> items)
     {
         var set = new HashSet<int>();
         var itemsCopy = items.ToList();

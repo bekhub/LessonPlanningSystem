@@ -7,7 +7,7 @@ public class Classroom
     public Classroom()
     {
         CourseVsRooms = new HashSet<CourseVsRoom>();
-        TimeTables = new HashSet<TimeTable>();
+        TimeTables = new HashSet<Timetable>();
     }
 
     public int Id { get; set; }
@@ -19,7 +19,7 @@ public class Classroom
     public Building Building { get; set; }
     public Department Department { get; set; }
     public ICollection<CourseVsRoom> CourseVsRooms { get; set; }
-    public ICollection<TimeTable> TimeTables { get; set; }
+    public ICollection<Timetable> TimeTables { get; set; }
 
     public int GetRoomTime(int hour)
     {

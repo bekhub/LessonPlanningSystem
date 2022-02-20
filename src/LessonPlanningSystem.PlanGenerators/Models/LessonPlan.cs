@@ -1,4 +1,5 @@
-﻿using LessonPlanningSystem.PlanGenerators.Enums;
+﻿using LessonPlanningSystem.Generator.ValueObjects;
+using LessonPlanningSystem.PlanGenerators.Enums;
 
 namespace LessonPlanningSystem.PlanGenerators.Models;
 
@@ -9,6 +10,7 @@ public class LessonPlan
     public Semester Semester { get; set; }
     public int ClassroomId { get; set; }
     public LessonType LessonType { get; set; }
+    public TimeSchedule TimeSchedule { get; set; }
     public int UnpositionedTheoryHours { get; set; }
     public int UnpositionedPracticeHours { get; set; }
 

@@ -21,4 +21,9 @@ public class Teacher
     {
         throw new NotImplementedException();
     }
+    
+    //This function checks if the teacher is free at the given time. Returns TRUE if the teacher is free
+    public bool CheckTeacherIsFree(int hour) {
+        return GetTeacherTime(hour) == 0;
+    }
 }

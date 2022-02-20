@@ -9,13 +9,14 @@ public class RandomPlanGenerator : IPlanGenerator
 {
     private readonly CoursesData _coursesData;
     private readonly ClassroomsData _classroomsData;
+    private readonly TimetableData _timetableData;
     private readonly BuildingsData _buildingsData;
     private readonly TeachersData _teachersData;
     private readonly LessonPlansData _lessonPlansData;
     private readonly PlanConfiguration _configuration;
     
     public RandomPlanGenerator(CoursesData coursesData, PlanConfiguration configuration, ClassroomsData classroomsData, 
-        BuildingsData buildingsData, TeachersData teachersData, LessonPlansData lessonPlansData)
+        BuildingsData buildingsData, TeachersData teachersData, LessonPlansData lessonPlansData, TimetableData timetableData)
     {
         _coursesData = coursesData;
         _configuration = configuration;
@@ -23,6 +24,7 @@ public class RandomPlanGenerator : IPlanGenerator
         _buildingsData = buildingsData;
         _teachersData = teachersData;
         _lessonPlansData = lessonPlansData;
+        _timetableData = timetableData;
     }
 
     public LessonPlan GenerateBestLessonPlan()
@@ -41,21 +43,21 @@ public class RandomPlanGenerator : IPlanGenerator
         
     }
 
-    private void FindPlaceForLesson(LessonPlan lessonPlan, LessonType lessonType, int round)
+    private void FindPlaceForLesson(Course course, LessonType lessonType, int round)
     {
-        var currSgMode = lessonPlan.Course.SubgroupMode;
+        var currSgMode = course.SubgroupMode;
         if (currSgMode <= SubgroupMode.Mode2 || currSgMode == SubgroupMode.Mode6 && lessonType == LessonType.Practice) {
-            var hoursNeeded = lessonPlan.RemainingHoursByLessonType(lessonType);
+            var hoursNeeded = _timetableData.RemainingHoursByLessonType(course, lessonType);
 
             if (hoursNeeded <= 0) return;
 
             // checks if there are still unpositioned LESSONS
             // Here specialRequirementsForCourse(i, 0) generates list of special rooms for this type of lessons of this course
             // specialRoomsList is the list of rooms to use.
-            var roomList = lessonPlan.Course.GetRoomIdsForSpecialCourses(lessonType);
+            var roomList = course.GetRoomIdsForSpecialCourses(lessonType);
 
             if (roomList.Count == 0) {                                        //If there are NOT any special requirements for the given course and this type of lessons
-                roomList = _classroomsData.GenerateRoomsList(lessonPlan.Course, lessonType, round);                // Generate list of rooms for lessons of this course
+                roomList = _classroomsData.GenerateRoomsList(course, lessonType, round);                // Generate list of rooms for lessons of this course
             }
 
             if (roomList == null) return;
@@ -72,20 +74,20 @@ public class RandomPlanGenerator : IPlanGenerator
                 //Here we chek if there is enough time until lunch or the end of the day for the hours needed
                 for (int l = 0; l < hoursNeeded; l++) {
                     //System.out.println("ders kodu: "+this.courses[i].getDersKodu()+" hoursNeeded: "+hoursNeeded+" hour: "+hour+" l=: "+l);
-                    if (lessonPlan.GetRoomId(hour + l) != 0)
+                    if (_timetableData.GetRoomIdByCourseAndHour(course.Id, hour + l) != 0)
                         courseIsFree = false;    //check if the course free at that time (may be the uygulama lesson at the same time but in the other room)
 
                     // check if the students are free at the given time
-                    if (!this.CheckStudentsAreFree(lessonPlan, lessonPlan.Course.DepartmentId, lessonPlan.Course.GradeYear, hour + l, round))
+                    if (!this.CheckStudentsAreFree(course, course.DepartmentId, course.GradeYear, hour + l, round))
                         studentsAreFree = false;
 
                     // check if the teacher is free at the given time
-                    if (!this.CheckTeacherIsFree(lessonPlan.Course.Teacher, hour + l))
+                    if (!this.CheckTeacherIsFree(course.Teacher, hour + l))
                         teacherIsFree = false;
                 }
 
                 // This function ensures that BZD of 1'st and 3'd level are positioned before noon, and BZD of 2'nd and 4'th level are positioned after noon
-                if (!this.CheckHourIsConvenientForCourse(lessonPlan.Course, hour, round))
+                if (!this.CheckHourIsConvenientForCourse(course, hour, round))
                     hourIsConvenientForCourse = false;
                 //if(!this.checkHourIsConvenientForCourse(i, hour+hoursNeeded, round)) hourIsConvenientForCourse = false;
 
@@ -100,7 +102,7 @@ public class RandomPlanGenerator : IPlanGenerator
                             if (_classroomsData.AllClassrooms[j].GetRoomTime(hour + l) != 0)
                                 roomIsFree = false;        //check if the room is free at that time
                         } catch (IndexOutOfRangeException e) {
-                            Console.WriteLine("Array Index out of bounds: Mode 1, Uygulama: j=" + j + " hour=" + hour + " course id=" + lessonPlan.CourseId);
+                            Console.WriteLine("Array Index out of bounds: Mode 1, Uygulama: j=" + j + " hour=" + hour + " course id=" + course.Id);
                         }
                     }
                     if (roomIsFree) listOfFreeRooms.Add(j);
@@ -108,7 +110,7 @@ public class RandomPlanGenerator : IPlanGenerator
 
                 var listOfCapacityMatchedRooms = new List<int>();
                 if (listOfFreeRooms.Count != 0) {
-                    listOfCapacityMatchedRooms = this.CheckCapacityMatch(lessonPlan.Course, listOfFreeRooms, lessonType);
+                    listOfCapacityMatchedRooms = this.CheckCapacityMatch(course, listOfFreeRooms, lessonType);
                     if (listOfCapacityMatchedRooms.Count > 0) capacityMatch = true;
                 }
 
@@ -116,30 +118,16 @@ public class RandomPlanGenerator : IPlanGenerator
                     for (int l = 0; l < hoursNeeded; l++) {
                         //j => array index of the room
                         foreach (int j in listOfCapacityMatchedRooms) {
-                            _classroomsData.AllClassrooms[j].SetRoomTime(hour + l, lessonPlan.CourseId);    // writing course ID
+                            _classroomsData.AllClassrooms[j].SetRoomTime(hour + l, course.Id);    // writing course ID
                         }
 
-                        lessonPlan.SetCourseTime(hour + l, _classroomsData.AllClassrooms[listOfCapacityMatchedRooms[0]].Id);            // writing room ID
-                        this.SetStudentsAreNotFree(lessonPlan.ClassroomId, lessonPlan.Course.GradeYear, hour + l, lessonPlan.CourseId);
-                        this.SetTeacherIsNotFree(lessonPlan.Course.Teacher, hour + l, lessonPlan.CourseId);
+                        course.SetCourseTime(hour + l, _classroomsData.AllClassrooms[listOfCapacityMatchedRooms[0]].Id);            // writing room ID
+                        this.SetStudentsAreNotFree(course.DepartmentId, course.GradeYear, hour + l, course.Id);
+                        this.SetTeacherIsNotFree(course.Teacher, hour + l, course.Id);
                     }
-
-                    //decreesing the hours of lessons
-                    if (lessonType == LessonType.Theory) lessonPlan.UnpositionedTheoryHours -= hoursNeeded;
-                    if (lessonType == LessonType.Practice) lessonPlan.UnpositionedPracticeHours -= hoursNeeded;
                 }
             }
         }
-    }
-
-    private void FindPlaceForTheoryLesson()
-    {
-        
-    }
-    
-    private void FindPlaceForPracticeLesson()
-    {
-        
     }
 
     // This function checks if the given course lessons will not devided by lunch time or end of the day
@@ -149,11 +137,6 @@ public class RandomPlanGenerator : IPlanGenerator
         return hour % _configuration.HoursPerDay <= _configuration.LunchAfterHour 
             ? hour % _configuration.HoursPerDay + hoursNeeded - 1 <= _configuration.LunchAfterHour 
             : hour % _configuration.HoursPerDay + hoursNeeded - 1 <= _configuration.HoursPerDay - 1;
-    }
-    
-    //This function checks if the teacher is free at the given time. Returns TRUE if the teacher is free
-    bool CheckTeacherIsFree(Teacher teacher, int hour) {
-        return teacher.GetTeacherTime(hour) == 0;
     }
     
     // This function checks if the studentds of the given year level and department are free at the given hour

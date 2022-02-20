@@ -5,7 +5,20 @@ namespace LessonPlanningSystem.PlanGenerators.Models;
 public class Course
 {
     public int Id { get; init; }
-    public int TheoryHours { get; init; }
+    private readonly int _theoryHours;
+    public int TheoryHours {
+        get {
+            return _theoryHours;
+        }
+        init {
+            if (value == 1 && PracticeHours is not 0 and < 3 && TheoryRoomType == PracticeRoomType) {
+                _theoryHours = 0;
+                PracticeHours += value;
+            } else {
+                _theoryHours = value;
+            }
+        }
+    }
     public int PracticeHours { get; init; }
     public int MaxStudentsNumber { get; init; }
     public string Code { get; init; }

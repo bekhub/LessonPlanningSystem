@@ -7,14 +7,12 @@ namespace LessonPlanningSystem.PlanGenerators.DataStructures;
 public class ClassroomsData
 {
     private readonly Dictionary<int, Classroom> _allClassrooms;
-    private readonly BuildingsData _buildingsData;
     private readonly PlanConfiguration _configuration;
 
     public IReadOnlyDictionary<int, Classroom> AllClassrooms => _allClassrooms;
 
-    public ClassroomsData(BuildingsData buildingsData, PlanConfiguration configuration)
+    public ClassroomsData(PlanConfiguration configuration)
     {
-        _buildingsData = buildingsData;
         _configuration = configuration;
         _allClassrooms = new Dictionary<int, Classroom>();
     }
@@ -26,75 +24,45 @@ public class ClassroomsData
     
     // This function generates the list of the rooms to use for the given course. if lessonType=0 -> teorik
     public List<int> GenerateRoomsList(Course course, LessonType lessonType, int round) {
-        List<int> roomsList = new();
-        List<int> capacityDifference = new();
+        var roomIdListSortedByCapacity = new List<(int roomId, int capacity)>(AllClassrooms.Count);
 
-        //If it is the fourth or more round we should find building ID of the Faculty to which current course belongs to.
-        int facultyBuildingId = 0;
-        if (round >= 4) {
-            facultyBuildingId = course.Faculty.BuildingId;
-        }
-
-        bool roomTypeMatch, departmentMatch; //, roomCapasityMatch;
-        foreach (var (j, classroom) in AllClassrooms) {
+        foreach (var classroom in AllClassrooms.Values) {
             var currentRoomType = classroom.RoomType;
             
             var roomTypeNeeded = lessonType == LessonType.Theory ? course.TheoryRoomType : course.PracticeRoomType;
 
-            roomTypeMatch = RoomTypeCheck(roomTypeNeeded, currentRoomType, round);
+            var roomTypeMatch = RoomTypeCheck(roomTypeNeeded, currentRoomType, round); //, roomCapacityMatch;
 
-            int currentRoomsBuildingId = classroom.BuildingId;
-            if (round <= 3)
-                departmentMatch = course.FacultyId == classroom.Department.FacultyId;        //check if the course and the room are belong to the same faculty
-            else {
-                if (round == 4) {    // In the fourth round we try to find rooms from the same building
-
-                    departmentMatch = currentRoomsBuildingId == facultyBuildingId;
-                } else {   // If round 5 than we should find rooms from neighbour buildings also
-                    int currentRoomDistanceInfo = 0;
-                    int facultyDistanceInfo = 0;
-                    foreach (var building in _buildingsData.AllBuildings.Values) {
-                        if (building.Id == currentRoomsBuildingId) {
-                            currentRoomDistanceInfo = building.DistanceNumber;
-                        }
-                        if (building.Id == facultyBuildingId) {
-                            facultyDistanceInfo = building.DistanceNumber;
-                        }
-                    }
+            bool departmentMatch;
+            switch (round) {
+                case <= 3:
+                    departmentMatch = course.FacultyId == classroom.Department.FacultyId;        //check if the course and the room are belong to the same faculty
+                    break;
+                case 4: // In the fourth round we try to find rooms from the same building
+                    departmentMatch = classroom.BuildingId == course.Faculty.BuildingId;
+                    break;
+                default: {
+                    // If round 5 than we should find rooms from neighbour buildings also
+                    var currentRoomDistanceInfo = classroom.Building.DistanceNumber;
+                    var facultyDistanceInfo = course.Faculty.Building.DistanceNumber;
                     departmentMatch = Math.Abs(facultyDistanceInfo - currentRoomDistanceInfo) <= _configuration.RadiusAroundBuilding;
+                    break;
                 }
             }
 
             if (roomTypeMatch && departmentMatch) {
-                roomsList.Add(j);                // Adding room index to the rooms list
-                capacityDifference.Add(classroom.Capacity);    // - course.getMaxOgrenciSayisi());
+                roomIdListSortedByCapacity.Add((classroom.Id, classroom.Capacity));
             }
         }
 
-        //If No convenient rooms have been found
-        if (roomsList.Count == 0) {
-            return null;
-        }
-
-        //Sort the list by Capasity Difference - ASC - buble algorithm
-        for (int i = roomsList.Count; i >= 2; i--)
-            for (int j = 0; j < i - 1; j++) {
-                if (capacityDifference[j] > capacityDifference[j + 1]) {
-                    int temp = capacityDifference[j];
-                    capacityDifference[j] = capacityDifference[j + 1];
-                    capacityDifference[j + 1] = temp;
-
-                    temp = roomsList[j];
-                    roomsList[j] = roomsList[j + 1];
-                    roomsList[j+ 1] = temp;
-                }
-            }
-
-        return roomsList;
+        return roomIdListSortedByCapacity.Count == 0 ? null : roomIdListSortedByCapacity
+            .OrderBy(x => x.capacity)
+            .Select(x => x.roomId)
+            .ToList();
     }
     
     // This function checks the room type
-    bool RoomTypeCheck(RoomType roomTypeNeeded, RoomType currentRoomType, int round) => round switch {
+    private bool RoomTypeCheck(RoomType roomTypeNeeded, RoomType currentRoomType, int round) => round switch {
         // If room type needed is equal to 1, it meens "herhangi bir oda"
         <= 2 when roomTypeNeeded == RoomType.Normal => 
             currentRoomType is RoomType.Normal or RoomType.WithTwoBoards or RoomType.WithProjector,

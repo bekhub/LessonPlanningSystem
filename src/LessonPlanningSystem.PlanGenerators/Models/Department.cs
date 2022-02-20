@@ -6,7 +6,6 @@ public class Department
     {
         Classrooms = new HashSet<Classroom>();
         Courses = new HashSet<Course>();
-        GradeYears = new HashSet<GradeYear>();
     }
 
     public int Id { get; set; }
@@ -17,5 +16,4 @@ public class Department
     public Faculty Faculty { get; set; }
     public ICollection<Classroom> Classrooms { get; set; }
     public ICollection<Course> Courses { get; set; }
-    public ICollection<GradeYear> GradeYears { get; set; }
 }
