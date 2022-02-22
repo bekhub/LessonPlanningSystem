@@ -1,5 +1,8 @@
-﻿namespace LessonPlanningSystem.Generator.ValueObjects;
+﻿namespace LessonPlanningSystem.PlanGenerators.ValueObjects;
 
+/// <summary>
+/// An immutable type that is distinguishable only by the state of its properties
+/// </summary>
 public abstract class ValueObject
 {
     protected static bool EqualOperator(ValueObject left, ValueObject right)

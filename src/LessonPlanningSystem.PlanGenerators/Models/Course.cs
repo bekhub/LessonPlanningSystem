@@ -1,24 +1,13 @@
-﻿using LessonPlanningSystem.PlanGenerators.Enums;
+﻿using LessonPlanningSystem.PlanGenerators.ValueObjects;
+using LessonPlanningSystem.PlanGenerators.Enums;
+using static LessonPlanningSystem.PlanGenerators.Configuration.StaticConfiguration;
 
 namespace LessonPlanningSystem.PlanGenerators.Models;
 
 public class Course
 {
     public int Id { get; init; }
-    private readonly int _theoryHours;
-    public int TheoryHours {
-        get {
-            return _theoryHours;
-        }
-        init {
-            if (value == 1 && PracticeHours is not 0 and < 3 && TheoryRoomType == PracticeRoomType) {
-                _theoryHours = 0;
-                PracticeHours += value;
-            } else {
-                _theoryHours = value;
-            }
-        }
-    }
+    public int TheoryHours { get; init; }
     public int PracticeHours { get; init; }
     public int MaxStudentsNumber { get; init; }
     public string Code { get; init; }
@@ -27,7 +16,7 @@ public class Course
     public int UnpositionedTheoryHours { get; init; }
     public int UnpositionedPracticeHours { get; init; }
     public Semester Semester { get; init; }
-    public int GradeYear { get; init; }
+    public GradeYear GradeYear { get; init; }
     public bool? DivideTheoryPractice { get; init; }
     public CourseType CourseType { get; init; }
     public int DepartmentId { get; init; }
@@ -40,7 +29,34 @@ public class Course
     public Faculty Faculty { get; init; }
     public ICollection<CourseVsRoom> CourseVsRooms { get; init; }
     
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="lessonType"></param>
+    /// <returns></returns>
     public List<int> GetRoomIdsForSpecialCourses(LessonType lessonType) {
-        return CourseVsRooms.Where(x => x.LessonType == lessonType).Select(x => x.ClassroomId).ToList();
+        return CourseVsRooms.Where(x => x.LessonType == lessonType)
+            .Select(x => x.ClassroomId).ToList();
+    }
+
+    /// <summary>
+    /// Ensures that BZD of 1'st and 3'd level are positioned before noon,
+    /// and BZD of 2'nd and 4'th level are positioned after noon
+    /// </summary>
+    /// <param name="time"></param>
+    /// <param name="round"></param>
+    /// <returns></returns>
+    public bool TimeIsConvenientForCourse(ScheduleTime time, int round) {
+        // This rule is not acceptable after first round
+        // This rule is not acceptable for the courses other than BZD
+        if (round > 2 || CourseType != CourseType.DepartmentMandatory)
+            return true;
+
+        // Todo: add check for hoursNeeded
+        return GradeYear switch {
+            GradeYear.First or GradeYear.Third => time.Hour % HoursPerDay <= 3,
+            GradeYear.Second or GradeYear.Fourth => time.Hour % HoursPerDay >= 4,
+            _ => true,
+        };
     }
 }

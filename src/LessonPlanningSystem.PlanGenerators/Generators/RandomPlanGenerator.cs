@@ -1,4 +1,5 @@
-﻿using LessonPlanningSystem.PlanGenerators.DataStructures;
+﻿using LessonPlanningSystem.PlanGenerators.ValueObjects;
+using LessonPlanningSystem.PlanGenerators.DataStructures;
 using LessonPlanningSystem.PlanGenerators.Configuration;
 using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
@@ -12,18 +13,16 @@ public class RandomPlanGenerator : IPlanGenerator
     private readonly TimetableData _timetableData;
     private readonly BuildingsData _buildingsData;
     private readonly TeachersData _teachersData;
-    private readonly LessonPlansData _lessonPlansData;
     private readonly PlanConfiguration _configuration;
     
     public RandomPlanGenerator(CoursesData coursesData, PlanConfiguration configuration, ClassroomsData classroomsData, 
-        BuildingsData buildingsData, TeachersData teachersData, LessonPlansData lessonPlansData, TimetableData timetableData)
+        BuildingsData buildingsData, TeachersData teachersData, TimetableData timetableData)
     {
         _coursesData = coursesData;
         _configuration = configuration;
         _classroomsData = classroomsData;
         _buildingsData = buildingsData;
         _teachersData = teachersData;
-        _lessonPlansData = lessonPlansData;
         _timetableData = timetableData;
     }
 
@@ -61,6 +60,15 @@ public class RandomPlanGenerator : IPlanGenerator
             }
 
             if (roomList == null) return;
+            foreach (var time in ScheduleTime.GetWeekScheduleTimes()) {
+                if (!ScheduleTime.NotLunchOrEndOfDay(time.Hour, hoursNeeded) || 
+                    !_timetableData.ScheduleTimeIsFree(course, time, hoursNeeded, round) ||
+                    //if(!this.checkHourIsConvenientForCourse(i, hour+hoursNeeded, round)) hourIsConvenientForCourse = false;
+                    !course.TimeIsConvenientForCourse(time, round)) continue;
+                
+                var capacityMatch = false;
+                
+            }
 
             for (int hour = 0; hour <= _configuration.WeekHoursNumber - hoursNeeded; hour++) {
                 var capacityMatch = false;
@@ -69,12 +77,12 @@ public class RandomPlanGenerator : IPlanGenerator
                 var teacherIsFree = true;
                 var hourIsConvenientForCourse = true;
 
-                if (!this.CheckTimeForLunchOrEndOfDay(hour, hoursNeeded)) continue;
-
                 //Here we chek if there is enough time until lunch or the end of the day for the hours needed
+                if (!this.CheckTimeForLunchOrEndOfDay(hour, hoursNeeded)) continue;
+                
                 for (int l = 0; l < hoursNeeded; l++) {
                     //System.out.println("ders kodu: "+this.courses[i].getDersKodu()+" hoursNeeded: "+hoursNeeded+" hour: "+hour+" l=: "+l);
-                    if (_timetableData.GetRoomIdByCourseAndHour(course.Id, hour + l) != 0)
+                    if (_timetableData.CourseIsFree(course.Id, hour + l) != 0)
                         courseIsFree = false;    //check if the course free at that time (may be the uygulama lesson at the same time but in the other room)
 
                     // check if the students are free at the given time
@@ -138,45 +146,7 @@ public class RandomPlanGenerator : IPlanGenerator
             ? hour % _configuration.HoursPerDay + hoursNeeded - 1 <= _configuration.LunchAfterHour 
             : hour % _configuration.HoursPerDay + hoursNeeded - 1 <= _configuration.HoursPerDay - 1;
     }
-    
-    // This function checks if the studentds of the given year level and department are free at the given hour
-    bool CheckStudentsAreFree(LessonPlan courseIndex, int departmentId, int yearLevel, int hour, int round) { 
-        int j = 0;
 
-        var lessonPlan = _lessonPlansData.AlLessonPlans.Values.Where(x =>
-            x.Course.DepartmentId == departmentId && x.Course.GradeYear == yearLevel);
-        
-        // Search for the desired row
-        try {
-            foreach (var lessonPlan in _lessonPlansData.AlLessonPlans.Values) {
-                if (lessonPlan.Course.DepartmentId == departmentId && lessonPlan.Course.GradeYear == yearLevel) break;
-            }
-            while (true) {
-                if ((this.studentsTimetable[j].getDepartmentID() == departmentId) && (this.studentsTimetable[j].getYearLevel() == yearLevel))
-                    break;
-                else j++;
-            }
-        } catch (IndexOutOfRangeException e) {
-            Console.WriteLine("Exception from checkStudentsAreFree: department" + departmentId + " year level: " + yearLevel + " courseIndex: " + courseIndex + " error: " + e);
-        }
-
-        // If students are free - return true! If students are not free, then check the course type. 
-        // If course type at given time is BISD and the type of the course to put is also BISD - return true (can put BISD courses at the same time)
-        // Otherwise return false;
-        int courseID = this.studentsTimetable[j].getGradeYearTime(hour);
-
-        try {
-            if (courseID == BOOKED) return false;
-            if (courseID == 0) return true;
-            else {
-                return (this.courses[this.findCourseIndexByID(courseID)].getCourseType() == this.courses[courseIndex].getCourseType()) && (this.courses[courseIndex].getCourseType() == 2) && (round > 1);
-            }
-        } catch (IndexOutOfRangeException e) {
-            Console.WriteLine("Exception from checkStudentsAreFree: department" + departmentId + " year level: " + yearLevel + " courseIndex: " + courseIndex + " Found course ID: " + courseID + " course index: " + this.findCourseIndexByID(courseID) + " error: " + e);
-            throw;
-        }
-    }
-    
     // This function ensures that BZD of 1'st and 3'd level are positioned before noon, and BZD of 2'nd and 4'th level are positioned after noon
     bool CheckHourIsConvenientForCourse(Course course, int hour, int round) {
         // i => index of the course
