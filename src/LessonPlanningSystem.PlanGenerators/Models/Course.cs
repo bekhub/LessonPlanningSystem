@@ -34,9 +34,9 @@ public class Course
     /// </summary>
     /// <param name="lessonType"></param>
     /// <returns></returns>
-    public List<int> GetRoomIdsForSpecialCourses(LessonType lessonType) {
+    public IEnumerable<int> GetRoomIdsForSpecialCourses(LessonType lessonType) {
         return CourseVsRooms.Where(x => x.LessonType == lessonType)
-            .Select(x => x.ClassroomId).ToList();
+            .Select(x => x.ClassroomId);
     }
 
     /// <summary>
@@ -58,5 +58,15 @@ public class Course
             GradeYear.Second or GradeYear.Fourth => time.Hour % HoursPerDay >= 4,
             _ => true,
         };
+    }
+
+    /// <summary>
+    /// Room type by lesson type
+    /// </summary>
+    /// <param name="lessonType"></param>
+    /// <returns></returns>
+    public RoomType NeededRoomType(LessonType lessonType)
+    {
+        return lessonType == LessonType.Theory ? TheoryRoomType : PracticeRoomType;
     }
 }

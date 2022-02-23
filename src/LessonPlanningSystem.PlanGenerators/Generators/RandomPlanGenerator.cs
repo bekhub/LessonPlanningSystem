@@ -55,9 +55,9 @@ public class RandomPlanGenerator : IPlanGenerator
             // specialRoomsList is the list of rooms to use.
             var roomList = course.GetRoomIdsForSpecialCourses(lessonType);
 
-            if (roomList.Count == 0) {                                        //If there are NOT any special requirements for the given course and this type of lessons
-                roomList = _classroomsData.GenerateRoomsList(course, lessonType, round);                // Generate list of rooms for lessons of this course
-            }
+            //If there are NOT any special requirements for the given course and this type of lessons
+            if (roomList.Count == 0)
+                roomList = _classroomsData.GenerateRoomsList(course, lessonType, round);
 
             if (roomList == null) return;
             foreach (var time in ScheduleTime.GetWeekScheduleTimes()) {

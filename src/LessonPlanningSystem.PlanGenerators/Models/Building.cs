@@ -9,7 +9,7 @@ public class Building
     }
 
     public int Id { get; set; }
-    public int DistanceNumber { get; set; }
+    public int Distance { get; set; }
 
     public ICollection<Classroom> Classrooms { get; set; }
     public ICollection<Faculty> Faculties { get; set; }

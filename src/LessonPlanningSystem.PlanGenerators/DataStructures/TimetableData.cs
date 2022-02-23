@@ -6,22 +6,94 @@ namespace LessonPlanningSystem.PlanGenerators.DataStructures;
 
 public class TimetableData
 {
+    private readonly ClassroomsData _classroomsData;
+    
     /// <summary>
     /// Timetables by course id
     /// </summary>
-    public Dictionary<int, List<Timetable>> CoursesTimetable = new();
+    public Dictionary<int, Dictionary<ScheduleTime, Timetable>> CoursesTimetable = new();
     /// <summary>
     /// Timetables by classroom id
     /// </summary>
-    public Dictionary<int, List<Timetable>> ClassroomsTimetable = new();
+    public Dictionary<int, Dictionary<ScheduleTime, Timetable>> ClassroomsTimetable = new();
     /// <summary>
     /// Timetables by teacher code
     /// </summary>
-    public Dictionary<int, List<Timetable>> TeachersTimetable = new();
+    public Dictionary<int, Dictionary<ScheduleTime, Timetable>> TeachersTimetable = new();
     /// <summary>
     /// Timetables by students(department id and grade year)
     /// </summary>
     public Dictionary<(int DepartmentId, GradeYear GradeYear), List<Timetable>> StudentsTimetable = new();
+
+    public TimetableData(ClassroomsData classroomsData) {
+        _classroomsData = classroomsData;
+    }
+    
+    public void GenerateFreeRoomListByCourse(Course course, LessonType lessonType, ScheduleTime time, int round)
+    {
+        var roomIds = course.GetRoomIdsForSpecialCourses(lessonType);
+        if (!roomIds.Any()) roomIds = _classroomsData.GenerateRoomsList(course, lessonType, round);
+        roomIds = roomIds.Where(id => !ClassroomsTimetable[id].ContainsKey(time)).ToList();
+    }
+
+    //This function checks capacity match for the given list of rooms and returns the list of convenient rooms
+    private List<int> CheckCapacityMatch(Course course, List<int> listOfFreeRooms, LessonType lessonType) {
+        var listOfRooms = new List<int>();
+
+        if (lessonType == 0) {    // If the lesson type is Teorik lesson, then just simple check for capacity of room and course students number
+            foreach (int j in listOfFreeRooms) {
+                if (course.MaxStudentsNumber <= _classroomsData.AllClassrooms[j].Capacity + 10) {
+                    listOfRooms.Add(j);
+                    break;
+                }
+            }
+        } else {    // This means if lesson type is Uygulama, then find suitable room, if no room found - try to find two rooms
+
+            // at first let's try single room capacity match
+            foreach (int j in listOfFreeRooms) {
+                if (course.MaxStudentsNumber <= _classroomsData.AllClassrooms[j].Capacity + 10) {
+                    listOfRooms.Add(j);
+                    break;
+                }
+            }
+
+            if (course.PracticeRoomType is RoomType.WithComputers or RoomType.Laboratory) {
+                if (listOfRooms.Count == 0) {    // This means that there is not any room with enough capacity. So we need to find two rooms with total capacity that is enough for the course
+                    int arrayDimension = listOfFreeRooms.Count;
+                    var capacityTotals = new int[arrayDimension, arrayDimension];
+
+                    for (int column = 0; column < arrayDimension; column++) {
+                        for (int row = 0; row < arrayDimension; row++) {
+                            if (row > column) break;
+                            if (row == column)
+                                capacityTotals[row, column] = _classroomsData.AllClassrooms[listOfFreeRooms[row]].Capacity;
+                            else {
+                                capacityTotals[row, column] = _classroomsData.AllClassrooms[listOfFreeRooms[row]].Capacity + _classroomsData.AllClassrooms[listOfFreeRooms[column]].Capacity;
+                            }
+                        }
+                    }
+
+                    bool roomsFound = false;
+                    for (int column = 0; column < arrayDimension; column++) {
+                        for (int row = 0; row < arrayDimension; row++) {
+                            if (row > column) break;
+                            if (course.MaxStudentsNumber <= capacityTotals[row, column] + 10) {
+                                if (_classroomsData.AllClassrooms[listOfFreeRooms[row]].BuildingId == _classroomsData.AllClassrooms[listOfFreeRooms[column]].BuildingId) {
+                                    listOfRooms.Add(listOfFreeRooms[row]);
+                                    listOfRooms.Add(listOfFreeRooms[column]);
+                                    roomsFound = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (roomsFound) break;
+                    }
+                }
+
+            }
+        }
+        return listOfRooms;
+    }
 
     /// <summary>
     /// Checks if course, students and teacher are free at the given time
@@ -57,7 +129,7 @@ public class TimetableData
     /// <returns>True if the course is free</returns>
     public bool CourseIsFree(int courseId, ScheduleTime time)
     {
-        return CoursesTimetable[courseId].TrueForAll(x => x.ScheduleTime != time);
+        return !CoursesTimetable[courseId].ContainsKey(time);
     }
 
     /// <summary>
@@ -85,7 +157,7 @@ public class TimetableData
     /// <param name="time"></param>
     /// <returns>True if the teacher is free</returns>
     public bool TeacherIsFree(Teacher teacher, ScheduleTime time) {
-        return TeachersTimetable[teacher.Code].TrueForAll(x => x.ScheduleTime != time);
+        return !TeachersTimetable[teacher.Code].ContainsKey(time);
     }
     
     /// <summary>
@@ -108,7 +180,7 @@ public class TimetableData
     };
 
     private int UnpositionedTheoryHours(Course course) => 
-        course.TheoryHours - CoursesTimetable[course.Id].Count(x => x.LessonType == LessonType.Theory);
+        course.TheoryHours - CoursesTimetable[course.Id].Values.Count(x => x.LessonType == LessonType.Theory);
     private int UnpositionedPracticeHours(Course course) => 
-        course.PracticeHours - CoursesTimetable[course.Id].Count(x => x.LessonType == LessonType.Practice);
+        course.PracticeHours - CoursesTimetable[course.Id].Values.Count(x => x.LessonType == LessonType.Practice);
 }

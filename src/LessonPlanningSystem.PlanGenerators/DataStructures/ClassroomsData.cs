@@ -1,19 +1,18 @@
-﻿using LessonPlanningSystem.PlanGenerators.Configuration;
-using LessonPlanningSystem.PlanGenerators.Enums;
+﻿using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
+using static LessonPlanningSystem.PlanGenerators.Configuration.StaticConfiguration;
 
 namespace LessonPlanningSystem.PlanGenerators.DataStructures;
 
 public class ClassroomsData
 {
     private readonly Dictionary<int, Classroom> _allClassrooms;
-    private readonly PlanConfiguration _configuration;
-
+    
     public IReadOnlyDictionary<int, Classroom> AllClassrooms => _allClassrooms;
+    public SortedCollection<int, Classroom> SortedByCapacity;
 
-    public ClassroomsData(PlanConfiguration configuration)
+    public ClassroomsData()
     {
-        _configuration = configuration;
         _allClassrooms = new Dictionary<int, Classroom>();
     }
 
@@ -22,46 +21,32 @@ public class ClassroomsData
         return _allClassrooms.TryAdd(classroom.Id, classroom);
     }
     
-    // This function generates the list of the rooms to use for the given course. if lessonType=0 -> teorik
-    public List<int> GenerateRoomsList(Course course, LessonType lessonType, int round) {
-        var roomIdListSortedByCapacity = new List<(int roomId, int capacity)>(AllClassrooms.Count);
-
-        foreach (var classroom in AllClassrooms.Values) {
-            var currentRoomType = classroom.RoomType;
-            
-            var roomTypeNeeded = lessonType == LessonType.Theory ? course.TheoryRoomType : course.PracticeRoomType;
-
-            var roomTypeMatch = RoomTypeCheck(roomTypeNeeded, currentRoomType, round); //, roomCapacityMatch;
-
-            bool departmentMatch;
-            switch (round) {
-                case <= 3:
-                    departmentMatch = course.FacultyId == classroom.Department.FacultyId;        //check if the course and the room are belong to the same faculty
-                    break;
-                case 4: // In the fourth round we try to find rooms from the same building
-                    departmentMatch = classroom.BuildingId == course.Faculty.BuildingId;
-                    break;
-                default: {
-                    // If round 5 than we should find rooms from neighbour buildings also
-                    var currentRoomDistanceInfo = classroom.Building.DistanceNumber;
-                    var facultyDistanceInfo = course.Faculty.Building.DistanceNumber;
-                    departmentMatch = Math.Abs(facultyDistanceInfo - currentRoomDistanceInfo) <= _configuration.RadiusAroundBuilding;
-                    break;
-                }
-            }
-
-            if (roomTypeMatch && departmentMatch) {
-                roomIdListSortedByCapacity.Add((classroom.Id, classroom.Capacity));
-            }
-        }
-
-        return roomIdListSortedByCapacity.Count == 0 ? null : roomIdListSortedByCapacity
-            .OrderBy(x => x.capacity)
-            .Select(x => x.roomId)
-            .ToList();
+    /// <summary>
+    /// Generate list of rooms for lessons of this course
+    /// </summary>
+    /// <param name="course"></param>
+    /// <param name="lessonType"></param>
+    /// <param name="round"></param>
+    /// <returns></returns>
+    public IEnumerable<int> GenerateRoomsList(Course course, LessonType lessonType, int round) {
+        return from classroom in SortedByCapacity.Values
+            let roomTypeMatch = RoomTypeCheck(course.NeededRoomType(lessonType), classroom.RoomType, round)
+            let facultyDistance = course.Faculty.Building.Distance
+            let classroomDistance = classroom.Building.Distance
+            let departmentMatch = round switch {
+                <= 3 => course.FacultyId == classroom.Department.FacultyId, //check if the course and the room are belong to the same faculty
+                4 => classroom.BuildingId == course.Faculty.BuildingId, // In the fourth round we try to find rooms from the same building
+                _ => Math.Abs(facultyDistance - classroomDistance) <= RadiusAroundBuilding, // If round 5 than we should find rooms from neighbour buildings also
+            } where roomTypeMatch && departmentMatch select classroom.Id;
     }
     
-    // This function checks the room type
+    /// <summary>
+    /// This function checks the room type
+    /// </summary>
+    /// <param name="roomTypeNeeded"></param>
+    /// <param name="currentRoomType"></param>
+    /// <param name="round"></param>
+    /// <returns></returns>
     private bool RoomTypeCheck(RoomType roomTypeNeeded, RoomType currentRoomType, int round) => round switch {
         // If room type needed is equal to 1, it meens "herhangi bir oda"
         <= 2 when roomTypeNeeded == RoomType.Normal => 
