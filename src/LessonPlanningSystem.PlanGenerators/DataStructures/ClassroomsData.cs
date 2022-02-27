@@ -9,11 +9,14 @@ public class ClassroomsData
     private readonly Dictionary<int, Classroom> _allClassrooms;
     
     public IReadOnlyDictionary<int, Classroom> AllClassrooms => _allClassrooms;
-    public SortedCollection<int, Classroom> SortedByCapacity;
+    public IReadOnlyList<Classroom> SortedByCapacity { get; private set; }
+    
+    public readonly Action AddingEnded;
 
     public ClassroomsData()
     {
         _allClassrooms = new Dictionary<int, Classroom>();
+        AddingEnded += SortByCapacity;
     }
 
     public bool Add(Classroom classroom)
@@ -21,6 +24,11 @@ public class ClassroomsData
         return _allClassrooms.TryAdd(classroom.Id, classroom);
     }
     
+    private void SortByCapacity()
+    {
+        SortedByCapacity = _allClassrooms.Values.OrderBy(x => x.Capacity).ToList();
+    }
+
     /// <summary>
     /// Generate list of rooms for lessons of this course
     /// </summary>
@@ -28,8 +36,10 @@ public class ClassroomsData
     /// <param name="lessonType"></param>
     /// <param name="round"></param>
     /// <returns></returns>
-    public IEnumerable<int> GenerateRoomsList(Course course, LessonType lessonType, int round) {
-        return from classroom in SortedByCapacity.Values
+    /// Todo: make pre-calculation for each course. Maybe in multi-threading
+    public IEnumerable<Classroom> GenerateRoomsList(Course course, LessonType lessonType, int round)
+    {
+        return from classroom in SortedByCapacity 
             let roomTypeMatch = RoomTypeCheck(course.NeededRoomType(lessonType), classroom.RoomType, round)
             let facultyDistance = course.Faculty.Building.Distance
             let classroomDistance = classroom.Building.Distance
@@ -37,7 +47,7 @@ public class ClassroomsData
                 <= 3 => course.FacultyId == classroom.Department.FacultyId, //check if the course and the room are belong to the same faculty
                 4 => classroom.BuildingId == course.Faculty.BuildingId, // In the fourth round we try to find rooms from the same building
                 _ => Math.Abs(facultyDistance - classroomDistance) <= RadiusAroundBuilding, // If round 5 than we should find rooms from neighbour buildings also
-            } where roomTypeMatch && departmentMatch select classroom.Id;
+            } where roomTypeMatch && departmentMatch select classroom;
     }
     
     /// <summary>

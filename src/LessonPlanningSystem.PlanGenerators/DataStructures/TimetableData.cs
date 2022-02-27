@@ -1,4 +1,5 @@
-﻿using LessonPlanningSystem.PlanGenerators.Enums;
+﻿using System.Diagnostics.CodeAnalysis;
+using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
 using LessonPlanningSystem.PlanGenerators.ValueObjects;
 
@@ -13,86 +14,56 @@ public class TimetableData
     /// </summary>
     public Dictionary<int, Dictionary<ScheduleTime, Timetable>> CoursesTimetable = new();
     /// <summary>
-    /// Timetables by classroom id
+    /// Timetables by classroom id. Classroom can be used only once at the same time
     /// </summary>
     public Dictionary<int, Dictionary<ScheduleTime, Timetable>> ClassroomsTimetable = new();
     /// <summary>
-    /// Timetables by teacher code
+    /// Timetables by teacher code. Teacher can be in only one room at the same time
     /// </summary>
     public Dictionary<int, Dictionary<ScheduleTime, Timetable>> TeachersTimetable = new();
     /// <summary>
-    /// Timetables by students(department id and grade year)
+    /// Timetables by students(department id and grade year). Students can be in multiple rooms at the same time
     /// </summary>
     public Dictionary<(int DepartmentId, GradeYear GradeYear), List<Timetable>> StudentsTimetable = new();
 
     public TimetableData(ClassroomsData classroomsData) {
         _classroomsData = classroomsData;
     }
-    
-    public void GenerateFreeRoomListByCourse(Course course, LessonType lessonType, ScheduleTime time, int round)
+
+    public void AddTimetable(Timetable timetable)
     {
-        var roomIds = course.GetRoomIdsForSpecialCourses(lessonType);
-        if (!roomIds.Any()) roomIds = _classroomsData.GenerateRoomsList(course, lessonType, round);
-        roomIds = roomIds.Where(id => !ClassroomsTimetable[id].ContainsKey(time)).ToList();
+        throw new NotImplementedException();
+    }
+    
+    // Todo: make optimization
+    [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
+    public List<Classroom> GenerateFreeRoomListForCourse(Course course, LessonType lessonType, ScheduleTime time, int round)
+    {
+        // Todo: multiple same generation for course. Change this implementation 
+        var roomsForSpecialCourses = course.GetRoomsForSpecialCourses(lessonType).ToList();
+        var rooms = roomsForSpecialCourses.Any() ? roomsForSpecialCourses 
+            : _classroomsData.GenerateRoomsList(course, lessonType, round);
+        var freeRooms = rooms.Where(x => !ClassroomsTimetable[x.Id].ContainsKey(time));
+        var matchedByCapacity = freeRooms.Where(x => course.MaxStudentsNumber <= x.Capacity + 10).Take(1).ToList();
+        if (lessonType == LessonType.Theory || matchedByCapacity.Count > 0 ||
+            course.PracticeRoomType is not (RoomType.WithComputers or RoomType.Laboratory)) return matchedByCapacity;
+        return TwoRoomsByCapacity(course, freeRooms);
     }
 
-    //This function checks capacity match for the given list of rooms and returns the list of convenient rooms
-    private List<int> CheckCapacityMatch(Course course, List<int> listOfFreeRooms, LessonType lessonType) {
-        var listOfRooms = new List<int>();
-
-        if (lessonType == 0) {    // If the lesson type is Teorik lesson, then just simple check for capacity of room and course students number
-            foreach (int j in listOfFreeRooms) {
-                if (course.MaxStudentsNumber <= _classroomsData.AllClassrooms[j].Capacity + 10) {
-                    listOfRooms.Add(j);
-                    break;
+    //This function finds two rooms with total capacity that is enough for the course
+    private List<Classroom> TwoRoomsByCapacity(Course course, IEnumerable<Classroom> freeRooms)
+    {
+        foreach (var byBuilding in freeRooms.GroupBy(x => x.BuildingId)) {
+            var rooms = byBuilding.ToList();
+            for (int col = 0; col < rooms.Count; col++) {
+                for (int row = 0; row < col; row++) {
+                    var (rowRoom, colRoom) = (rooms[row], rooms[col]);
+                    int currentCapacity = rowRoom.Capacity + colRoom.Capacity;
+                    if (course.MaxStudentsNumber <= currentCapacity + 10) return new() { rowRoom, colRoom };
                 }
-            }
-        } else {    // This means if lesson type is Uygulama, then find suitable room, if no room found - try to find two rooms
-
-            // at first let's try single room capacity match
-            foreach (int j in listOfFreeRooms) {
-                if (course.MaxStudentsNumber <= _classroomsData.AllClassrooms[j].Capacity + 10) {
-                    listOfRooms.Add(j);
-                    break;
-                }
-            }
-
-            if (course.PracticeRoomType is RoomType.WithComputers or RoomType.Laboratory) {
-                if (listOfRooms.Count == 0) {    // This means that there is not any room with enough capacity. So we need to find two rooms with total capacity that is enough for the course
-                    int arrayDimension = listOfFreeRooms.Count;
-                    var capacityTotals = new int[arrayDimension, arrayDimension];
-
-                    for (int column = 0; column < arrayDimension; column++) {
-                        for (int row = 0; row < arrayDimension; row++) {
-                            if (row > column) break;
-                            if (row == column)
-                                capacityTotals[row, column] = _classroomsData.AllClassrooms[listOfFreeRooms[row]].Capacity;
-                            else {
-                                capacityTotals[row, column] = _classroomsData.AllClassrooms[listOfFreeRooms[row]].Capacity + _classroomsData.AllClassrooms[listOfFreeRooms[column]].Capacity;
-                            }
-                        }
-                    }
-
-                    bool roomsFound = false;
-                    for (int column = 0; column < arrayDimension; column++) {
-                        for (int row = 0; row < arrayDimension; row++) {
-                            if (row > column) break;
-                            if (course.MaxStudentsNumber <= capacityTotals[row, column] + 10) {
-                                if (_classroomsData.AllClassrooms[listOfFreeRooms[row]].BuildingId == _classroomsData.AllClassrooms[listOfFreeRooms[column]].BuildingId) {
-                                    listOfRooms.Add(listOfFreeRooms[row]);
-                                    listOfRooms.Add(listOfFreeRooms[column]);
-                                    roomsFound = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (roomsFound) break;
-                    }
-                }
-
             }
         }
-        return listOfRooms;
+        return new List<Classroom>();
     }
 
     /// <summary>
@@ -156,9 +127,7 @@ public class TimetableData
     /// <param name="teacher"></param>
     /// <param name="time"></param>
     /// <returns>True if the teacher is free</returns>
-    public bool TeacherIsFree(Teacher teacher, ScheduleTime time) {
-        return !TeachersTimetable[teacher.Code].ContainsKey(time);
-    }
+    public bool TeacherIsFree(Teacher teacher, ScheduleTime time) => !TeachersTimetable[teacher.Code].ContainsKey(time);
     
     /// <summary>
     /// 

@@ -34,9 +34,9 @@ public class Course
     /// </summary>
     /// <param name="lessonType"></param>
     /// <returns></returns>
-    public IEnumerable<int> GetRoomIdsForSpecialCourses(LessonType lessonType) {
+    public IEnumerable<Classroom> GetRoomsForSpecialCourses(LessonType lessonType) {
         return CourseVsRooms.Where(x => x.LessonType == lessonType)
-            .Select(x => x.ClassroomId);
+            .Select(x => x.Classroom);
     }
 
     /// <summary>
