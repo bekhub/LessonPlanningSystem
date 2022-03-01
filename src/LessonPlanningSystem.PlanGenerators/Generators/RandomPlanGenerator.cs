@@ -42,7 +42,7 @@ public class RandomPlanGenerator : IPlanGenerator
         
     }
 
-    private void FindPlaceForLesson(Course course, LessonType lessonType, int round)
+    private void FindPlaceForLesson(Course course, LessonType lessonType, Round round)
     {
         var currSgMode = course.SubgroupMode;
         if (currSgMode <= SubgroupMode.Mode2 || currSgMode == SubgroupMode.Mode6 && lessonType == LessonType.Practice) {
@@ -53,15 +53,25 @@ public class RandomPlanGenerator : IPlanGenerator
                     !_timetableData.ScheduleTimeIsFree(course, time, hoursNeeded, round) ||
                     //if(!this.checkHourIsConvenientForCourse(i, hour+hoursNeeded, round)) hourIsConvenientForCourse = false;
                     !course.TimeIsConvenientForCourse(time, round)) continue;
-                // Todo: change it, because it is not efficient.
-                var rooms = _timetableData.GenerateFreeRoomListForCourse(course, lessonType, time, round);
+                var rooms = FindFreeRooms(course, lessonType, time, round);
+                if (rooms == null || rooms.Count == 0) continue;
                 _timetableData.AddTimetable(new Timetable {
                     Course = course,
                     Classrooms = rooms,
                     LessonType = lessonType,
                     ScheduleTime = time,
                 });
+                break;
             }
         }
+    }
+
+    private List<Classroom> FindFreeRooms(Course course, LessonType lessonType, ScheduleTime time, Round round)
+    {
+        var freeRoom = _timetableData.FindFreeRoomWithMatchedCapacity(course, lessonType, time, round);
+        if (freeRoom != null) return new List<Classroom> { freeRoom };
+        if (lessonType == LessonType.Practice && course.PracticeRoomType is RoomType.WithComputers or RoomType.Laboratory)
+            return _timetableData.FindTwoFreeRoomsWithMatchedCapacity(course, lessonType, time, round);
+        return null;
     }
 }

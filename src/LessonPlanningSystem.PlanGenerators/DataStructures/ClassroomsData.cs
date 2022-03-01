@@ -1,4 +1,5 @@
-﻿using LessonPlanningSystem.PlanGenerators.Enums;
+﻿using LessonPlanningSystem.PlanGenerators.Configuration;
+using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
 using static LessonPlanningSystem.PlanGenerators.Configuration.StaticConfiguration;
 
@@ -7,16 +8,21 @@ namespace LessonPlanningSystem.PlanGenerators.DataStructures;
 public class ClassroomsData
 {
     private readonly Dictionary<int, Classroom> _allClassrooms;
-    
-    public IReadOnlyDictionary<int, Classroom> AllClassrooms => _allClassrooms;
-    public IReadOnlyList<Classroom> SortedByCapacity { get; private set; }
-    
-    public readonly Action AddingEnded;
+    private readonly Dictionary<(int, Round), IReadOnlyList<Classroom>> _theoryClassrooms;
+    private readonly Dictionary<(int, Round), IReadOnlyList<Classroom>> _practiceClassrooms;
 
-    public ClassroomsData()
+    public IReadOnlyDictionary<int, Classroom> AllClassrooms => _allClassrooms;
+
+    private readonly CoursesData _coursesData;
+    private readonly PlanConfiguration _configuration;
+
+    public ClassroomsData(CoursesData coursesData, PlanConfiguration configuration)
     {
+        _coursesData = coursesData;
+        _configuration = configuration;
         _allClassrooms = new Dictionary<int, Classroom>();
-        AddingEnded += SortByCapacity;
+        _theoryClassrooms = new Dictionary<(int, Round), IReadOnlyList<Classroom>>();
+        _practiceClassrooms = new Dictionary<(int, Round), IReadOnlyList<Classroom>>();
     }
 
     public bool Add(Classroom classroom)
@@ -24,9 +30,30 @@ public class ClassroomsData
         return _allClassrooms.TryAdd(classroom.Id, classroom);
     }
     
-    private void SortByCapacity()
+    public void AddingEnded()
     {
-        SortedByCapacity = _allClassrooms.Values.OrderBy(x => x.Capacity).ToList();
+        if (_allClassrooms.Count == 0) throw new InvalidOperationException("");
+        GenerateRoomListForCourses();
+    }
+    
+    public IReadOnlyList<Classroom> GetClassrooms(Course course, LessonType lessonType, Round round) =>
+        lessonType switch {
+            LessonType.Theory => _theoryClassrooms[(course.Id, round)],
+            LessonType.Practice => _practiceClassrooms[(course.Id, round)],
+            _ => throw new ArgumentOutOfRangeException(nameof(lessonType), lessonType, null),
+        };
+
+    private void GenerateRoomListForCourses()
+    {
+        var options = new ParallelOptions {
+            MaxDegreeOfParallelism = _configuration.MaxNumberOfThreads ?? Environment.ProcessorCount - 1,
+        };
+        Parallel.ForEach(_coursesData.AllCourses.Values, options, course => {
+            for (var round = Round.Third; round <= Round.Fifth; round++) {
+                _theoryClassrooms[(course.Id, round)] = GenerateRooms(course, LessonType.Theory, round).ToList();
+                _practiceClassrooms[(course.Id, round)] = GenerateRooms(course, LessonType.Practice, round).ToList();
+            }
+        });
     }
 
     /// <summary>
@@ -36,16 +63,15 @@ public class ClassroomsData
     /// <param name="lessonType"></param>
     /// <param name="round"></param>
     /// <returns></returns>
-    /// Todo: make pre-calculation for each course. Maybe in multi-threading
-    public IEnumerable<Classroom> GenerateRoomsList(Course course, LessonType lessonType, int round)
+    private IEnumerable<Classroom> GenerateRooms(Course course, LessonType lessonType, Round round)
     {
-        return from classroom in SortedByCapacity 
+        return from classroom in _allClassrooms.Values.OrderBy(x => x.Capacity) 
             let roomTypeMatch = RoomTypeCheck(course.NeededRoomType(lessonType), classroom.RoomType, round)
             let facultyDistance = course.Faculty.Building.Distance
             let classroomDistance = classroom.Building.Distance
             let departmentMatch = round switch {
-                <= 3 => course.FacultyId == classroom.Department.FacultyId, //check if the course and the room are belong to the same faculty
-                4 => classroom.BuildingId == course.Faculty.BuildingId, // In the fourth round we try to find rooms from the same building
+                <= Round.Third => course.FacultyId == classroom.Department.FacultyId, //check if the course and the room are belong to the same faculty
+                Round.Fourth => classroom.BuildingId == course.Faculty.BuildingId, // In the fourth round we try to find rooms from the same building
                 _ => Math.Abs(facultyDistance - classroomDistance) <= RadiusAroundBuilding, // If round 5 than we should find rooms from neighbour buildings also
             } where roomTypeMatch && departmentMatch select classroom;
     }
@@ -57,13 +83,13 @@ public class ClassroomsData
     /// <param name="currentRoomType"></param>
     /// <param name="round"></param>
     /// <returns></returns>
-    private bool RoomTypeCheck(RoomType roomTypeNeeded, RoomType currentRoomType, int round) => round switch {
+    private bool RoomTypeCheck(RoomType roomTypeNeeded, RoomType currentRoomType, Round round) => round switch {
         // If room type needed is equal to 1, it meens "herhangi bir oda"
-        <= 2 when roomTypeNeeded == RoomType.Normal => 
+        <= Round.Second when roomTypeNeeded == RoomType.Normal => 
             currentRoomType is RoomType.Normal or RoomType.WithTwoBoards or RoomType.WithProjector,
         //check for the room type needed for the TEORIK lessons of the current course
-        <= 2 => roomTypeNeeded == currentRoomType,
-        3 => roomTypeNeeded switch {
+        <= Round.Second => roomTypeNeeded == currentRoomType,
+        Round.Third => roomTypeNeeded switch {
             // This part is for round 3 (same faculty) with lite extend
             RoomType.Normal or RoomType.WithTwoBoards => currentRoomType is RoomType.Normal or RoomType.WithTwoBoards,
             RoomType.WithProjector or RoomType.WithSmartBoardAndProjector => currentRoomType is RoomType.WithProjector

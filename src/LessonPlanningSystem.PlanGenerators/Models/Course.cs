@@ -27,16 +27,28 @@ public class Course
 
     public Teacher Teacher { get; init; }
     public Faculty Faculty { get; init; }
-    public ICollection<CourseVsRoom> CourseVsRooms { get; init; }
-    
+    public IReadOnlyCollection<CourseVsRoom> CourseVsRooms { get; init; }
+
+    private IReadOnlyList<Classroom> _theorySpecialRooms;
+    private IReadOnlyList<Classroom> _practiceSpecialRooms;
+
     /// <summary>
     /// 
     /// </summary>
     /// <param name="lessonType"></param>
     /// <returns></returns>
-    public IEnumerable<Classroom> GetRoomsForSpecialCourses(LessonType lessonType) {
-        return CourseVsRooms.Where(x => x.LessonType == lessonType)
-            .Select(x => x.Classroom);
+    public IReadOnlyList<Classroom> GetRoomsForSpecialCourses(LessonType lessonType) => lessonType switch {
+        LessonType.Theory => _theorySpecialRooms,
+        LessonType.Practice => _practiceSpecialRooms,
+        _ => throw new ArgumentOutOfRangeException(nameof(lessonType), lessonType, null),
+    };
+
+    public void GenerateSpecialRooms()
+    {
+        _theorySpecialRooms = CourseVsRooms.Where(x => x.LessonType == LessonType.Theory)
+            .Select(x => x.Classroom).ToList();
+        _practiceSpecialRooms = CourseVsRooms.Where(x => x.LessonType == LessonType.Practice)
+            .Select(x => x.Classroom).ToList();
     }
 
     /// <summary>
@@ -46,10 +58,10 @@ public class Course
     /// <param name="time"></param>
     /// <param name="round"></param>
     /// <returns></returns>
-    public bool TimeIsConvenientForCourse(ScheduleTime time, int round) {
+    public bool TimeIsConvenientForCourse(ScheduleTime time, Round round) {
         // This rule is not acceptable after first round
         // This rule is not acceptable for the courses other than BZD
-        if (round > 2 || CourseType != CourseType.DepartmentMandatory)
+        if (round > Round.Second || CourseType != CourseType.DepartmentMandatory)
             return true;
 
         // Todo: add check for hoursNeeded

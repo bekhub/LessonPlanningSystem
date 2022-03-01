@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#nullable enable
 using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
 using LessonPlanningSystem.PlanGenerators.ValueObjects;
@@ -14,9 +14,9 @@ public class TimetableData
     /// </summary>
     public Dictionary<int, Dictionary<ScheduleTime, Timetable>> CoursesTimetable = new();
     /// <summary>
-    /// Timetables by classroom id. Classroom can be used only once at the same time
+    /// Timetables by classroom id. There may be two classrooms at the same time
     /// </summary>
-    public Dictionary<int, Dictionary<ScheduleTime, Timetable>> ClassroomsTimetable = new();
+    public Dictionary<int, Dictionary<ScheduleTime, List<Timetable>>> ClassroomsTimetable = new();
     /// <summary>
     /// Timetables by teacher code. Teacher can be in only one room at the same time
     /// </summary>
@@ -35,35 +35,52 @@ public class TimetableData
         throw new NotImplementedException();
     }
     
-    // Todo: make optimization
-    [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
-    public List<Classroom> GenerateFreeRoomListForCourse(Course course, LessonType lessonType, ScheduleTime time, int round)
+    /// <summary>
+    /// Finds room with capacity that is enough for the course 
+    /// </summary>
+    /// <param name="course"></param>
+    /// <param name="lessonType"></param>
+    /// <param name="time"></param>
+    /// <param name="round"></param>
+    /// <returns></returns>
+    public Classroom? FindFreeRoomWithMatchedCapacity(Course course, LessonType lessonType, ScheduleTime time, Round round)
     {
-        // Todo: multiple same generation for course. Change this implementation 
-        var roomsForSpecialCourses = course.GetRoomsForSpecialCourses(lessonType).ToList();
-        var rooms = roomsForSpecialCourses.Any() ? roomsForSpecialCourses 
-            : _classroomsData.GenerateRoomsList(course, lessonType, round);
-        var freeRooms = rooms.Where(x => !ClassroomsTimetable[x.Id].ContainsKey(time));
-        var matchedByCapacity = freeRooms.Where(x => course.MaxStudentsNumber <= x.Capacity + 10).Take(1).ToList();
-        if (lessonType == LessonType.Theory || matchedByCapacity.Count > 0 ||
-            course.PracticeRoomType is not (RoomType.WithComputers or RoomType.Laboratory)) return matchedByCapacity;
-        return TwoRoomsByCapacity(course, freeRooms);
+        var freeRooms = GetFreeRoomsByCourse(course, lessonType, time, round);
+        return freeRooms.FirstOrDefault(x => course.MaxStudentsNumber <= x.Capacity + 10);
     }
-
-    //This function finds two rooms with total capacity that is enough for the course
-    private List<Classroom> TwoRoomsByCapacity(Course course, IEnumerable<Classroom> freeRooms)
+    
+    /// <summary>
+    /// Finds two rooms with total capacity that is enough for the course 
+    /// </summary>
+    /// <param name="course"></param>
+    /// <param name="lessonType"></param>
+    /// <param name="time"></param>
+    /// <param name="round"></param>
+    /// <returns></returns>
+    public List<Classroom>? FindTwoFreeRoomsWithMatchedCapacity(Course course, LessonType lessonType, ScheduleTime time, Round round)
     {
+        var freeRooms = GetFreeRoomsByCourse(course, lessonType, time, round);
+        // Todo: I didn't understand why we do so
         foreach (var byBuilding in freeRooms.GroupBy(x => x.BuildingId)) {
             var rooms = byBuilding.ToList();
             for (int col = 0; col < rooms.Count; col++) {
                 for (int row = 0; row < col; row++) {
                     var (rowRoom, colRoom) = (rooms[row], rooms[col]);
                     int currentCapacity = rowRoom.Capacity + colRoom.Capacity;
-                    if (course.MaxStudentsNumber <= currentCapacity + 10) return new() { rowRoom, colRoom };
+                    if (course.MaxStudentsNumber <= currentCapacity + 10) 
+                        return new List<Classroom> { rowRoom, colRoom };
                 }
             }
         }
-        return new List<Classroom>();
+        return null;
+    }
+
+    private IEnumerable<Classroom> GetFreeRoomsByCourse(Course course, LessonType lessonType, ScheduleTime time, Round round)
+    {
+        var roomsForSpecialCourses = course.GetRoomsForSpecialCourses(lessonType);
+        var rooms = roomsForSpecialCourses.Any() ? roomsForSpecialCourses 
+            : _classroomsData.GetClassrooms(course, lessonType, round);
+        return rooms.Where(x => !ClassroomsTimetable[x.Id].ContainsKey(time));
     }
 
     /// <summary>
@@ -74,7 +91,7 @@ public class TimetableData
     /// <param name="hoursNeeded"></param>
     /// <param name="round"></param>
     /// <returns></returns>
-    public bool ScheduleTimeIsFree(Course course, ScheduleTime time, int hoursNeeded, int round)
+    public bool ScheduleTimeIsFree(Course course, ScheduleTime time, int hoursNeeded, Round round)
     {
         for (int l = 0; l < hoursNeeded; l++) {
             var currentTime = new ScheduleTime(time.Weekday, time.Hour + l);
@@ -110,12 +127,12 @@ public class TimetableData
     /// <param name="scheduleTime"></param>
     /// <param name="round"></param>
     /// <returns>True if students are free</returns>
-    public bool StudentsAreFree(Course course, ScheduleTime scheduleTime, int round)
+    public bool StudentsAreFree(Course course, ScheduleTime scheduleTime, Round round)
     {
         var timetablesByDate = StudentsTimetable[(course.DepartmentId, course.GradeYear)]
             .Where(x => x.ScheduleTime == scheduleTime).ToList();
         
-        if (course.CourseType == CourseType.DepartmentElective && round > 1)
+        if (course.CourseType == CourseType.DepartmentElective && round > Round.First)
             return timetablesByDate.TrueForAll(x => x.Course.CourseType == CourseType.DepartmentElective);
         
         return timetablesByDate.Count == 0;
