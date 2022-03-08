@@ -71,6 +71,17 @@ public class Course
             _ => true,
         };
     }
+    
+    /// <summary>
+    /// Ensures that BZD of 1'st and 3'd level are positioned before noon,
+    /// and BZD of 2'nd and 4'th level are positioned after noon
+    /// </summary>
+    /// <param name="timeRange"></param>
+    /// <param name="round"></param>
+    /// <returns></returns>
+    public bool TimeRangeIsConvenientForCourse(ScheduleTimeRange timeRange, Round round) {
+        return timeRange.GetScheduleTimes().All(x => TimeIsConvenientForCourse(x, round));
+    }
 
     /// <summary>
     /// Room type by lesson type

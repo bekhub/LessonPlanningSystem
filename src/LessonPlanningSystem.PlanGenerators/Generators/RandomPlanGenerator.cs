@@ -45,33 +45,70 @@ public class RandomPlanGenerator : IPlanGenerator
     private void FindPlaceForLesson(Course course, LessonType lessonType, Round round)
     {
         var currSgMode = course.SubgroupMode;
-        if (currSgMode <= SubgroupMode.Mode2 || currSgMode == SubgroupMode.Mode6 && lessonType == LessonType.Practice) {
+        if (currSgMode == SubgroupMode.Mode1 && lessonType == LessonType.Practice) {
+            var hoursNeeded = _timetableData.RemainingHoursByLessonType(course, lessonType);
+            if (hoursNeeded <= 0 || 
+                // The following case needed in case if there is only 1 teorik hour and it has been added to uygulama hours in the method RemainingHoursByLessonType
+                hoursNeeded % course.PracticeHours != 0) return;
+            foreach (var timeRange in ScheduleTimeRange.GetWeekScheduleTimeRanges(hoursNeeded)) {
+                if (!_timetableData.ScheduleTimeRangeIsFree(course, timeRange, round) ||
+                    // Todo: why we do not use following?!
+                    // !course.TimeRangeIsConvenientForCourse(timeRange, round) ||
+                    !course.TimeIsConvenientForCourse(timeRange.GetScheduleTimes().First(), round)) continue;
+
+                var rooms = FindFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round, 
+                    (courseStudentsNumber, roomCapacity) => courseStudentsNumber / 2 <= roomCapacity + 10);
+                if (rooms == null || rooms.Count == 0) continue;
+                foreach (var time in timeRange.GetScheduleTimes()) {
+                    _timetableData.AddTimetable(new Timetable {
+                        Course = course,
+                        Classrooms = rooms,
+                        LessonType = lessonType,
+                        ScheduleTime = time,
+                    });
+                }
+                if (_timetableData.RemainingHoursByLessonType(course, lessonType) <= 0) break;
+            }
+        }
+        else if (currSgMode <= SubgroupMode.Mode2 || currSgMode == SubgroupMode.Mode6 && lessonType == LessonType.Practice) {
             var hoursNeeded = _timetableData.RemainingHoursByLessonType(course, lessonType);
             if (hoursNeeded <= 0) return;
-            foreach (var time in ScheduleTime.GetWeekScheduleTimes()) {
-                if (!ScheduleTime.NotLunchOrEndOfDay(time.Hour, hoursNeeded) || 
-                    !_timetableData.ScheduleTimeIsFree(course, time, hoursNeeded, round) ||
-                    //if(!this.checkHourIsConvenientForCourse(i, hour+hoursNeeded, round)) hourIsConvenientForCourse = false;
-                    !course.TimeIsConvenientForCourse(time, round)) continue;
-                var rooms = FindFreeRooms(course, lessonType, time, round);
+            foreach (var timeRange in ScheduleTimeRange.GetWeekScheduleTimeRanges(hoursNeeded)) {
+                if (!_timetableData.ScheduleTimeRangeIsFree(course, timeRange, round) ||
+                    // !course.TimeRangeIsConvenientForCourse(timeRange, round) ||
+                    !course.TimeIsConvenientForCourse(timeRange.GetScheduleTimes().First(), round)) continue;
+                
+                var rooms = FindFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round);
                 if (rooms == null || rooms.Count == 0) continue;
-                _timetableData.AddTimetable(new Timetable {
-                    Course = course,
-                    Classrooms = rooms,
-                    LessonType = lessonType,
-                    ScheduleTime = time,
-                });
-                break;
+                foreach (var time in timeRange.GetScheduleTimes()) {
+                    _timetableData.AddTimetable(new Timetable {
+                        Course = course,
+                        Classrooms = rooms,
+                        LessonType = lessonType,
+                        ScheduleTime = time,
+                    });
+                }
+                if (_timetableData.RemainingHoursByLessonType(course, lessonType) <= 0) break;
             }
         }
     }
 
-    private List<Classroom> FindFreeRooms(Course course, LessonType lessonType, ScheduleTime time, Round round)
+    private List<Classroom> FindFreeRoomsWithMatchedCapacity(Course course, LessonType lessonType, ScheduleTimeRange timeRange, Round round,
+        Func<int, int, bool> capacityCheck)
     {
-        var freeRoom = _timetableData.FindFreeRoomWithMatchedCapacity(course, lessonType, time, round);
+        var freeRoom = _timetableData.FindFreeRoomWithMatchedCapacity(course, lessonType, timeRange, round, capacityCheck);
         if (freeRoom != null) return new List<Classroom> { freeRoom };
         if (lessonType == LessonType.Practice && course.PracticeRoomType is RoomType.WithComputers or RoomType.Laboratory)
-            return _timetableData.FindTwoFreeRoomsWithMatchedCapacity(course, lessonType, time, round);
+            return _timetableData.FindTwoFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round, capacityCheck);
+        return null;
+    }
+    
+    private List<Classroom> FindFreeRoomsWithMatchedCapacity(Course course, LessonType lessonType, ScheduleTimeRange timeRange, Round round)
+    {
+        var freeRoom = _timetableData.FindFreeRoomWithMatchedCapacity(course, lessonType, timeRange, round);
+        if (freeRoom != null) return new List<Classroom> { freeRoom };
+        if (lessonType == LessonType.Practice && course.PracticeRoomType is RoomType.WithComputers or RoomType.Laboratory)
+            return _timetableData.FindTwoFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round);
         return null;
     }
 }

@@ -1,7 +1,5 @@
 ﻿
-Action actions = () => Console.WriteLine("Hello world");
-actions += () => Console.WriteLine("bye bye");
+using LessonPlanningSystem.DatabaseLayer;
+using Microsoft.EntityFrameworkCore;
 
-DoSmth(actions);
-
-void DoSmth(Action action) => action?.Invoke();
+using var context = new TimetableV4Context();
