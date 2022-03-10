@@ -1,4 +1,6 @@
-﻿using LessonPlanningSystem.PlanGenerators.Configuration;
+﻿using System.Collections.Concurrent;
+using System.Collections.Immutable;
+using LessonPlanningSystem.PlanGenerators.Configuration;
 using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
 using static LessonPlanningSystem.PlanGenerators.Configuration.StaticConfiguration;
@@ -8,8 +10,10 @@ namespace LessonPlanningSystem.PlanGenerators.DataStructures;
 public class ClassroomsData
 {
     private readonly Dictionary<int, Classroom> _allClassrooms;
-    private readonly Dictionary<(int, Round), IReadOnlyList<Classroom>> _theoryClassrooms;
-    private readonly Dictionary<(int, Round), IReadOnlyList<Classroom>> _practiceClassrooms;
+    private IReadOnlyDictionary<(int, Round), IReadOnlyList<Classroom>> _theoryClassrooms;
+    private IReadOnlyDictionary<(int, Round), IReadOnlyList<Classroom>> _practiceClassrooms;
+    
+    private ImmutableList<Classroom> _sortedByCapacity;
 
     public IReadOnlyDictionary<int, Classroom> AllClassrooms => _allClassrooms;
 
@@ -21,8 +25,6 @@ public class ClassroomsData
         _coursesData = coursesData;
         _configuration = configuration;
         _allClassrooms = new Dictionary<int, Classroom>();
-        _theoryClassrooms = new Dictionary<(int, Round), IReadOnlyList<Classroom>>();
-        _practiceClassrooms = new Dictionary<(int, Round), IReadOnlyList<Classroom>>();
     }
 
     public bool Add(Classroom classroom)
@@ -32,11 +34,12 @@ public class ClassroomsData
     
     public void AddingEnded()
     {
-        if (_allClassrooms.Count == 0) throw new InvalidOperationException("");
+        if (_allClassrooms.Count == 0) throw new InvalidOperationException("Classrooms must be added!");
+        _sortedByCapacity = _allClassrooms.Values.OrderBy(x => x.Capacity).ToImmutableList();
         GenerateRoomListForCourses();
     }
     
-    public IReadOnlyList<Classroom> GetClassrooms(Course course, LessonType lessonType, Round round) =>
+    public IReadOnlyList<Classroom> GetClassroomsByCourse(Course course, LessonType lessonType, Round round) =>
         lessonType switch {
             LessonType.Theory => _theoryClassrooms[(course.Id, round)],
             LessonType.Practice => _practiceClassrooms[(course.Id, round)],
@@ -48,12 +51,16 @@ public class ClassroomsData
         var options = new ParallelOptions {
             MaxDegreeOfParallelism = _configuration.MaxNumberOfThreads ?? Environment.ProcessorCount - 1,
         };
+        var concurrentTheoryClassrooms = new ConcurrentDictionary<(int, Round), IReadOnlyList<Classroom>>();
+        var concurrentPracticeClassrooms = new ConcurrentDictionary<(int, Round), IReadOnlyList<Classroom>>();
         Parallel.ForEach(_coursesData.AllCourses.Values, options, course => {
             for (var round = Round.Third; round <= Round.Fifth; round++) {
-                _theoryClassrooms[(course.Id, round)] = GenerateRooms(course, LessonType.Theory, round).ToList();
-                _practiceClassrooms[(course.Id, round)] = GenerateRooms(course, LessonType.Practice, round).ToList();
+                concurrentTheoryClassrooms[(course.Id, round)] = GenerateRooms(course, LessonType.Theory, round).ToList();
+                concurrentPracticeClassrooms[(course.Id, round)] = GenerateRooms(course, LessonType.Practice, round).ToList();
             }
         });
+        _theoryClassrooms = concurrentTheoryClassrooms;
+        _practiceClassrooms = concurrentPracticeClassrooms;
     }
 
     /// <summary>
@@ -65,7 +72,7 @@ public class ClassroomsData
     /// <returns></returns>
     private IEnumerable<Classroom> GenerateRooms(Course course, LessonType lessonType, Round round)
     {
-        return from classroom in _allClassrooms.Values.OrderBy(x => x.Capacity) 
+        return from classroom in _sortedByCapacity 
             let roomTypeMatch = RoomTypeCheck(course.NeededRoomType(lessonType), classroom.RoomType, round)
             let facultyDistance = course.Faculty.Building.Distance
             let classroomDistance = classroom.Building.Distance

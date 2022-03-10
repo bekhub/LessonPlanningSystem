@@ -92,4 +92,9 @@ public class Course
     {
         return lessonType == LessonType.Theory ? TheoryRoomType : PracticeRoomType;
     }
+
+    public override int GetHashCode()
+    {
+        return Id;
+    }
 }

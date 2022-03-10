@@ -12,21 +12,26 @@ public class TimetableData
     /// <summary>
     /// Timetables by course id
     /// </summary>
-    private readonly TimetableByTimeByKey<int> _coursesTimetable = new();
+    private readonly ScheduleTimetableDict<int> _coursesTimetable = new();
     /// <summary>
     /// Timetables by classroom id. There may be two classrooms at the same time
     /// </summary>
-    private readonly TimetablesByTimeByKey<int> _classroomsTimetable = new();
+    private readonly ScheduleTimetablesDict<int> _classroomsTimetable = new();
     /// <summary>
     /// Timetables by teacher code. Teacher can be in only one room at the same time
     /// </summary>
-    private readonly TimetableByTimeByKey<int> _teachersTimetable = new();
+    private readonly ScheduleTimetableDict<int> _teachersTimetable = new();
     /// <summary>
     /// Timetables by students(department id and grade year). Students can be in multiple rooms at the same time
     /// </summary>
-    private readonly TimetablesByTimeByKey<(int DepartmentId, GradeYear gradeYear)> _studentsTimetable = new();
+    private readonly ScheduleTimetablesDict<(int DepartmentId, GradeYear gradeYear)> _studentsTimetable = new();
 
-    public TimetableData(ClassroomsData classroomsData) {
+    private readonly List<Timetable> _timetables = new();
+
+    public IReadOnlyList<Timetable> Timetables => _timetables;
+
+    public TimetableData(ClassroomsData classroomsData)
+    {
         _classroomsData = classroomsData;
     }
 
@@ -36,9 +41,58 @@ public class TimetableData
         _coursesTimetable.TryAdd(course.Id, timetable);
         _teachersTimetable.TryAdd(course.Teacher.Code, timetable);
         _studentsTimetable.TryAdd((course.DepartmentId, course.GradeYear), timetable);
+        _timetables.Add(timetable);
         foreach (var room in timetable.Classrooms) {
             _classroomsTimetable.TryAdd(room.Id, timetable);
         }
+    }
+
+    /// <summary>
+    /// This function calculates the total number of unpositioned lessons
+    /// </summary>
+    /// <returns></returns>
+    public int TotalUnpositionedLessons(IEnumerable<Course> allCourses)
+    {
+        return allCourses.Sum(x => UnpositionedPracticeHours(x) + UnpositionedTheoryHours(x));
+    }
+
+    /// <summary>
+    /// This function calculates the total number of separated lessons
+    /// </summary>
+    /// <returns></returns>
+    public int TotalSeparatedLessons()
+    {
+        return _coursesTimetable.Values.Select(x => x.Keys)
+            .Sum(ScheduleTime.CountSeparatedTimesPerDay);
+    }
+
+    /// <summary>
+    /// This function calculates the maximum number of hours to teach for a teacher without break during one day.
+    /// </summary>
+    /// <returns></returns>
+    public int MaxTeachingHours()
+    {
+        return _teachersTimetable.Values.Select(x => x.Keys)
+            .Max(ScheduleTime.CountMaxContinuousDurationPerDay);
+    }
+
+    public List<Classroom>? FindFreeRoomsWithMatchedCapacity(Course course, LessonType lessonType, ScheduleTimeRange timeRange, Round round,
+        Func<int, int, bool> capacityCheck)
+    {
+        var freeRoom = FindFreeRoomWithMatchedCapacity(course, lessonType, timeRange, round, capacityCheck);
+        if (freeRoom != null) return new List<Classroom> { freeRoom };
+        if (lessonType == LessonType.Practice && course.PracticeRoomType is RoomType.WithComputers or RoomType.Laboratory)
+            return FindTwoFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round, capacityCheck);
+        return null;
+    }
+    
+    public List<Classroom>? FindFreeRoomsWithMatchedCapacity(Course course, LessonType lessonType, ScheduleTimeRange timeRange, Round round)
+    {
+        var freeRoom = FindFreeRoomWithMatchedCapacity(course, lessonType, timeRange, round);
+        if (freeRoom != null) return new List<Classroom> { freeRoom };
+        if (lessonType == LessonType.Practice && course.PracticeRoomType is RoomType.WithComputers or RoomType.Laboratory)
+            return FindTwoFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round);
+        return null;
     }
 
     /// <summary>
@@ -129,7 +183,7 @@ public class TimetableData
     {
         var roomsForSpecialCourses = course.GetRoomsForSpecialCourses(lessonType);
         var rooms = roomsForSpecialCourses.Any() ? roomsForSpecialCourses 
-            : _classroomsData.GetClassrooms(course, lessonType, round);
+            : _classroomsData.GetClassroomsByCourse(course, lessonType, round);
         return rooms.Where(x => RoomIsFree(x, time));
     }
     
@@ -137,7 +191,7 @@ public class TimetableData
     {
         var roomsForSpecialCourses = course.GetRoomsForSpecialCourses(lessonType);
         var rooms = roomsForSpecialCourses.Any() ? roomsForSpecialCourses 
-            : _classroomsData.GetClassrooms(course, lessonType, round);
+            : _classroomsData.GetClassroomsByCourse(course, lessonType, round);
         return rooms.Where(x => RoomIsFree(x, timeRange));
     }
 
@@ -242,19 +296,19 @@ public class TimetableData
     private int UnpositionedPracticeHours(Course course) => 
         course.PracticeHours - _coursesTimetable[course.Id].Values.Count(x => x.LessonType == LessonType.Practice);
 
-    private class TimetableByTimeByKey<TKey> : Dictionary<TKey, TimetableByTime> where TKey : notnull
+    private class ScheduleTimetableDict<TKey> : Dictionary<TKey, ScheduleTimetable> where TKey : notnull
     {
         public bool TryAdd(TKey key, Timetable timetable)
         {
             if (ContainsKey(key)) return this[key].TryAdd(timetable.ScheduleTime, timetable);
-            this[key] = new TimetableByTime {
-                [timetable.ScheduleTime] = timetable
+            this[key] = new ScheduleTimetable {
+                [timetable.ScheduleTime] = timetable,
             };
             return true;
         }
     }
 
-    private class TimetablesByTimeByKey<TKey> : Dictionary<TKey, TimetablesByTime> where TKey : notnull
+    private class ScheduleTimetablesDict<TKey> : Dictionary<TKey, ScheduleTimetables> where TKey : notnull
     {
         public bool TryAdd(TKey key, Timetable timetable)
         {
@@ -264,20 +318,20 @@ public class TimetableData
                     timetablesByTime[timetable.ScheduleTime].Add(timetable);
 
                 timetablesByTime[timetable.ScheduleTime] = new List<Timetable> {
-                    timetable
+                    timetable,
                 };
                 return true;
             }
 
-            this[key] = new TimetablesByTime {
+            this[key] = new ScheduleTimetables {
                 [timetable.ScheduleTime] = new() {
-                    timetable
-                }
+                    timetable,
+                },
             };
             return true;
         }
     }
     
-    private class TimetableByTime : Dictionary<ScheduleTime, Timetable> { }
-    private class TimetablesByTime : Dictionary<ScheduleTime, List<Timetable>> { }
+    private class ScheduleTimetable : Dictionary<ScheduleTime, Timetable> { }
+    private class ScheduleTimetables : Dictionary<ScheduleTime, List<Timetable>> { }
 }

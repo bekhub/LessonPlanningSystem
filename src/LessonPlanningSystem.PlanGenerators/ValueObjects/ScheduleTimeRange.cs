@@ -11,7 +11,7 @@ public class ScheduleTimeRange : ValueObject
     {
         Time = time;
         Duration = duration;
-        for (int i = 0; i < duration; i++) {
+        for (var i = 0; i < duration; i++) {
             _times.Add(new ScheduleTime(time.Weekday, time.Hour + i));
         }
     }

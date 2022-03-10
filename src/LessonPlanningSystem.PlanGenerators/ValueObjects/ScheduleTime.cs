@@ -32,8 +32,61 @@ public class ScheduleTime : ValueObject
         }
     }
 
-    // This function checks if the given course lessons will not devided by lunch time or end of the day
-    //In other words: it checks if the lessons will finish before lunch or before end of the day
+    public static int CountSeparatedTimesPerDay(IEnumerable<ScheduleTime> times)
+    {
+        var separatedTimes = 0;
+        foreach (var timesByWeekday in times.GroupBy(x => x.Weekday)) {
+            var hours = timesByWeekday.Select(x => x.Hour).OrderBy(x => x).ToArray();
+            switch (hours.Length) {
+                case 1:
+                    separatedTimes++; continue;
+                case 2:
+                    separatedTimes += hours[1] - hours[0] == 1 ? 0 : 1; continue;
+            }
+
+            for (var i = 1; i < hours.Length - 1; i++) {
+                if (hours[i] - hours[i - 1] == 1 || hours[i + 1] - hours[i] == 1) continue;
+                separatedTimes++;
+            }
+        }
+
+        return separatedTimes;
+    }
+
+    public static int CountMaxContinuousDurationPerDay(IEnumerable<ScheduleTime> times)
+    {
+        var maxContinuousDuration = 0;
+        foreach (var timesByWeekday in times.GroupBy(x => x.Weekday)) {
+            var hours = timesByWeekday.Select(x => x.Hour).OrderBy(x => x).ToArray();
+            switch (hours.Length) {
+                case 1:
+                    maxContinuousDuration = Math.Max(maxContinuousDuration, 1); 
+                    continue;
+                case 2:
+                    if (hours[1] - hours[0] == 1) maxContinuousDuration = Math.Max(maxContinuousDuration, 2);
+                    continue;
+            }
+
+            var currentContinuousDuration = 0;
+            for (var i = 0; i < hours.Length - 1; i++) {
+                if (hours[i + 1] - hours[i] == 1) currentContinuousDuration++;
+                else {
+                    maxContinuousDuration = Math.Max(maxContinuousDuration, currentContinuousDuration + 1);
+                    currentContinuousDuration = 0;
+                }
+            }
+            maxContinuousDuration = Math.Max(maxContinuousDuration, currentContinuousDuration);
+        }
+
+        return maxContinuousDuration;
+    }
+    
+    /// <summary>
+    /// This function checks if the given course lessons will not devided by lunch time or end of the day
+    /// In other words: it checks if the lessons will finish before lunch or before end of the day
+    /// </summary>
+    /// <param name="hoursNeeded"></param>
+    /// <returns></returns>
     public bool NotLunchOrEndOfDay(int hoursNeeded)
     {
         return Hour % HoursPerDay <= LunchAfterHour 

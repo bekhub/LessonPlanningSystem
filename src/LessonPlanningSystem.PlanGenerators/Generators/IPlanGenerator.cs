@@ -1,8 +1,9 @@
-﻿using LessonPlanningSystem.PlanGenerators.Models;
+﻿using LessonPlanningSystem.PlanGenerators.DataStructures;
+using LessonPlanningSystem.PlanGenerators.Models;
 
 namespace LessonPlanningSystem.PlanGenerators.Generators;
 
 public interface IPlanGenerator
 {
-    LessonPlan GenerateBestLessonPlan();
+    TimetableData GenerateLessonPlan(CoursesList coursesList);
 }

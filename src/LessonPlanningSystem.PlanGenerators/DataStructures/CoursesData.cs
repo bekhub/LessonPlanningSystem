@@ -27,12 +27,12 @@ public class CoursesData
     /// Courses with <see cref="CourseType.DepartmentMandatory"/> course type (BZD) and
     /// <see cref="TeacherType.LessonHourlyPaid"/> teacher type (DSÜ)
     /// </summary>
-    public readonly CoursesBySgMode DepartmentMandatoryCoursesLessonHourlyPaid;
+    public readonly CoursesBySgMode DepartmentMandatoryCoursesLHP;
     /// <summary>
     /// Courses with <see cref="CourseType.DepartmentElective"/> course type (BİSD) and
     /// <see cref="TeacherType.LessonHourlyPaid"/> teacher type (DSÜ)
     /// </summary>
-    public readonly CoursesBySgMode DepartmentElectiveCoursesLessonHourlyPaid;
+    public readonly CoursesBySgMode DepartmentElectiveCoursesLHP;
 
     /// <summary>
     /// Dictionary of all courses. For key is id
@@ -46,22 +46,33 @@ public class CoursesData
         DepartmentMandatoryCourses = new CoursesBySgMode();
         DepartmentElectiveCourses = new CoursesBySgMode();
         GeneralMandatoryCourses = new CoursesBySgMode();
-        DepartmentMandatoryCoursesLessonHourlyPaid = new CoursesBySgMode();
-        DepartmentElectiveCoursesLessonHourlyPaid = new CoursesBySgMode();
+        DepartmentMandatoryCoursesLHP = new CoursesBySgMode();
+        DepartmentElectiveCoursesLHP = new CoursesBySgMode();
+    }
+
+    public CoursesList GenerateRandomizedCoursesLists()
+    {
+        return new CoursesList {
+            RemoteEducationCourses = RemoteEducationCourses.GenerateRandomizedCoursesList(),
+            DepartmentMandatoryCourses = DepartmentMandatoryCourses.GenerateRandomizedCoursesList(),
+            DepartmentElectiveCourses = DepartmentElectiveCourses.GenerateRandomizedCoursesList(),
+            GeneralMandatoryCourses = GeneralMandatoryCourses.GenerateRandomizedCoursesList(),
+            DepartmentMandatoryCoursesLHP = DepartmentMandatoryCoursesLHP.GenerateRandomizedCoursesList(),
+            DepartmentElectiveCoursesLHP = DepartmentElectiveCoursesLHP.GenerateRandomizedCoursesList(),
+        };
     }
 
     public bool Add(Course course)
     {
         if (!_allCourses.TryAdd(course.Id, course)) return false;
 
-        
         switch(course.CourseType) {
             case CourseType.DepartmentMandatory when course.Teacher.TeacherType == TeacherType.LessonHourlyPaid:
-                DepartmentMandatoryCoursesLessonHourlyPaid.AddBySubgroupMode(course); break;
+                DepartmentMandatoryCoursesLHP.AddBySubgroupMode(course); break;
             case CourseType.DepartmentMandatory: DepartmentMandatoryCourses.AddBySubgroupMode(course); break;
             
             case CourseType.DepartmentElective when course.Teacher.TeacherType == TeacherType.LessonHourlyPaid:
-                DepartmentElectiveCoursesLessonHourlyPaid.AddBySubgroupMode(course); break;
+                DepartmentElectiveCoursesLHP.AddBySubgroupMode(course); break;
             case CourseType.DepartmentElective: DepartmentElectiveCourses.AddBySubgroupMode(course); break;
 
             case CourseType.GeneralMandatory: GeneralMandatoryCourses.AddBySubgroupMode(course); break;

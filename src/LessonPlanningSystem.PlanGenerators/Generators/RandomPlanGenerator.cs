@@ -8,38 +8,45 @@ namespace LessonPlanningSystem.PlanGenerators.Generators;
 
 public class RandomPlanGenerator : IPlanGenerator
 {
-    private readonly CoursesData _coursesData;
-    private readonly ClassroomsData _classroomsData;
     private readonly TimetableData _timetableData;
-    private readonly BuildingsData _buildingsData;
-    private readonly TeachersData _teachersData;
     private readonly PlanConfiguration _configuration;
     
-    public RandomPlanGenerator(CoursesData coursesData, PlanConfiguration configuration, ClassroomsData classroomsData, 
-        BuildingsData buildingsData, TeachersData teachersData, TimetableData timetableData)
+    public RandomPlanGenerator(PlanConfiguration configuration, ClassroomsData classroomsData)
     {
-        _coursesData = coursesData;
         _configuration = configuration;
-        _classroomsData = classroomsData;
-        _buildingsData = buildingsData;
-        _teachersData = teachersData;
-        _timetableData = timetableData;
+        _timetableData = new TimetableData(classroomsData);
     }
 
-    public LessonPlan GenerateBestLessonPlan()
+    public TimetableData GenerateLessonPlan(CoursesList coursesList)
     {
-        var options = new ParallelOptions {
-            MaxDegreeOfParallelism = _configuration.MaxNumberOfThreads ?? Environment.ProcessorCount - 1,
-        };
-        Parallel.For(0, _configuration.NumberOfVariants, options, _ => {
-            
-        });
-        throw new NotImplementedException();
-    }
+        if (_configuration.IncludeRemoteEducationCourses) 
+            FindPlaceForRemoteLesson(coursesList.RemoteEducationCourses);
+        if (_configuration.IncludeGeneralMandatoryCourses) 
+            FindPlaceForGeneralMandatoryLessons(coursesList.GeneralMandatoryCourses);
 
-    private void GenerateLessonPlan()
-    {
+        // Round 4 - search from same building, round 5 - search from other buildings
+        for (var round = Round.First; round <= Round.Fifth; round++) {
+            // Placing courses of DSU teachers
+            foreach (var course in coursesList.DepartmentMandatoryCoursesLHP) {
+                FindPlaceForLesson(course, LessonType.Theory, round); // Find place for TEORIK lesson
+                FindPlaceForLesson(course, LessonType.Practice, round); // Find place for UYGULAMA lesson
+            }
+            foreach (var course in coursesList.DepartmentElectiveCoursesLHP) {
+                FindPlaceForLesson(course, LessonType.Theory, round); // Find place for TEORIK lesson
+                FindPlaceForLesson(course, LessonType.Practice, round); // Find place for UYGULAMA lesson
+            }
+            // Placing courses of Tam Zamanli teachers
+            foreach (var course in coursesList.DepartmentMandatoryCourses) {
+                FindPlaceForLesson(course, LessonType.Theory, round); // Find place for TEORIK lesson
+                FindPlaceForLesson(course, LessonType.Practice, round); // Find place for UYGULAMA lesson
+            }
+            foreach (var course in coursesList.DepartmentElectiveCourses) {
+                FindPlaceForLesson(course, LessonType.Theory, round); // Find place for TEORIK lesson
+                FindPlaceForLesson(course, LessonType.Practice, round); // Find place for UYGULAMA lesson
+            }
+        }
         
+        return _timetableData;
     }
 
     private void FindPlaceForLesson(Course course, LessonType lessonType, Round round)
@@ -56,7 +63,7 @@ public class RandomPlanGenerator : IPlanGenerator
                     // !course.TimeRangeIsConvenientForCourse(timeRange, round) ||
                     !course.TimeIsConvenientForCourse(timeRange.GetScheduleTimes().First(), round)) continue;
 
-                var rooms = FindFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round, 
+                var rooms = _timetableData.FindFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round, 
                     (courseStudentsNumber, roomCapacity) => courseStudentsNumber / 2 <= roomCapacity + 10);
                 if (rooms == null || rooms.Count == 0) continue;
                 foreach (var time in timeRange.GetScheduleTimes()) {
@@ -78,7 +85,7 @@ public class RandomPlanGenerator : IPlanGenerator
                     // !course.TimeRangeIsConvenientForCourse(timeRange, round) ||
                     !course.TimeIsConvenientForCourse(timeRange.GetScheduleTimes().First(), round)) continue;
                 
-                var rooms = FindFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round);
+                var rooms = _timetableData.FindFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round);
                 if (rooms == null || rooms.Count == 0) continue;
                 foreach (var time in timeRange.GetScheduleTimes()) {
                     _timetableData.AddTimetable(new Timetable {
@@ -93,22 +100,7 @@ public class RandomPlanGenerator : IPlanGenerator
         }
     }
 
-    private List<Classroom> FindFreeRoomsWithMatchedCapacity(Course course, LessonType lessonType, ScheduleTimeRange timeRange, Round round,
-        Func<int, int, bool> capacityCheck)
-    {
-        var freeRoom = _timetableData.FindFreeRoomWithMatchedCapacity(course, lessonType, timeRange, round, capacityCheck);
-        if (freeRoom != null) return new List<Classroom> { freeRoom };
-        if (lessonType == LessonType.Practice && course.PracticeRoomType is RoomType.WithComputers or RoomType.Laboratory)
-            return _timetableData.FindTwoFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round, capacityCheck);
-        return null;
-    }
-    
-    private List<Classroom> FindFreeRoomsWithMatchedCapacity(Course course, LessonType lessonType, ScheduleTimeRange timeRange, Round round)
-    {
-        var freeRoom = _timetableData.FindFreeRoomWithMatchedCapacity(course, lessonType, timeRange, round);
-        if (freeRoom != null) return new List<Classroom> { freeRoom };
-        if (lessonType == LessonType.Practice && course.PracticeRoomType is RoomType.WithComputers or RoomType.Laboratory)
-            return _timetableData.FindTwoFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round);
-        return null;
-    }
+    private void FindPlaceForRemoteLesson(IReadOnlyList<Course> coursesListRemoteEducationCourses) { }
+
+    private void FindPlaceForGeneralMandatoryLessons(IReadOnlyList<Course> coursesListGeneralMandatoryCourses) { }
 }
