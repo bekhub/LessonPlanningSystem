@@ -5,9 +5,9 @@ public enum Semester
     /// <summary>
     /// Güz dönemi
     /// </summary>
-    Autumn,
+    Autumn = 1,
     /// <summary>
     /// Bahar dönemi
     /// </summary>
-    Spring,
+    Spring = 2,
 }

@@ -77,7 +77,7 @@ public class CoursesData
 
             case CourseType.GeneralMandatory: GeneralMandatoryCourses.AddBySubgroupMode(course); break;
             case CourseType.RemoteEducation: RemoteEducationCourses.AddBySubgroupMode(course); break;
-            case CourseType.NonDepartmentalElective:
+            case CourseType.NonDepartmentalElective: break; // skip this course type
             default: throw new ArgumentOutOfRangeException(nameof(course.CourseType), "Invalid course type!");
         }
 

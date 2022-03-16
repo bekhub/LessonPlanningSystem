@@ -5,21 +5,21 @@ public enum Weekdays
     /// <summary>
     /// Pazartesi
     /// </summary>
-    Monday,
+    Monday = 1,
     /// <summary>
     /// Salı
     /// </summary>
-    Tuesday,
+    Tuesday = 2,
     /// <summary>
     /// Çarşamba
     /// </summary>
-    Wednesday,
+    Wednesday = 3,
     /// <summary>
     /// Perşembe
     /// </summary>
-    Thursday,
+    Thursday = 4,
     /// <summary>
     /// Cuma
     /// </summary>
-    Friday,
+    Friday = 5,
 }

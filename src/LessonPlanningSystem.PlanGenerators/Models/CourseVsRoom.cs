@@ -4,12 +4,9 @@ namespace LessonPlanningSystem.PlanGenerators.Models;
 
 public class CourseVsRoom
 {
-    public int Id { get; set; }
-    public LessonType LessonType { get; set; }
-    public bool Archived { get; set; }
-    public int ClassroomId { get; set; }
-    public int CourseId { get; set; }
+    public int Id { get; init; }
+    public LessonType LessonType { get; init; }
 
-    public Classroom Classroom { get; set; }
-    public Course Course { get; set; }
+    public Classroom Classroom { get; init; }
+    public Course Course { get; init; }
 }

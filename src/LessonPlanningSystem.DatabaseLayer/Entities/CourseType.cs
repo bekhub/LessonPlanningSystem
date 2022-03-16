@@ -2,11 +2,6 @@
 
 public class CourseType
 {
-    public CourseType()
-    {
-        Courses = new HashSet<Course>();
-    }
-
     public int Id { get; set; }
     public string Type { get; set; }
     public int TypeCode { get; set; }

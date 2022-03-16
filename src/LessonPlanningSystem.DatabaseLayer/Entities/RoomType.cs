@@ -2,13 +2,6 @@
 
 public class RoomType
 {
-    public RoomType()
-    {
-        Classrooms = new HashSet<Classroom>();
-        CoursePracticeRoomTypes = new HashSet<Course>();
-        CourseTheoryRoomTypes = new HashSet<Course>();
-    }
-
     public int Id { get; set; }
     public string Type { get; set; }
     public int TypeCode { get; set; }

@@ -3,22 +3,39 @@ using LessonPlanningSystem.PlanGenerators.Configuration;
 using LessonPlanningSystem.PlanGenerators.DataStructures;
 using LessonPlanningSystem.PlanGenerators.Generators;
 
-namespace LessonPlanningSystem.Generator;
+namespace LessonPlanningSystem.Application;
 
 public class BestPlanGenerator
 {
     private readonly PlanConfiguration _configuration;
-    private readonly CoursesData _coursesData;
-    private readonly ClassroomsData _classroomsData;
+    private CoursesData _coursesData;
+    private ClassroomsData _classroomsData;
+    private readonly TimetableService _timetableService;
     
-    public BestPlanGenerator(PlanConfiguration configuration, CoursesData coursesData, ClassroomsData classroomsData)
+    public BestPlanGenerator(PlanConfiguration configuration, TimetableService timetableService)
     {
         _configuration = configuration;
-        _coursesData = coursesData;
-        _classroomsData = classroomsData;
+        _timetableService = timetableService;
     }
 
     public TimetableData GenerateBestLessonPlan()
+    {
+        if (_coursesData == null || _classroomsData == null) 
+            throw new InvalidOperationException($"Should be called after {nameof(ReadRequiredDataAsync)}");
+        var inefficiencyDict = GenerateLessonPlans();
+        var minInefficiency = inefficiencyDict.Keys.Min();
+        var bestCoursesList = inefficiencyDict[minInefficiency];
+        var planGenerator = new RandomPlanGenerator(_configuration, _classroomsData);
+        return planGenerator.GenerateLessonPlan(bestCoursesList);
+    }
+    
+    public async Task ReadRequiredDataAsync()
+    {
+        _coursesData = await _timetableService.GetCoursesDataAsync(_configuration.Semester);
+        _classroomsData = await _timetableService.GetClassroomsDataAsync(_coursesData.AllCourses.Values.ToList());
+    }
+
+    private IDictionary<int, CoursesList> GenerateLessonPlans()
     {
         var options = new ParallelOptions {
             MaxDegreeOfParallelism = _configuration.MaxNumberOfThreads ?? Environment.ProcessorCount - 1,
@@ -33,10 +50,7 @@ public class BestPlanGenerator
                 lessonPlan.TotalSeparatedLessons(), lessonPlan.MaxTeachingHours());
             inefficiencyDict.TryAdd(inefficiency, randomizedCoursesLists);
         });
-        var minInefficiency = inefficiencyDict.Keys.Min();
-        var bestCoursesList = inefficiencyDict[minInefficiency];
-        var planGenerator = new RandomPlanGenerator(_configuration, _classroomsData);
-        return planGenerator.GenerateLessonPlan(bestCoursesList);
+        return inefficiencyDict;
     }
 
     private int CalculateInefficiency(int totalUnpositionedLessons, int totalSeparatedLessons, int maxTeachingHours)

@@ -28,7 +28,7 @@ public class ScheduleTimeRange : ValueObject
     public static IEnumerable<ScheduleTimeRange> GetWeekScheduleTimeRanges(int duration)
     {
         foreach (var time in ScheduleTime.GetWeekScheduleTimes()) {
-            if (!time.NotLunchOrEndOfDay(duration)) continue;
+            if (!time.NotLunchOrEndOfDay(duration) || time.Hour + duration > 12) continue;
             yield return new ScheduleTimeRange(time, duration);
         }
     }

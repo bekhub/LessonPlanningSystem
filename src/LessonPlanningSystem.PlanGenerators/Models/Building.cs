@@ -2,15 +2,6 @@
 
 public class Building
 {
-    public Building()
-    {
-        Classrooms = new HashSet<Classroom>();
-        Faculties = new HashSet<Faculty>();
-    }
-
-    public int Id { get; set; }
-    public int Distance { get; set; }
-
-    public ICollection<Classroom> Classrooms { get; set; }
-    public ICollection<Faculty> Faculties { get; set; }
+    public int Id { get; init; }
+    public int Distance { get; init; }
 }

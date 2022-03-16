@@ -2,13 +2,6 @@
 
 public class Department
 {
-    public Department()
-    {
-        Classrooms = new HashSet<Classroom>();
-        Courses = new HashSet<Course>();
-        GradeYears = new HashSet<GradeYear>();
-    }
-
     public int Id { get; set; }
     public string Name { get; set; }
     public bool Archived { get; set; }

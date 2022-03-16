@@ -19,14 +19,11 @@ public class Course
     public GradeYear GradeYear { get; init; }
     public bool? DivideTheoryPractice { get; init; }
     public CourseType CourseType { get; init; }
-    public int DepartmentId { get; init; }
-    public int FacultyId { get; init; }
-    public int TeacherCode { get; init; }
-    public RoomType PracticeRoomType { get; init; }
-    public RoomType TheoryRoomType { get; init; }
+    public RoomType? PracticeRoomType { get; init; }
+    public RoomType? TheoryRoomType { get; init; }
 
     public Teacher Teacher { get; init; }
-    public Faculty Faculty { get; init; }
+    public Department Department { get; init; }
     public IReadOnlyCollection<CourseVsRoom> CourseVsRooms { get; init; }
 
     private IReadOnlyList<Classroom> _theorySpecialRooms;
@@ -64,7 +61,6 @@ public class Course
         if (round > Round.Second || CourseType != CourseType.DepartmentMandatory)
             return true;
 
-        // Todo: add check for hoursNeeded
         return GradeYear switch {
             GradeYear.First or GradeYear.Third => time.Hour % HoursPerDay <= 3,
             GradeYear.Second or GradeYear.Fourth => time.Hour % HoursPerDay >= 4,
@@ -88,7 +84,7 @@ public class Course
     /// </summary>
     /// <param name="lessonType"></param>
     /// <returns></returns>
-    public RoomType NeededRoomType(LessonType lessonType)
+    public RoomType? NeededRoomType(LessonType lessonType)
     {
         return lessonType == LessonType.Theory ? TheoryRoomType : PracticeRoomType;
     }

@@ -5,8 +5,9 @@ namespace LessonPlanningSystem.PlanGenerators.Models;
 
 public class Timetable
 {
-    public LessonType LessonType { get; set; }
-    public ScheduleTime ScheduleTime { get; set; }
-    public List<Classroom> Classrooms { get; set; }
-    public Course Course { get; set; }
+    public int? Id { get; init; }
+    public LessonType LessonType { get; init; }
+    public ScheduleTime ScheduleTime { get; init; }
+    public List<Classroom> Classrooms { get; init; }
+    public Course Course { get; init; }
 }
