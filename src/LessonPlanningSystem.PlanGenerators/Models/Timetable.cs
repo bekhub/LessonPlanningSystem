@@ -10,4 +10,9 @@ public class Timetable
     public ScheduleTime ScheduleTime { get; init; }
     public List<Classroom> Classrooms { get; init; }
     public Course Course { get; init; }
+
+    public override string ToString()
+    {
+        return $"[{ScheduleTime}, ({string.Join(',', Classrooms)})]";
+    }
 }

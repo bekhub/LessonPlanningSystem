@@ -24,8 +24,12 @@ public class TimetableService
     {
         var coursesData = new CoursesData();
         var courses = _context.Courses
-            .Where(x => x.Semester == semester.ToDbValue() && x.Teacher != null &&
-                        x.CourseVsRooms.All(z => z.Classroom != null))
+            .Where(x => 
+                x.Semester == semester.ToDbValue() &&
+                x.Active &&
+                x.Teacher != null &&
+                x.UserId != 12 &&
+                x.CourseVsRooms.All(z => z.Classroom != null))
             .Include(x => x.Teacher)
             .Include(x => x.Department)
                 .ThenInclude(x => x.Faculty)

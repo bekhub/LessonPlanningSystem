@@ -28,11 +28,14 @@ public class TimetableData
 
     private readonly List<Timetable> _timetables = new();
 
+    private readonly IReadOnlyList<Course> _allCourses;
+    
     public IReadOnlyList<Timetable> Timetables => _timetables;
 
-    public TimetableData(ClassroomsData classroomsData)
+    public TimetableData(ClassroomsData classroomsData, IReadOnlyList<Course> allCourses)
     {
         _classroomsData = classroomsData;
+        _allCourses = allCourses;
     }
 
     public void AddTimetable(Timetable timetable)
@@ -51,9 +54,29 @@ public class TimetableData
     /// This function calculates the total number of unpositioned lessons
     /// </summary>
     /// <returns></returns>
-    public int TotalUnpositionedLessons(IEnumerable<Course> allCourses)
+    public int TotalUnpositionedLessons()
     {
-        return allCourses.Sum(x => UnpositionedPracticeHours(x) + UnpositionedTheoryHours(x));
+        return _allCourses.Sum(x => UnpositionedPracticeHours(x) + UnpositionedTheoryHours(x));
+    }
+
+    /// <summary>
+    /// This function calculates the total free hours of the rooms
+    /// </summary>
+    /// <returns></returns>
+    public int TotalFreeHoursOfRooms()
+    {
+        return _classroomsData.AllClassrooms.Values.Count(x => 
+            x.RoomType is not (RoomType.WithComputers or RoomType.Laboratory or RoomType.Gym) && 
+            !_classroomsTimetable.ContainsKey(x.Id));
+    }
+
+    /// <summary>
+    /// This function calculates the total number of unpositioned courses
+    /// </summary>
+    /// <returns></returns>
+    public int TotalUnpositionedCourses()
+    {
+        return _allCourses.Count(x => UnpositionedPracticeHours(x) + UnpositionedTheoryHours(x) > 0);
     }
 
     /// <summary>

@@ -10,4 +10,9 @@ public class Classroom
 
     public Building Building { get; init; }
     public Department Department { get; init; }
+
+    public override string ToString()
+    {
+        return $"{Id}";
+    }
 }

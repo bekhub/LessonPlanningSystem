@@ -11,10 +11,11 @@ public class RandomPlanGenerator : IPlanGenerator
     private readonly TimetableData _timetableData;
     private readonly PlanConfiguration _configuration;
     
-    public RandomPlanGenerator(PlanConfiguration configuration, ClassroomsData classroomsData)
+    public RandomPlanGenerator(PlanConfiguration configuration, IReadOnlyDictionary<int, Course> allCourses,
+        ClassroomsData classroomsData)
     {
         _configuration = configuration;
-        _timetableData = new TimetableData(classroomsData);
+        _timetableData = new TimetableData(classroomsData, allCourses.Values.ToList());
     }
 
     public TimetableData GenerateLessonPlan(CoursesList coursesList)

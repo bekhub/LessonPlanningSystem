@@ -10,4 +10,12 @@ public class CoursesList
     public IReadOnlyList<Course> GeneralMandatoryCourses { get; init; }
     public IReadOnlyList<Course> DepartmentMandatoryCoursesLHP { get; init; }
     public IReadOnlyList<Course> DepartmentElectiveCoursesLHP { get; init; }
+
+    public IReadOnlyList<Course> AllCourses => RemoteEducationCourses
+        .Concat(DepartmentMandatoryCourses)
+        .Concat(DepartmentElectiveCourses)
+        .Concat(GeneralMandatoryCourses)
+        .Concat(DepartmentMandatoryCoursesLHP)
+        .Concat(DepartmentElectiveCoursesLHP)
+        .ToList();
 }

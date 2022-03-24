@@ -99,4 +99,9 @@ public class ScheduleTime : ValueObject
         yield return Weekday;
         yield return Hour;
     }
+
+    public override string ToString()
+    {
+        return $"({Weekday} - {Hour})";
+    }
 }

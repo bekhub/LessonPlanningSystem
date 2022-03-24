@@ -2,7 +2,9 @@
 using LessonPlanningSystem.Application;
 using LessonPlanningSystem.DatabaseLayer;
 using LessonPlanningSystem.PlanGenerators.Configuration;
+using LessonPlanningSystem.PlanGenerators.DataStructures;
 using LessonPlanningSystem.PlanGenerators.Enums;
+using LessonPlanningSystem.PlanGenerators.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 var service = new ServiceCollection();
@@ -15,7 +17,7 @@ var timetableService = provider.GetRequiredService<TimetableService>();
 var configuration = new PlanConfiguration {
     IncludeGeneralMandatoryCourses = false,
     IncludeRemoteEducationCourses = false,
-    Semester = Semester.Spring,
+    Semester = Semester.Autumn,
     NumberOfVariants = 1,
     UnpositionedLessonsCoefficient = 100,
     SeparatedLessonsCoefficient = 10,
@@ -29,6 +31,6 @@ await planGenerator.ReadRequiredDataAsync();
 stopwatch.Stop();
 Console.WriteLine("Reading data: " + stopwatch.Elapsed);
 stopwatch.Restart();
-var timetableData = planGenerator.GenerateBestLessonPlan();
+var timetableData = await planGenerator.GenerateBestLessonPlanAsync();
 stopwatch.Stop();
 Console.WriteLine("Generating lesson plan: " + stopwatch.Elapsed);

@@ -16,7 +16,7 @@ public static class HelperExtensions
         int currIdx = itemsCopy.Count;
         while (currIdx > 1) {
             currIdx--;
-            int rndNmr = ThreadSafeRandom.ThisThreadsRandom.Next(currIdx + 1);
+            int rndNmr = Random.Shared.Next(currIdx + 1);
             (itemsCopy[rndNmr], itemsCopy[currIdx]) = (itemsCopy[currIdx], itemsCopy[rndNmr]);
         }
 
@@ -36,7 +36,7 @@ public static class HelperExtensions
         var itemsCopy = items.ToList();
         var n = itemsCopy.Count;
         while (set.Count != n) {
-            var rndNmr = ThreadSafeRandom.ThisThreadsRandom.Next(n);
+            var rndNmr = Random.Shared.Next(n);
             var currIdx = n - set.Count - 1;
             if (set.Add(rndNmr)) (itemsCopy[rndNmr], itemsCopy[currIdx]) = (itemsCopy[currIdx], itemsCopy[rndNmr]);
         }
