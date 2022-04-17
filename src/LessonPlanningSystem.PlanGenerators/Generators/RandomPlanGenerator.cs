@@ -1,6 +1,7 @@
 ﻿using LessonPlanningSystem.PlanGenerators.ValueObjects;
 using LessonPlanningSystem.PlanGenerators.DataStructures;
 using LessonPlanningSystem.PlanGenerators.Configuration;
+using LessonPlanningSystem.PlanGenerators.DataStructures.Extensions;
 using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
 
@@ -9,12 +10,14 @@ namespace LessonPlanningSystem.PlanGenerators.Generators;
 public class RandomPlanGenerator : IPlanGenerator
 {
     private readonly TimetableData _timetableData;
+    private readonly ClassroomsData _classroomsData;
     private readonly PlanConfiguration _configuration;
     
     public RandomPlanGenerator(PlanConfiguration configuration, IReadOnlyDictionary<int, Course> allCourses,
         ClassroomsData classroomsData)
     {
         _configuration = configuration;
+        _classroomsData = classroomsData;
         _timetableData = new TimetableData(classroomsData, allCourses.Values.ToList());
     }
 
@@ -52,51 +55,96 @@ public class RandomPlanGenerator : IPlanGenerator
 
     private void FindPlaceForLesson(Course course, LessonType lessonType, Round round)
     {
-        var currSgMode = course.SubgroupMode;
-        if (currSgMode == SubgroupMode.Mode1 && lessonType == LessonType.Practice) {
-            var hoursNeeded = _timetableData.RemainingHoursByLessonType(course, lessonType);
-            if (hoursNeeded <= 0 || 
-                // The following case needed in case if there is only 1 teorik hour and it has been added to uygulama hours in the method RemainingHoursByLessonType
-                hoursNeeded % course.PracticeHours != 0) return;
-            foreach (var timeRange in ScheduleTimeRange.GetWeekScheduleTimeRanges(hoursNeeded)) {
-                if (!_timetableData.ScheduleTimeRangeIsFree(course, timeRange, round) ||
-                    // Todo: why we do not use following?!
-                    // !course.TimeRangeIsConvenientForCourse(timeRange, round) ||
-                    !course.TimeIsConvenientForCourse(timeRange.GetScheduleTimes().First(), round)) continue;
-
-                var rooms = _timetableData.FindFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round, 
-                    (courseStudentsNumber, roomCapacity) => courseStudentsNumber / 2 <= roomCapacity + 10);
-                if (rooms == null || rooms.Count == 0) continue;
-                foreach (var time in timeRange.GetScheduleTimes()) {
-                    _timetableData.AddTimetable(new Timetable {
-                        Course = course,
-                        Classrooms = rooms,
-                        LessonType = lessonType,
-                        ScheduleTime = time,
-                    });
-                }
-                if (_timetableData.RemainingHoursByLessonType(course, lessonType) <= 0) break;
-            }
+        switch (course.SubgroupMode) {
+            case SubgroupMode.Mode1 when lessonType == LessonType.Practice:
+                FindPlaceForOneTeacherOneLabLesson(course, lessonType, round); break;
+            case SubgroupMode.Mode6 when lessonType == LessonType.Practice:
+            case <= SubgroupMode.Mode2: FindPlaceForOneTeacherManyLabLesson(course, lessonType, round); break;
+            case SubgroupMode.Mode3: FindPlaceForManyTeacherOneLabLesson(course, lessonType, round); break;
+            case SubgroupMode.Mode4: FindPlaceForManyTeacherManyLabLesson(course, lessonType, round); break;
+            case SubgroupMode.Mode6 when lessonType == LessonType.Theory: 
+            case SubgroupMode.Mode5: FindPlaceForManyDepartmentsJointLesson(course, lessonType, round); break;
         }
-        else if (currSgMode <= SubgroupMode.Mode2 || currSgMode == SubgroupMode.Mode6 && lessonType == LessonType.Practice) {
-            var hoursNeeded = _timetableData.RemainingHoursByLessonType(course, lessonType);
-            if (hoursNeeded <= 0) return;
-            foreach (var timeRange in ScheduleTimeRange.GetWeekScheduleTimeRanges(hoursNeeded)) {
-                if (!_timetableData.ScheduleTimeRangeIsFree(course, timeRange, round) ||
-                    // !course.TimeRangeIsConvenientForCourse(timeRange, round) ||
-                    !course.TimeIsConvenientForCourse(timeRange.GetScheduleTimes().First(), round)) continue;
+    }
+
+    private void FindPlaceForOneTeacherOneLabLesson(Course course, LessonType lessonType, Round round)
+    {
+        var hoursNeeded = _timetableData.RemainingHoursByLessonType(course, lessonType);
+        if (hoursNeeded <= 0 || 
+            // The following case needed in case if there is only 1 teorik hour and it has been added to uygulama hours
+            // in the method RemainingHoursByLessonType
+            hoursNeeded % course.PracticeHours != 0) return;
+        foreach (var timeRange in ScheduleTimeRange.GetWeekScheduleTimeRanges(hoursNeeded)) {
+            if (!_timetableData.ScheduleTimeRangeIsFree(course, timeRange, round) ||
+                // We only check the first hour, because we get hours that are not divided by lunch
+                !course.TimeIsConvenientForCourse(timeRange.GetScheduleTimes().First(), round)) continue;
+
+            var rooms = _timetableData.FindFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round, 
+                (courseStudentsNumber, roomCapacity) => courseStudentsNumber / 2 <= roomCapacity + 10);
+            if (rooms == null || rooms.Count == 0) continue;
+            _timetableData.AddTimetable(course, lessonType, timeRange, rooms);
+            if (_timetableData.RemainingHoursByLessonType(course, lessonType) <= 0) break;
+        }
+    }
+
+    private void FindPlaceForOneTeacherManyLabLesson(Course course, LessonType lessonType, Round round)
+    {
+        var hoursNeeded = _timetableData.RemainingHoursByLessonType(course, lessonType);
+        if (hoursNeeded <= 0) return;
+        foreach (var timeRange in ScheduleTimeRange.GetWeekScheduleTimeRanges(hoursNeeded)) {
+            if (!_timetableData.ScheduleTimeRangeIsFree(course, timeRange, round) ||
+                // We only check the first hour, because we get hours that are not divided by lunch
+                !course.TimeIsConvenientForCourse(timeRange.GetScheduleTimes().First(), round)) continue;
                 
-                var rooms = _timetableData.FindFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round);
-                if (rooms == null || rooms.Count == 0) continue;
-                foreach (var time in timeRange.GetScheduleTimes()) {
-                    _timetableData.AddTimetable(new Timetable {
-                        Course = course,
-                        Classrooms = rooms,
-                        LessonType = lessonType,
-                        ScheduleTime = time,
-                    });
-                }
-                if (_timetableData.RemainingHoursByLessonType(course, lessonType) <= 0) break;
+            var rooms = _timetableData.FindFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round);
+            if (rooms == null || rooms.Count == 0) continue;
+            _timetableData.AddTimetable(course, lessonType, timeRange, rooms);
+            if (_timetableData.RemainingHoursByLessonType(course, lessonType) <= 0) break;
+        }
+    }
+    
+    private void FindPlaceForManyTeacherOneLabLesson(Course course, LessonType lessonType, Round round) { }
+    
+    private void FindPlaceForManyTeacherManyLabLesson(Course course, LessonType lessonType, Round round) { }
+
+    private void FindPlaceForManyDepartmentsJointLesson(Course course, LessonType lessonType, Round round)
+    {
+        var theory = _timetableData.RemainingHoursByLessonType(course, LessonType.Theory);
+        var practice = _timetableData.RemainingHoursByLessonType(course, LessonType.Practice);
+        if (theory + practice == 0) return;
+        
+        var mergedCourses = _timetableData.MergeCoursesByCourse(course);
+        if (mergedCourses.Count <= 1) return;
+        
+        var firstCourse = mergedCourses[0];
+        var totalStudentsNumber = 0;
+        foreach (var mergedCourse in mergedCourses) {
+            // Todo: Why we exit from method here
+            if (mergedCourse.Teacher.Code != firstCourse.Teacher.Code ||
+                mergedCourse.TheoryHours != firstCourse.TheoryHours ||
+                mergedCourse.PracticeHours != firstCourse.PracticeHours ||
+                mergedCourse.TheoryRoomType != firstCourse.TheoryRoomType ||
+                mergedCourse.PracticeRoomType != firstCourse.PracticeRoomType) return;
+            totalStudentsNumber += mergedCourse.MaxStudentsNumber;
+        }
+
+        var maxLessonType = course.SubgroupMode == SubgroupMode.Mode6 && lessonType == LessonType.Theory 
+            ? LessonType.Theory : LessonType.Practice;
+        for (var type = LessonType.Theory; type <= maxLessonType; type++) {
+            var hoursNeeded = _timetableData.RemainingHoursByLessonType(firstCourse, type);
+            if (hoursNeeded == 0) continue;
+            foreach (var timeRange in ScheduleTimeRange.GetWeekScheduleTimeRanges(hoursNeeded)) {
+                if (!course.TimeIsConvenientForCourse(timeRange.GetScheduleTimes().First(), round) ||
+                    !_timetableData.ScheduleTimeRangeIsFree(firstCourse, timeRange, round)) continue;
+                var freeRooms = course.HoursByLessonType(type) != 0 
+                    ? _timetableData.GetFreeRoomsByCourses(mergedCourses, type, timeRange, round)
+                    : new List<Classroom>();
+                if (freeRooms.Count == 0) continue;
+                var matchedRooms = freeRooms.RoomsWithMatchedCapacity(firstCourse, 
+                    (_, roomCapacity) => totalStudentsNumber <= roomCapacity + 10);
+                if (matchedRooms == null) continue;
+                _timetableData.AddTimetable(mergedCourses, lessonType, timeRange, matchedRooms);
+                break;
             }
         }
     }

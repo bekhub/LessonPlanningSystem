@@ -27,6 +27,7 @@ public class TimetableService
             .Where(x => 
                 x.Semester == semester.ToDbValue() &&
                 x.Active &&
+                // Todo: remove null checks, why we have nulls in database?
                 x.Teacher != null &&
                 x.UserId != 12 &&
                 x.CourseVsRooms.All(z => z.Classroom != null))
@@ -46,7 +47,7 @@ public class TimetableService
             .AsSplitQuery();
         await foreach (var entity in courses.AsAsyncEnumerable()) {
             var course = _mapper.Map<Course>(entity);
-            course.GenerateSpecialRooms();
+            course.CourseCreated();
             coursesData.Add(course);
         }
         return coursesData;

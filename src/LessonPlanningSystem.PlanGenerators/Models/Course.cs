@@ -4,9 +4,8 @@ using static LessonPlanningSystem.PlanGenerators.Configuration.StaticConfigurati
 
 namespace LessonPlanningSystem.PlanGenerators.Models;
 
-public class Course
+public class Course : Entity
 {
-    public int Id { get; init; }
     public int TheoryHours { get; init; }
     public int PracticeHours { get; init; }
     public int MaxStudentsNumber { get; init; }
@@ -30,17 +29,25 @@ public class Course
     private IReadOnlyList<Classroom> _practiceSpecialRooms;
 
     /// <summary>
-    /// 
+    /// Returns special rooms for this course by lesson type
     /// </summary>
-    /// <param name="lessonType"></param>
-    /// <returns></returns>
+    /// <param name="lessonType">Type of lesson</param>
+    /// <returns>Special rooms</returns>
     public IReadOnlyList<Classroom> GetRoomsForSpecialCourses(LessonType lessonType) => lessonType switch {
         LessonType.Theory => _theorySpecialRooms,
         LessonType.Practice => _practiceSpecialRooms,
         _ => throw new ArgumentOutOfRangeException(nameof(lessonType), lessonType, null),
     };
 
-    public void GenerateSpecialRooms()
+    /// <summary>
+    /// Call after object creation
+    /// </summary>
+    public void CourseCreated()
+    {
+        GenerateSpecialRooms();
+    }
+
+    private void GenerateSpecialRooms()
     {
         _theorySpecialRooms = CourseVsRooms.Where(x => x.LessonType == LessonType.Theory)
             .Select(x => x.Classroom).ToList();
@@ -89,8 +96,10 @@ public class Course
         return lessonType == LessonType.Theory ? TheoryRoomType : PracticeRoomType;
     }
 
-    public override int GetHashCode()
-    {
-        return Id;
-    }
+    /// <summary>
+    /// Lesson hours by lesson type
+    /// </summary>
+    /// <param name="lessonType"></param>
+    /// <returns></returns>
+    public int HoursByLessonType(LessonType lessonType) => lessonType == LessonType.Theory ? TheoryHours : PracticeHours;
 }

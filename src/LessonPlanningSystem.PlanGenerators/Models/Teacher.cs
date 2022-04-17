@@ -2,8 +2,10 @@
 
 namespace LessonPlanningSystem.PlanGenerators.Models;
 
-public class Teacher
+public class Teacher : Entity
 {
+    public override int Id => Code;
+
     /// <summary>
     /// Teacher's registration number
     /// </summary>

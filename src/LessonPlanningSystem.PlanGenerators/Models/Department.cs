@@ -1,8 +1,6 @@
 ﻿namespace LessonPlanningSystem.PlanGenerators.Models;
 
-public class Department
+public class Department : Entity
 {
-    public int Id { get; init; }
-
     public Faculty Faculty { get; init; }
 }

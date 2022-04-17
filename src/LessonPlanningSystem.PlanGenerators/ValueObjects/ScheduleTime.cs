@@ -89,9 +89,9 @@ public class ScheduleTime : ValueObject
     /// <returns></returns>
     public bool NotLunchOrEndOfDay(int hoursNeeded)
     {
-        return Hour % HoursPerDay <= LunchAfterHour 
-            ? Hour % HoursPerDay + hoursNeeded - 1 <= LunchAfterHour 
-            : Hour % HoursPerDay + hoursNeeded - 1 <= HoursPerDay - 1;
+        return Hour <= LunchAfterHour 
+            ? Hour + hoursNeeded < LunchAfterHour 
+            : Hour + hoursNeeded <= HoursPerDay;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()

@@ -2,9 +2,8 @@
 
 namespace LessonPlanningSystem.PlanGenerators.Models;
 
-public class Classroom
+public class Classroom : Entity
 {
-    public int Id { get; init; }
     public int Capacity { get; init; }
     public RoomType RoomType { get; init; }
 
