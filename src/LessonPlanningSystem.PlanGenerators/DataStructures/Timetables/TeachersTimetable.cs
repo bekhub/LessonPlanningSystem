@@ -15,12 +15,17 @@ public class TeachersTimetable : ScheduleTimetableDict<int>
     /// <summary>
     /// Checks if the teacher is free at the given time.
     /// </summary>
-    /// <param name="teacher"></param>
-    /// <param name="time"></param>
-    /// <returns>True if the teacher is free</returns>
     public bool TeacherIsFree(Teacher teacher, ScheduleTime time)
     {
         if (!ContainsKey(teacher.Code)) return true;
         return !this[teacher.Code].ContainsKey(time);
+    }
+    
+    /// <summary>
+    /// Checks if the teacher is free at the given time.
+    /// </summary>
+    public bool TeacherIsFree(Teacher teacher, ScheduleTimeRange timeRange)
+    {
+        return timeRange.GetScheduleTimes().All(x => TeacherIsFree(teacher, x));
     }
 }

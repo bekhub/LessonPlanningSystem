@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using LessonPlanningSystem.Generator.DataStructures.Timetables;
+using LessonPlanningSystem.PlanGenerators.DataStructures.Extensions;
 using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
 using LessonPlanningSystem.PlanGenerators.ValueObjects;
@@ -39,6 +40,9 @@ public class TimetableData
         _allCourses = allCourses;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void AddTimetable(Course course, LessonType lessonType, ScheduleTimeRange timeRange, 
         IReadOnlyList<Classroom> rooms)
     {
@@ -54,6 +58,9 @@ public class TimetableData
         }
     }
     
+    /// <summary>
+    /// 
+    /// </summary>
     public void AddTimetable(IReadOnlyList<Course> courses, LessonType lessonType, ScheduleTimeRange timeRange, 
         IReadOnlyList<Classroom> rooms)
     {
@@ -75,7 +82,6 @@ public class TimetableData
     /// <summary>
     /// This function calculates the total number of unpositioned lessons
     /// </summary>
-    /// <returns></returns>
     public int TotalUnpositionedLessons()
     {
         return _allCourses.Sum(x => 
@@ -85,7 +91,6 @@ public class TimetableData
     /// <summary>
     /// This function calculates the total free hours of the rooms
     /// </summary>
-    /// <returns></returns>
     public int TotalFreeHoursOfRooms()
     {
         var totalHours = ScheduleTime.GetWeekScheduleTimes().Count();
@@ -99,7 +104,6 @@ public class TimetableData
     /// <summary>
     /// This function calculates the total number of unpositioned courses
     /// </summary>
-    /// <returns></returns>
     public int TotalUnpositionedCourses()
     {
         return _allCourses.Count(x => 
@@ -109,83 +113,48 @@ public class TimetableData
     /// <summary>
     /// This function calculates the total number of separated lessons
     /// </summary>
-    /// <returns></returns>
     public int TotalSeparatedLessons() => CoursesTimetable.TotalSeparatedLessons();
 
     /// <summary>
     /// This function calculates the maximum number of hours to teach for a teacher without break during one day.
     /// </summary>
-    /// <returns></returns>
     public int MaxTeachingHours() => TeachersTimetable.MaxTeachingHours();
-
-    public List<Classroom>? FindFreeRoomsWithMatchedCapacity(Course course, LessonType lessonType, 
-        ScheduleTimeRange timeRange, Round round, Func<int, int, bool>? capacityCheck = null)
-    {
-        var freeRoom = FindFreeRoomWithMatchedCapacity(course, lessonType, timeRange, round, capacityCheck);
-        if (freeRoom != null) return new List<Classroom> { freeRoom };
-        if (lessonType == LessonType.Practice && course.PracticeRoomType is RoomType.WithComputers or RoomType.Laboratory)
-            return FindTwoFreeRoomsWithMatchedCapacity(course, lessonType, timeRange, round, capacityCheck);
-        return null;
-    }
-
+    
     /// <summary>
-    /// Finds room with capacity that is enough for the course 
+    /// 
     /// </summary>
-    /// <param name="course"></param>
-    /// <param name="lessonType"></param>
-    /// <param name="timeRange"></param>
-    /// <param name="round"></param>
-    /// <param name="capacityCheck"></param>
-    /// <returns></returns>
-    public Classroom? FindFreeRoomWithMatchedCapacity(Course course, LessonType lessonType, ScheduleTimeRange timeRange, 
-        Round round, Func<int, int, bool>? capacityCheck = null)
+    public IReadOnlyList<Classroom> GetRoomsByCourse(Course course, LessonType lessonType, Round round)
     {
-        var freeRooms = GetFreeRoomsByCourse(course, lessonType, timeRange, round);
-        return capacityCheck == null
-            ? freeRooms.FirstOrDefault(x => course.MaxStudentsNumber <= x.Capacity + 10)
-            : freeRooms.FirstOrDefault(x => capacityCheck(course.MaxStudentsNumber, x.Capacity));
-    }
-
-    /// <summary>
-    /// Finds two rooms with total capacity that is enough for the course 
-    /// </summary>
-    /// <param name="course"></param>
-    /// <param name="lessonType"></param>
-    /// <param name="timeRange"></param>
-    /// <param name="round"></param>
-    /// <param name="capacityCheck"></param>
-    /// <returns></returns>
-    public List<Classroom>? FindTwoFreeRoomsWithMatchedCapacity(Course course, LessonType lessonType, 
-        ScheduleTimeRange timeRange, Round round, Func<int, int, bool>? capacityCheck = null)
-    {
-        var freeRooms = GetFreeRoomsByCourse(course, lessonType, timeRange, round);
-        // Todo: I didn't understand why we do so
-        foreach (var byBuilding in freeRooms.GroupBy(x => x.Building.Id)) {
-            var rooms = byBuilding.ToList();
-            for (int col = 0; col < rooms.Count; col++) {
-                for (int row = 0; row < col; row++) {
-                    var (rowRoom, colRoom) = (rooms[row], rooms[col]);
-                    int currentCapacity = rowRoom.Capacity + colRoom.Capacity;
-                    if (capacityCheck == null && course.MaxStudentsNumber <= currentCapacity + 10)
-                        return new List<Classroom> { rowRoom, colRoom };
-                    if (capacityCheck != null && capacityCheck(course.MaxStudentsNumber, currentCapacity)) 
-                        return new List<Classroom> { rowRoom, colRoom };
-                }
-            }
-        }
-        return null;
+        var roomsForSpecialCourses = course.GetRoomsForSpecialCourses(lessonType);
+        var rooms = roomsForSpecialCourses.Any() ? roomsForSpecialCourses 
+            : _classroomsData.GetClassroomsByCourse(course, lessonType, round);
+        return rooms.ToList();
     }
     
-    private IEnumerable<Classroom> GetFreeRoomsByCourse(Course course, LessonType lessonType, 
+    /// <summary>
+    /// 
+    /// </summary>
+    public IReadOnlyList<Classroom> GetFreeRooms(IEnumerable<Classroom> rooms, ScheduleTimeRange timeRange)
+    {
+        return rooms.Where(x => ClassroomsTimetable.RoomIsFree(x, timeRange)).ToList()!;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public IReadOnlyList<Classroom> GetFreeRoomsByCourse(Course course, LessonType lessonType, 
         ScheduleTimeRange timeRange, Round round)
     {
         var roomsForSpecialCourses = course.GetRoomsForSpecialCourses(lessonType);
         var rooms = roomsForSpecialCourses.Any() ? roomsForSpecialCourses 
             : _classroomsData.GetClassroomsByCourse(course, lessonType, round);
         return rooms.Any(x => x == null) ? new List<Classroom>() 
-            : rooms.Where(x => ClassroomsTimetable.RoomIsFree(x, timeRange));
+            : rooms.Where(x => ClassroomsTimetable.RoomIsFree(x, timeRange)).ToList();
     }
     
+    /// <summary>
+    /// 
+    /// </summary>
     public IReadOnlyList<Classroom> GetFreeRoomsByCourses(IReadOnlyList<Course> courses, LessonType lessonType, 
         ScheduleTimeRange timeRange, Round round)
     {
@@ -206,10 +175,6 @@ public class TimetableData
     /// <summary>
     /// Checks if course, students and teacher are free at the given time
     /// </summary>
-    /// <param name="course"></param>
-    /// <param name="timeRange"></param>
-    /// <param name="round"></param>
-    /// <returns></returns>
     public bool ScheduleTimeRangeIsFree(Course course, ScheduleTimeRange timeRange, Round round)
     {
         foreach (var currentTime in timeRange.GetScheduleTimes()) {
@@ -230,9 +195,6 @@ public class TimetableData
     /// <summary>
     /// Returns remaining hours for course by lesson type
     /// </summary>
-    /// <param name="course"></param>
-    /// <param name="lessonType"></param>
-    /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public int RemainingHoursByLessonType(Course course, LessonType lessonType) => lessonType switch {
         // If there is only 1 hour for theory lesson, may be it is better to put it together with practice lessons

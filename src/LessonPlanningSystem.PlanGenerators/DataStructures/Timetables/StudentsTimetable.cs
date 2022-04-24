@@ -9,10 +9,6 @@ public class StudentsTimetable : ScheduleTimetablesDict<(int DepartmentId, Grade
     /// <summary>
     /// Checks if students of the given year level and department are free at the given time
     /// </summary>
-    /// <param name="course"></param>
-    /// <param name="scheduleTime"></param>
-    /// <param name="round"></param>
-    /// <returns>True if students are free</returns>
     public bool StudentsAreFree(Course course, ScheduleTime scheduleTime, Round round)
     {
         var departmentId = course.Department.Id;
@@ -25,5 +21,13 @@ public class StudentsTimetable : ScheduleTimetablesDict<(int DepartmentId, Grade
             return timetablesByDate.TrueForAll(x => x.Course.CourseType == CourseType.DepartmentElective);
         
         return timetablesByDate.Count == 0;
+    }
+    
+    /// <summary>
+    /// Checks if students of the given year level and department are free at the given time
+    /// </summary>
+    public bool StudentsAreFree(Course course, ScheduleTimeRange timeRange, Round round)
+    {
+        return timeRange.GetScheduleTimes().All(time => StudentsAreFree(course, time, round));
     }
 }

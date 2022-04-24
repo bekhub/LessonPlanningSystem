@@ -1,12 +1,45 @@
-﻿namespace LessonPlanningSystem.PlanGenerators.Models;
+﻿#nullable enable
+namespace LessonPlanningSystem.PlanGenerators.Models;
 
 public abstract class Entity : IComparable<Entity>
 {
     public virtual int Id { get; init; }
 
-    public int CompareTo(Entity other)
+    public int CompareTo(Entity? other)
     {
-        return Id.CompareTo(other.Id);
+        return Id.CompareTo(other?.Id);
+    }
+    
+    protected bool Equals(Entity other)
+    {
+        return Id == other.Id;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) {
+            return false;
+        }
+
+        if (ReferenceEquals(this, obj)) {
+            return true;
+        }
+
+        return obj.GetType() == this.GetType() && Equals((Entity)obj);
+    }
+    
+    public static bool operator==(Entity? first, Entity? second)
+    {
+        return first switch {
+            null => false,
+            not null when second is null => false,
+            _ => first.Equals(second)
+        };
+    }
+
+    public static bool operator !=(Entity? first, Entity? second)
+    {
+        return !(first == second);
     }
 
     public override int GetHashCode()
