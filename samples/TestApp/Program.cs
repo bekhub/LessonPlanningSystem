@@ -2,9 +2,7 @@
 using LessonPlanningSystem.Application;
 using LessonPlanningSystem.DatabaseLayer;
 using LessonPlanningSystem.PlanGenerators.Configuration;
-using LessonPlanningSystem.PlanGenerators.DataStructures;
 using LessonPlanningSystem.PlanGenerators.Enums;
-using LessonPlanningSystem.PlanGenerators.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 var service = new ServiceCollection();
@@ -24,12 +22,13 @@ var configuration = new PlanConfiguration {
     MaxTeachingHoursCoefficient = 1,
     MaxNumberOfThreads = null,
 };
-var planGenerator = new BestPlanGenerator(configuration, timetableService);
 var stopwatch = new Stopwatch();
 stopwatch.Start();
-await planGenerator.ReadRequiredDataAsync();
+var coursesData = await timetableService.GetCoursesDataAsync(configuration.Semester);
+var classroomData = await timetableService.GetClassroomsDataAsync(coursesData.AllCourses.Values.ToList());
 stopwatch.Stop();
 Console.WriteLine("Reading data: " + stopwatch.Elapsed);
+var planGenerator = new BestPlanGenerator(configuration, coursesData, classroomData);
 stopwatch.Restart();
 var timetableData = await planGenerator.GenerateBestLessonPlanAsync();
 stopwatch.Stop();

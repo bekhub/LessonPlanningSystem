@@ -1,7 +1,7 @@
 ﻿using LessonPlanningSystem.PlanGenerators.Models;
 using LessonPlanningSystem.PlanGenerators.ValueObjects;
 
-namespace LessonPlanningSystem.Generator.DataStructures.Timetables;
+namespace LessonPlanningSystem.PlanGenerators.DataStructures.Timetables;
 
 public class TeachersTimetable : ScheduleTimetableDict<int>
 {

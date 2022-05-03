@@ -1,6 +1,6 @@
 ﻿using LessonPlanningSystem.PlanGenerators.DataStructures;
 
-namespace LessonPlanningSystem.PlanGenerators.Generators;
+namespace LessonPlanningSystem.PlanGenerators.Generators.Interfaces;
 
 public interface IPlanGenerator
 {

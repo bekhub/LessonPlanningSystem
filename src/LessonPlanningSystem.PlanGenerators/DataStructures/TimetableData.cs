@@ -1,6 +1,5 @@
 ﻿#nullable enable
-using LessonPlanningSystem.Generator.DataStructures.Timetables;
-using LessonPlanningSystem.PlanGenerators.DataStructures.Extensions;
+using LessonPlanningSystem.PlanGenerators.DataStructures.Timetables;
 using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
 using LessonPlanningSystem.PlanGenerators.ValueObjects;
@@ -136,7 +135,7 @@ public class TimetableData
     /// </summary>
     public IReadOnlyList<Classroom> GetFreeRooms(IEnumerable<Classroom> rooms, ScheduleTimeRange timeRange)
     {
-        return rooms.Where(x => ClassroomsTimetable.RoomIsFree(x, timeRange)).ToList()!;
+        return rooms.Where(x => ClassroomsTimetable.RoomIsFree(x, timeRange)).ToList();
     }
 
     /// <summary>
