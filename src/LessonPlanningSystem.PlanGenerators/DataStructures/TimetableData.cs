@@ -47,12 +47,7 @@ public class TimetableData
     {
         foreach (var time in timeRange.GetScheduleTimes()) {
             foreach (var room in rooms) {
-                var timetable = new Timetable(course, lessonType, time, room);
-                CoursesTimetable.Add(course.Id, timetable);
-                TeachersTimetable.Add(course.Teacher.Code, timetable);
-                StudentsTimetable.Add((course.Department.Id, course.GradeYear), timetable);
-                ClassroomsTimetable.Add(room.Id, timetable);
-                _timetables.Add(timetable);
+                AddTimetable(new Timetable(course, lessonType, time, room));
             }
         }
     }
@@ -68,14 +63,21 @@ public class TimetableData
             var coursesRoomsCrossJoin = from course in courses from room in rooms 
                 select (course, room);
             foreach (var (course, room) in coursesRoomsCrossJoin) {
-                var timetable = new Timetable(course, lessonType, time, room);
-                CoursesTimetable.Add(course.Id, timetable);
-                TeachersTimetable.Add(course.Teacher.Code, timetable);
-                StudentsTimetable.Add((course.Department.Id, course.GradeYear), timetable);
-                ClassroomsTimetable.Add(room.Id, timetable);
-                _timetables.Add(timetable);
+                AddTimetable(new Timetable(course, lessonType, time, room));
             }
         }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public void AddTimetable(Timetable timetable)
+    {
+        CoursesTimetable.Add(timetable.Course.Id, timetable);
+        TeachersTimetable.Add(timetable.Course.Teacher.Code, timetable);
+        StudentsTimetable.Add((timetable.Course.Department.Id, timetable.Course.GradeYear), timetable);
+        ClassroomsTimetable.Add(timetable.Classroom.Id, timetable);
+        _timetables.Add(timetable);
     }
 
     /// <summary>
@@ -177,11 +179,10 @@ public class TimetableData
     public bool ScheduleTimeRangeIsFree(Course course, ScheduleTimeRange timeRange, Round round)
     {
         foreach (var currentTime in timeRange.GetScheduleTimes()) {
-            //check if the course free at that time (may be the uygulama lesson at the same time but in the other room)
+            //check if the course free at that time (may be the practice lesson at the same time but in the other room)
             if (!CoursesTimetable.CourseIsFree(course.Id, currentTime)) return false;
 
             // check if the students are free at the given time
-            // Todo: keep <round> logic in one place
             if (!StudentsTimetable.StudentsAreFree(course, currentTime, round)) return false;
 
             // check if the teacher is free at the given time

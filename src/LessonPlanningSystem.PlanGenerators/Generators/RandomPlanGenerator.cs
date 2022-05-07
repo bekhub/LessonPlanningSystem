@@ -31,19 +31,11 @@ public class RandomPlanGenerator : IPlanGenerator
         // Round 4 - search from same building, round 5 - search from other buildings
         for (var round = Round.First; round <= Round.Fifth; round++) {
             // Placing courses of DSU teachers
-            foreach (var course in coursesList.DepartmentMandatoryCoursesLHP) {
-                FindPlaceForLesson(course, round);
-            }
-            foreach (var course in coursesList.DepartmentElectiveCoursesLHP) {
-                FindPlaceForLesson(course, round);
-            }
+            foreach (var course in coursesList.DepartmentMandatoryCoursesLHP) FindPlaceForLesson(course, round);
+            foreach (var course in coursesList.DepartmentElectiveCoursesLHP) FindPlaceForLesson(course, round);
             // Placing courses of Tam Zamanli teachers
-            foreach (var course in coursesList.DepartmentMandatoryCourses) {
-                FindPlaceForLesson(course, round);
-            }
-            foreach (var course in coursesList.DepartmentElectiveCourses) {
-                FindPlaceForLesson(course, round);
-            }
+            foreach (var course in coursesList.DepartmentMandatoryCourses) FindPlaceForLesson(course, round);
+            foreach (var course in coursesList.DepartmentElectiveCourses) FindPlaceForLesson(course, round);
         }
         
         return _timetableData;
