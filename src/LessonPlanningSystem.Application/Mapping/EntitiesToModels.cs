@@ -41,8 +41,6 @@ public class EntitiesToModels : Profile
         CreateMap<Entities.TimeTable, Models.Timetable>(MemberList.Destination)
             .ForMember(x => x.LessonType, expression => 
                 expression.MapFrom(x => MapHelper.Parse<LessonType>(x.LessonType.Id)))
-            .ForMember(x => x.Classrooms, expression => 
-                expression.MapFrom(x => new List<Entities.Classroom> { x.Classroom }))
             .ForMember(x => x.ScheduleTime, expression => 
                 expression.MapFrom(x => 
                     new ScheduleTime(MapHelper.Parse<Weekdays>(x.TimeDay.Id), x.TimeHour.Id)));

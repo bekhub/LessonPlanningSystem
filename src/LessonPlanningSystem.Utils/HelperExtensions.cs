@@ -22,7 +22,12 @@ public static class HelperExtensions
 
         return itemsCopy;
     }
-
+    
+    public static bool IsNullOrEmpty<T>(this IEnumerable<T>? collection)
+    {
+        return collection == null || !collection.Any();
+    }
+    
     /// <summary>
     /// Shuffles a copy of a given list. The method is thread-safe.
     /// Generates a full sequence of random indexes of list size.

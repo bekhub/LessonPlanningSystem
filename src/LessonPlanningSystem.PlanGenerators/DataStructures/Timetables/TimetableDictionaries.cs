@@ -7,7 +7,10 @@ public class ScheduleTimetableDict<TKey> : Dictionary<TKey, ScheduleTimetable> w
 {
     public void Add(TKey key, Timetable timetable)
     {
-        if (ContainsKey(key)) this[key].Add(timetable.ScheduleTime, timetable);
+        if (ContainsKey(key)) {
+            if (!this[key].TryAdd(timetable.ScheduleTime, timetable))
+                Console.WriteLine($"{key} - courseId is already added");
+        }
         this[key] = new ScheduleTimetable {
             [timetable.ScheduleTime] = timetable,
         };

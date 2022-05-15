@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AutoBogus;
+using FluentAssertions;
 using LessonPlanningSystem.PlanGenerators.DataStructures;
 using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
@@ -23,13 +24,13 @@ public class CoursesBySgModeTests
         };
         var coursesBySgMode = new CoursesBySgMode();
         coursesBySgMode.AddBySubgroupMode(courseMode5);
-        Assert.Equal(1, coursesBySgMode.SubgroupMode5N6Courses.Count);
+        coursesBySgMode.SubgroupMode5N6Courses.Count.Should().Be(1);
         coursesBySgMode.AddBySubgroupMode(courseMode6);
-        Assert.Equal(2, coursesBySgMode.SubgroupMode5N6Courses.Count);
-        Assert.Empty(coursesBySgMode.SubgroupMode4Courses);
-        Assert.Empty(coursesBySgMode.SubgroupMode3Courses);
-        Assert.Empty(coursesBySgMode.SpecialCourses);
-        Assert.Empty(coursesBySgMode.NormalCourses);
+        coursesBySgMode.SubgroupMode5N6Courses.Count.Should().Be(2);
+        coursesBySgMode.SubgroupMode4Courses.Should().BeEmpty();
+        coursesBySgMode.SubgroupMode3Courses.Should().BeEmpty();
+        coursesBySgMode.SpecialCourses.Should().BeEmpty();
+        coursesBySgMode.NormalCourses.Should().BeEmpty();
     }
     
     [Fact]
@@ -41,11 +42,11 @@ public class CoursesBySgModeTests
         };
         var coursesBySgMode = new CoursesBySgMode();
         coursesBySgMode.AddBySubgroupMode(course);
-        Assert.Equal(1, coursesBySgMode.SubgroupMode4Courses.Count);
-        Assert.Empty(coursesBySgMode.SubgroupMode5N6Courses);
-        Assert.Empty(coursesBySgMode.SubgroupMode3Courses);
-        Assert.Empty(coursesBySgMode.SpecialCourses);
-        Assert.Empty(coursesBySgMode.NormalCourses);
+        coursesBySgMode.SubgroupMode4Courses.Count.Should().Be(1);
+        coursesBySgMode.SubgroupMode5N6Courses.Should().BeEmpty();
+        coursesBySgMode.SubgroupMode3Courses.Should().BeEmpty();
+        coursesBySgMode.SpecialCourses.Should().BeEmpty();
+        coursesBySgMode.NormalCourses.Should().BeEmpty();
     }
     
     [Fact]
@@ -57,11 +58,11 @@ public class CoursesBySgModeTests
         };
         var coursesBySgMode = new CoursesBySgMode();
         coursesBySgMode.AddBySubgroupMode(course);
-        Assert.Equal(1, coursesBySgMode.SubgroupMode3Courses.Count);
-        Assert.Empty(coursesBySgMode.SubgroupMode5N6Courses);
-        Assert.Empty(coursesBySgMode.SubgroupMode4Courses);
-        Assert.Empty(coursesBySgMode.SpecialCourses);
-        Assert.Empty(coursesBySgMode.NormalCourses);
+        coursesBySgMode.SubgroupMode3Courses.Count.Should().Be(1);
+        coursesBySgMode.SubgroupMode5N6Courses.Should().BeEmpty();
+        coursesBySgMode.SubgroupMode4Courses.Should().BeEmpty();
+        coursesBySgMode.SpecialCourses.Should().BeEmpty();
+        coursesBySgMode.NormalCourses.Should().BeEmpty();
     }
 
     [Fact]
@@ -79,11 +80,11 @@ public class CoursesBySgModeTests
         foreach (var course in courses) {
             coursesBySgMode.AddBySubgroupMode(course);
         }
-        Assert.Equal(3, coursesBySgMode.SpecialCourses.Count);
-        Assert.Empty(coursesBySgMode.SubgroupMode5N6Courses);
-        Assert.Empty(coursesBySgMode.SubgroupMode4Courses);
-        Assert.Empty(coursesBySgMode.SubgroupMode3Courses);
-        Assert.Empty(coursesBySgMode.NormalCourses);
+        coursesBySgMode.SpecialCourses.Count.Should().Be(3);
+        coursesBySgMode.SubgroupMode5N6Courses.Should().BeEmpty();
+        coursesBySgMode.SubgroupMode4Courses.Should().BeEmpty();
+        coursesBySgMode.SubgroupMode3Courses.Should().BeEmpty();
+        coursesBySgMode.NormalCourses.Should().BeEmpty();
     }
         
     [Fact]
@@ -98,11 +99,11 @@ public class CoursesBySgModeTests
         foreach (var course in courses) {
             coursesBySgMode.AddBySubgroupMode(course);
         }
-        Assert.Equal(3, coursesBySgMode.NormalCourses.Count);
-        Assert.Empty(coursesBySgMode.SubgroupMode5N6Courses);
-        Assert.Empty(coursesBySgMode.SubgroupMode4Courses);
-        Assert.Empty(coursesBySgMode.SubgroupMode3Courses);
-        Assert.Empty(coursesBySgMode.SpecialCourses);
+        coursesBySgMode.NormalCourses.Count.Should().Be(3);
+        coursesBySgMode.SubgroupMode5N6Courses.Should().BeEmpty();
+        coursesBySgMode.SubgroupMode4Courses.Should().BeEmpty();
+        coursesBySgMode.SubgroupMode3Courses.Should().BeEmpty();
+        coursesBySgMode.SpecialCourses.Should().BeEmpty();
     }
 
     [Fact]
@@ -128,7 +129,7 @@ public class CoursesBySgModeTests
         initialCoursesList.AddRange(coursesBySgMode.SpecialCourses);
         initialCoursesList.AddRange(coursesBySgMode.NormalCourses);
         
-        Assert.Equal(initialCoursesList.Count, randomizedCoursesList.Count);
-        Assert.NotEqual(initialCoursesList, randomizedCoursesList);
+        initialCoursesList.Count.Should().Be(randomizedCoursesList.Count);
+        initialCoursesList.Should().NotEqual(randomizedCoursesList);
     }
 }

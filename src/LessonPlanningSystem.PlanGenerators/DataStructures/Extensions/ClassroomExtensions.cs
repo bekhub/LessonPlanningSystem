@@ -28,13 +28,13 @@ public static class ClassroomExtensions
     {
         var coursesRooms = new List<(Course, IReadOnlyList<Classroom>)>();
         var rooms = freeRooms.ToDictionary(x => x.Id);
-        var courses = mergedCourses.ToDictionary(x => x.Code);
+        var courses = mergedCourses.ToDictionary(x => x.Id);
         foreach (var course in mergedCourses) {
             var freeRoom = rooms.Values.RoomWithMatchedCapacity(course, capacityCheck);
             if (freeRoom == null) continue;
 
             rooms.Remove(freeRoom.Id);
-            courses.Remove(course.Code);
+            courses.Remove(course.Id);
             coursesRooms.Add((course, new List<Classroom> { freeRoom }));
         }
 

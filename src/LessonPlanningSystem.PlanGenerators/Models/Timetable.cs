@@ -10,7 +10,6 @@ public class Timetable
     public LessonType LessonType { get; init; }
     public ScheduleTime ScheduleTime { get; init; }
     public Classroom Classroom { get; set; }
-    public List<Classroom> Classrooms { get; init; }
 
     public Timetable(Course course, LessonType lessonType, ScheduleTime scheduleTime, Classroom classroom)
     {

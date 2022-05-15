@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using LessonPlanningSystem.PlanGenerators.DataStructures.Timetables;
 using LessonPlanningSystem.PlanGenerators.Enums;
 using LessonPlanningSystem.PlanGenerators.Models;
@@ -58,12 +58,25 @@ public class TimetableData
     public void AddTimetable(IReadOnlyList<Course> courses, LessonType lessonType, ScheduleTimeRange timeRange, 
         IReadOnlyList<Classroom> rooms)
     {
-        // Todo: Changed logic
+        // Todo: Almost old logic
         foreach (var time in timeRange.GetScheduleTimes()) {
-            var coursesRoomsCrossJoin = from course in courses from room in rooms 
-                select (course, room);
-            foreach (var (course, room) in coursesRoomsCrossJoin) {
-                AddTimetable(new Timetable(course, lessonType, time, room));
+            var firstCourse = courses[0];
+            var firstRoom = rooms[0];
+            
+            var timetable = new Timetable(firstCourse, lessonType, time, firstRoom);
+            TeachersTimetable.Add(firstCourse.Teacher.Code, timetable);
+            
+            foreach (var room in rooms) {
+                timetable = new Timetable(firstCourse, lessonType, time, room);
+                if (room == null) throw new Exception("What the hell!?");
+                ClassroomsTimetable.Add(room.Id, timetable);
+                _timetables.Add(timetable);
+            }
+            foreach (var course in courses) {
+                timetable = new Timetable(course, lessonType, time, firstRoom);
+                CoursesTimetable.Add(course.Id, timetable);
+                StudentsTimetable.Add((course.Department.Id, course.GradeYear), timetable);
+                if (course.Id != firstCourse.Id) _timetables.Add(timetable);
             }
         }
     }

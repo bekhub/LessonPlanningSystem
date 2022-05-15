@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 namespace LessonPlanningSystem.PlanGenerators.Models;
 
 public abstract class Entity : IComparable<Entity>
@@ -28,14 +28,11 @@ public abstract class Entity : IComparable<Entity>
         return obj.GetType() == this.GetType() && Equals((Entity)obj);
     }
     
-    public static bool operator==(Entity? first, Entity? second)
-    {
-        return first switch {
-            null => false,
-            not null when second is null => false,
-            _ => first.Equals(second)
-        };
-    }
+    public static bool operator==(Entity? first, Entity? second) => first switch {
+        null => second is null, 
+        not null when second is null => false, 
+        _ => first.Equals(second)
+    };
 
     public static bool operator !=(Entity? first, Entity? second)
     {
