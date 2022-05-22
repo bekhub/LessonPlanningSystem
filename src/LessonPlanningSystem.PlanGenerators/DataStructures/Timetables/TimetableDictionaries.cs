@@ -5,11 +5,12 @@ namespace LessonPlanningSystem.PlanGenerators.DataStructures.Timetables;
 
 public class ScheduleTimetableDict<TKey> : Dictionary<TKey, ScheduleTimetable> where TKey : notnull
 {
-    public void Add(TKey key, Timetable timetable)
+    public virtual void Add(TKey key, Timetable timetable)
     {
         if (ContainsKey(key)) {
             if (!this[key].TryAdd(timetable.ScheduleTime, timetable))
                 Console.WriteLine($"{key} - courseId is already added");
+            return;
         }
         this[key] = new ScheduleTimetable {
             [timetable.ScheduleTime] = timetable,
@@ -28,6 +29,7 @@ public class ScheduleTimetablesDict<TKey> : Dictionary<TKey, ScheduleTimetables>
             else timetablesByTime[timetable.ScheduleTime] = new List<Timetable> { 
                 timetable,
             };
+            return;
         }
 
         this[key] = new ScheduleTimetables {

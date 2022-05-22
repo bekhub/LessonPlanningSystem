@@ -18,4 +18,9 @@ public class CoursesList
         .Concat(DepartmentMandatoryCoursesLHP)
         .Concat(DepartmentElectiveCoursesLHP)
         .ToList();
+
+    public IEnumerable<Course> MainCourses => DepartmentMandatoryCoursesLHP
+        .Concat(DepartmentElectiveCoursesLHP)
+        .Concat(DepartmentMandatoryCourses)
+        .Concat(DepartmentElectiveCourses);
 }

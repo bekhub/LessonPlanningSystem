@@ -27,10 +27,7 @@ public class TimetableService
             .Where(x => 
                 x.Semester == semester.ToDbValue() &&
                 x.Active &&
-                // Todo: remove null checks, why we have nulls in database?
-                x.Teacher != null &&
-                x.UserId != 12 &&
-                x.CourseVsRooms.All(z => z.Classroom != null))
+                x.UserId != 12)
             .Include(x => x.Teacher)
             .Include(x => x.Department)
                 .ThenInclude(x => x.Faculty)

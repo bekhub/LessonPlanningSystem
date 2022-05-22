@@ -12,8 +12,6 @@ public class Course : Entity
     public string Code { get; init; }
     public int Credits { get; init; }
     public SubgroupMode SubgroupMode { get; init; }
-    public int UnpositionedTheoryHours { get; init; }
-    public int UnpositionedPracticeHours { get; init; }
     public Semester Semester { get; init; }
     public GradeYear GradeYear { get; init; }
     public bool? DivideTheoryPractice { get; init; }
@@ -50,8 +48,10 @@ public class Course : Entity
     private void GenerateSpecialRooms()
     {
         _theorySpecialRooms = CourseVsRooms.Where(x => x.LessonType == LessonType.Theory)
+            .Where(x => x.Classroom != null)
             .Select(x => x.Classroom).ToList();
         _practiceSpecialRooms = CourseVsRooms.Where(x => x.LessonType == LessonType.Practice)
+            .Where(x => x.Classroom != null)
             .Select(x => x.Classroom).ToList();
     }
 

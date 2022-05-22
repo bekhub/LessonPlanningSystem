@@ -19,6 +19,7 @@ public class OneTeacherManyLabStrategy : ILessonPlacingStrategy
     {
         var hoursNeeded = _timetableData.RemainingHoursByLessonType(course, lessonType);
         if (hoursNeeded <= 0) return;
+        // Todo: this can work incorrectly
         foreach (var timeRange in ScheduleTimeRange.GetWeekScheduleTimeRanges(hoursNeeded)) {
             if (!_timetableData.ScheduleTimeRangeIsFree(course, timeRange, round) ||
                 // We only check the first hour, because we get hours that are not divided by lunch
@@ -28,7 +29,8 @@ public class OneTeacherManyLabStrategy : ILessonPlacingStrategy
             var matchedRooms = freeRooms.RoomsWithMatchedCapacity(course, lessonType);
             if (matchedRooms == null || matchedRooms.Count == 0) continue;
             _timetableData.AddTimetable(course, lessonType, timeRange, matchedRooms);
-            if (_timetableData.RemainingHoursByLessonType(course, lessonType) <= 0) break;
+            hoursNeeded = _timetableData.RemainingHoursByLessonType(course, lessonType);
+            if (hoursNeeded <= 0) break;
         }
     }
 }

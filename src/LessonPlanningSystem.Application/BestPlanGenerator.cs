@@ -38,8 +38,7 @@ public class BestPlanGenerator
             MaxDegreeOfParallelism = _configuration.MaxNumberOfThreads ?? Environment.ProcessorCount - 1,
         };
         try {
-            var numberOfVariants = Enumerable.Range(0, _configuration.NumberOfVariants);
-            Parallel.ForEach(numberOfVariants, options, _ => {
+            Parallel.For(0, _configuration.NumberOfVariants, options, _ => {
                 var randomizedCoursesLists = _coursesData.GenerateRandomizedCoursesLists();
                 var planGenerator = new RandomPlanGenerator(_configuration, _coursesData.AllCourses, _classroomsData);
                 var lessonPlan = planGenerator.GenerateLessonPlan(randomizedCoursesLists);
