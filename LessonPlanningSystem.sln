@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LPS.Desktop", "clients\LPS.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "clients\TestApp\TestApp.csproj", "{D6C49B88-26A7-4162-A7C4-354E072E0F23}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LPS.Application.Tests", "tests\LPS.Application.Tests\LPS.Application.Tests.csproj", "{4E681A74-9055-4A36-A32A-F24B59DEEC9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +68,10 @@ Global
 		{D6C49B88-26A7-4162-A7C4-354E072E0F23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6C49B88-26A7-4162-A7C4-354E072E0F23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6C49B88-26A7-4162-A7C4-354E072E0F23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E681A74-9055-4A36-A32A-F24B59DEEC9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E681A74-9055-4A36-A32A-F24B59DEEC9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E681A74-9055-4A36-A32A-F24B59DEEC9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E681A74-9055-4A36-A32A-F24B59DEEC9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -78,6 +84,7 @@ Global
 		{C6FC6C65-1BFA-47D3-AF0F-BAD0758C42A0} = {F1ED1CFC-5D66-4548-A08C-387BA076C1D7}
 		{C439709E-BDE5-47C0-A1F4-D4CB493C3FBB} = {44D933E6-E47A-459D-90F1-3B4A6282C4C5}
 		{D6C49B88-26A7-4162-A7C4-354E072E0F23} = {44D933E6-E47A-459D-90F1-3B4A6282C4C5}
+		{4E681A74-9055-4A36-A32A-F24B59DEEC9A} = {59AFE825-8916-4C23-BE77-B0B36A8F419A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FBFC3017-6D8E-465C-8E59-A7221A285109}

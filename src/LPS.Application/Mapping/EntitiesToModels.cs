@@ -47,6 +47,8 @@ public class EntitiesToModels : Profile
 
         CreateMap<Entities.Department, Models.Department>(MemberList.Destination);
         CreateMap<Entities.Faculty, Models.Faculty>(MemberList.Destination);
-        CreateMap<Entities.Building, Models.Building>(MemberList.Destination);
+        CreateMap<Entities.Building, Models.Building>(MemberList.Destination)
+            .ForMember(x => x.Distance, expression => 
+                expression.MapFrom(x => x.DistanceNumber));
     }
 }

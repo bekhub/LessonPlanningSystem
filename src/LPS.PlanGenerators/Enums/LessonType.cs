@@ -5,9 +5,9 @@ public enum LessonType
     /// <summary>
     /// Teoretik Dersi
     /// </summary>
-    Theory = 0,
+    Theory = 1,
     /// <summary>
     /// Uygulama Dersi
     /// </summary>
-    Practice = 1,
+    Practice = 2,
 }

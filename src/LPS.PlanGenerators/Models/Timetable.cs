@@ -11,6 +11,8 @@ public class Timetable
     public ScheduleTime ScheduleTime { get; init; }
     public Classroom Classroom { get; set; }
 
+    public Timetable() { }
+
     public Timetable(Course course, LessonType lessonType, ScheduleTime scheduleTime, Classroom classroom)
     {
         Course = course;
