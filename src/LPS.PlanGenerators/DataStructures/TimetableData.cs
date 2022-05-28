@@ -9,34 +9,39 @@ namespace LPS.PlanGenerators.DataStructures;
 public class TimetableData
 {
     private readonly ClassroomsData _classroomsData;
+    private readonly IReadOnlyList<Course> _allCourses;
+    private readonly List<Timetable> _timetables;
     
     /// <summary>
     /// Timetables by course id
     /// </summary>
-    public readonly CoursesTimetable CoursesTimetable = new();
+    public readonly CoursesTimetable CoursesTimetable;
     /// <summary>
     /// Timetables by classroom id. There may be two classrooms at the same time
     /// </summary>
-    public readonly ClassroomsTimetable ClassroomsTimetable = new();
+    public readonly ClassroomsTimetable ClassroomsTimetable;
     /// <summary>
     /// Timetables by teacher code. Teacher can be in only one room at the same time
     /// </summary>
-    public readonly TeachersTimetable TeachersTimetable = new();
+    public readonly TeachersTimetable TeachersTimetable;
     /// <summary>
     /// Timetables by students(department id and grade year). Students can be in multiple rooms at the same time
     /// </summary>
-    public readonly StudentsTimetable StudentsTimetable = new();
-
-    private readonly List<Timetable> _timetables = new();
-
-    private readonly IReadOnlyList<Course> _allCourses;
-    
+    public readonly StudentsTimetable StudentsTimetable;
+    /// <summary>
+    /// All timetables
+    /// </summary>
     public IReadOnlyList<Timetable> Timetables => _timetables;
 
-    public TimetableData(ClassroomsData classroomsData, IReadOnlyList<Course> allCourses)
+    public TimetableData(ServiceProvider provider)
     {
-        _classroomsData = classroomsData;
-        _allCourses = allCourses;
+        CoursesTimetable = new CoursesTimetable(provider);
+        ClassroomsTimetable = new ClassroomsTimetable(provider);
+        TeachersTimetable = new TeachersTimetable();
+        StudentsTimetable = new StudentsTimetable();
+        _timetables = new List<Timetable>();
+        _classroomsData = provider.ClassroomsData;
+        _allCourses = provider.CoursesData.AllCourses.Values.ToList();
     }
 
     /// <summary>
@@ -82,7 +87,7 @@ public class TimetableData
     }
     
     /// <summary>
-    /// 
+    /// Add timetable
     /// </summary>
     public void AddTimetable(Timetable timetable)
     {
@@ -93,47 +98,6 @@ public class TimetableData
         _timetables.Add(timetable);
     }
 
-    /// <summary>
-    /// This function calculates the total number of unpositioned lessons
-    /// </summary>
-    public int TotalUnpositionedLessons()
-    {
-        return _allCourses.Sum(x => 
-            CoursesTimetable.UnpositionedPracticeHours(x) + CoursesTimetable.UnpositionedTheoryHours(x));
-    }
-
-    /// <summary>
-    /// This function calculates the total free hours of the rooms
-    /// </summary>
-    public int TotalFreeHoursOfRooms()
-    {
-        var totalHours = ScheduleTime.GetWeekScheduleTimes().Count();
-        return _classroomsData.AllClassrooms.Values.Where(x => 
-            x.RoomType is not (RoomType.WithComputers or RoomType.Laboratory or RoomType.Gym))
-            .Sum(x => ClassroomsTimetable.ContainsKey(x.Id)
-                ? totalHours - ClassroomsTimetable[x.Id].Count
-                : totalHours);
-    }
-
-    /// <summary>
-    /// This function calculates the total number of unpositioned courses
-    /// </summary>
-    public int TotalUnpositionedCourses()
-    {
-        return _allCourses.Count(x => 
-            CoursesTimetable.UnpositionedPracticeHours(x) + CoursesTimetable.UnpositionedTheoryHours(x) > 0);
-    }
-
-    /// <summary>
-    /// This function calculates the total number of separated lessons
-    /// </summary>
-    public int TotalSeparatedLessons() => CoursesTimetable.TotalSeparatedLessons();
-
-    /// <summary>
-    /// This function calculates the maximum number of hours to teach for a teacher without break during one day.
-    /// </summary>
-    public int MaxTeachingHours() => TeachersTimetable.MaxTeachingHours();
-    
     /// <summary>
     /// 
     /// </summary>

@@ -131,8 +131,8 @@ public class TimetableService
 
     public async Task DeleteCurrentSemesterTimetablesAsync()
     {
-        var sql = "delete from time_table where `educational_year` = " + _configuration.EducationalYear;
-        sql += " and `semester` = " + _configuration.Semester.ToDbValue();
-        await _context.Database.ExecuteSqlRawAsync(sql);
+        const string sql = "delete from time_table where `educational_year` = {0} and `semester` = {1}";
+        await _context.Database.ExecuteSqlRawAsync(sql, _configuration.EducationalYear,
+            _configuration.Semester.ToDbValue());
     }
 }

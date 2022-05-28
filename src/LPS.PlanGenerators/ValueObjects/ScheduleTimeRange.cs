@@ -12,7 +12,7 @@ public class ScheduleTimeRange : ValueObject
         Time = time;
         Duration = duration;
         for (var i = 0; i < duration; i++) {
-            _times.Add(new ScheduleTime(time.Weekday, time.Hour + i));
+            _times.Add(ScheduleTime.GetByWeekAndHour(time.Weekday, time.Hour + i));
         }
     }
 
@@ -28,7 +28,7 @@ public class ScheduleTimeRange : ValueObject
     public static IEnumerable<ScheduleTimeRange> GetWeekScheduleTimeRanges(int duration)
     {
         foreach (var time in ScheduleTime.GetWeekScheduleTimes()) {
-            if (!time.NotLunchOrEndOfDay(duration) || time.Hour + duration > 12) continue;
+            if (!time.NotLunchOrEndOfDay(duration) || time.Hour + duration > 11) continue;
             yield return new ScheduleTimeRange(time, duration);
         }
     }

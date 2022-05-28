@@ -5,6 +5,9 @@ namespace LPS.PlanGenerators.DataStructures.Timetables;
 
 public class TeachersTimetable : ScheduleTimetableDict<int>
 {
+    /// <summary>
+    /// This function calculates the maximum number of hours to teach for a teacher without break during one day.
+    /// </summary>
     public int MaxTeachingHours()
     {
         if (Count == 0) return 0;

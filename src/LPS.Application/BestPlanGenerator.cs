@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using LPS.PlanGenerators;
 using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.DataStructures;
 using LPS.PlanGenerators.Generators;
@@ -8,28 +9,24 @@ namespace LPS.Application;
 public class BestPlanGenerator
 {
     private readonly PlanConfiguration _configuration;
-    private readonly CoursesData _coursesData;
-    private readonly ClassroomsData _classroomsData;
+    private readonly ServiceProvider _provider;
     
-    private readonly BlockingCollection<(int inefficiency, CoursesList coursesList)> _blockingCollection = new();
-    private (int inefficiency, CoursesList coursesList)? _bestCoursesList;
+    private readonly BlockingCollection<(int inefficiency, GeneratedLessonPlan lessonPlan)> _blockingCollection = new();
+    private (int inefficiency, GeneratedLessonPlan lessonPlan)? _bestLessonPlan;
     
     public BestPlanGenerator(PlanConfiguration configuration, CoursesData coursesData, ClassroomsData classroomsData)
     {
         _configuration = configuration;
-        _coursesData = coursesData;
-        _classroomsData = classroomsData;
+        _provider = new ServiceProvider(configuration, coursesData, classroomsData);
     }
 
-    public async Task<(TimetableData timetable, CoursesList coursesList)> GenerateBestLessonPlanAsync()
+    public async Task<GeneratedLessonPlan> GenerateBestLessonPlanAsync()
     {
-        var coursesListTask = Task.Run(ChooseBestCoursesList);
+        var coursesListTask = Task.Factory.StartNew(ChooseBestLessonPlan, TaskCreationOptions.LongRunning);
         GenerateLessonPlans();
         await coursesListTask;
-        if (_bestCoursesList == null) throw new Exception("Best courses list is null");
-        var planGenerator = new RandomPlanGenerator(_configuration, _coursesData.AllCourses, _classroomsData);
-        var timetable = planGenerator.GenerateLessonPlan(_bestCoursesList.Value.coursesList);
-        return (timetable, _bestCoursesList.Value.coursesList);
+        if (_bestLessonPlan == null) throw new Exception("Best courses list is null");
+        return _bestLessonPlan.Value.lessonPlan;
     }
     
     private void GenerateLessonPlans()
@@ -39,28 +36,25 @@ public class BestPlanGenerator
         };
         try {
             Parallel.For(0, _configuration.NumberOfVariants, options, _ => {
-                var randomizedCoursesLists = _coursesData.GenerateRandomizedCoursesLists();
-                var planGenerator = new RandomPlanGenerator(_configuration, _coursesData.AllCourses, _classroomsData);
-                var lessonPlan = planGenerator.GenerateLessonPlan(randomizedCoursesLists);
-                var inefficiency = CalculateInefficiency(
-                    lessonPlan.TotalUnpositionedLessons(),
-                    lessonPlan.TotalSeparatedLessons(), lessonPlan.MaxTeachingHours());
-                _blockingCollection.Add((inefficiency, randomizedCoursesLists));
+                var lessonPlan = RandomPlanGenerator.GenerateLessonPlan(_provider);
+                var inefficiency = CalculateInefficiency(lessonPlan.TotalUnpositionedLessons, 
+                    lessonPlan.TotalSeparatedLessons, lessonPlan.MaxTeachingHours);
+                _blockingCollection.Add((inefficiency, lessonPlan));
             });
         } finally {
             _blockingCollection.CompleteAdding();
         }
     }
 
-    private void ChooseBestCoursesList()
+    private void ChooseBestLessonPlan()
     {
-        foreach (var coursesList in _blockingCollection.GetConsumingEnumerable()) {
-            if (_bestCoursesList == null) {
-                _bestCoursesList = coursesList;
+        foreach (var lessonPlan in _blockingCollection.GetConsumingEnumerable()) {
+            if (_bestLessonPlan == null) {
+                _bestLessonPlan = lessonPlan;
                 continue;
             }
-            if (coursesList.inefficiency < _bestCoursesList.Value.inefficiency) {
-                _bestCoursesList = coursesList;
+            if (lessonPlan.inefficiency < _bestLessonPlan.Value.inefficiency) {
+                _bestLessonPlan = lessonPlan;
             }
         }
     }

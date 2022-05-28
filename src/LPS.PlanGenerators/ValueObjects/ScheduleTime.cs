@@ -11,26 +11,35 @@ public class ScheduleTime : ValueObject
     public Weekdays Weekday { get; }
     public int Hour { get; }
     
+    private static readonly Dictionary<(Weekdays, int), ScheduleTime> WeekScheduleTimes;
+    
     public ScheduleTime(Weekdays weekday, int hour)
     {
-        if (hour is < 0 or > 12)
+        if (hour is < 0 or > 11)
             throw new ArgumentException("Hour must be greater than or equal to 0 and less than or equal to 12");
         Weekday = weekday;
         Hour = hour;
     }
 
-    /// <summary>
-    /// Gives all hours in weekdays
-    /// </summary>
-    /// <returns></returns>
-    public static IEnumerable<ScheduleTime> GetWeekScheduleTimes()
+    static ScheduleTime()
     {
+        WeekScheduleTimes = new Dictionary<(Weekdays, int), ScheduleTime>(Enum.GetValues<Weekdays>().Length * 12);
         for (Weekdays wd = Weekdays.Monday; wd <= Weekdays.Friday; wd++) {
-            for (int h = 0; h <= 12; h++) {
-                yield return new ScheduleTime(wd, h);
+            for (int h = 0; h <= 11; h++) {
+                WeekScheduleTimes.Add((wd, h), new ScheduleTime(wd, h));
             }
         }
     }
+
+    /// <summary>
+    /// Gives all hours in weekdays
+    /// </summary>
+    public static IEnumerable<ScheduleTime> GetWeekScheduleTimes() => WeekScheduleTimes.Values;
+    
+    /// <summary>
+    /// Returns schedule time by weekday and hour. Should be used to not to allocate extra memory
+    /// </summary>
+    public static ScheduleTime GetByWeekAndHour(Weekdays weekday, int hour) => WeekScheduleTimes[(weekday, hour)];
 
     public static int CountSeparatedTimesPerDay(IEnumerable<ScheduleTime> times)
     {

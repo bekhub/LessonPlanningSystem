@@ -1,27 +1,32 @@
 ﻿using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.DataStructures;
 using LPS.PlanGenerators.Enums;
-using LPS.PlanGenerators.Generators.Interfaces;
 using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.Strategies;
 
 namespace LPS.PlanGenerators.Generators;
 
-public class RandomPlanGenerator : IPlanGenerator
+public class RandomPlanGenerator
 {
     private readonly TimetableData _timetableData;
     private readonly PlanConfiguration _configuration;
     private readonly StrategyOrchestrator _strategyOrchestrator;
     
-    public RandomPlanGenerator(PlanConfiguration configuration, IReadOnlyDictionary<int, Course> allCourses,
-        ClassroomsData classroomsData)
+    private RandomPlanGenerator(ServiceProvider provider)
     {
-        _configuration = configuration;
-        _timetableData = new TimetableData(classroomsData, allCourses.Values.ToList());
+        _configuration = provider.PlanConfiguration;
+        _timetableData = provider.GetNewTimetableData();
         _strategyOrchestrator = new StrategyOrchestrator(_timetableData);
     }
 
-    public TimetableData GenerateLessonPlan(CoursesList coursesList)
+    public static GeneratedLessonPlan GenerateLessonPlan(ServiceProvider provider)
+    {
+        var coursesList = provider.CoursesData.GenerateRandomizedCoursesLists();
+        var generator = new RandomPlanGenerator(provider);
+        return generator.GenerateLessonPlan(coursesList);
+    }
+
+    private GeneratedLessonPlan GenerateLessonPlan(CoursesList coursesList)
     {
         if (_configuration.IncludeRemoteEducationCourses) 
             FindPlaceForRemoteLesson(coursesList.RemoteEducationCourses);
@@ -34,7 +39,19 @@ public class RandomPlanGenerator : IPlanGenerator
             foreach (var course in coursesList.MainCourses) FindPlaceForLesson(course, round);
         }
         
-        return _timetableData;
+        return new GeneratedLessonPlan {
+            CoursesTimetable = _timetableData.CoursesTimetable,
+            ClassroomsTimetable = _timetableData.ClassroomsTimetable,
+            TeachersTimetable = _timetableData.TeachersTimetable,
+            StudentsTimetable = _timetableData.StudentsTimetable,
+            Timetables = _timetableData.Timetables,
+            GeneratedCoursesList = coursesList,
+            TotalFreeHoursOfRooms = _timetableData.ClassroomsTimetable.TotalFreeHoursOfRooms(),
+            TotalUnpositionedLessons = _timetableData.CoursesTimetable.TotalUnpositionedLessons(),
+            TotalUnpositionedCourses = _timetableData.CoursesTimetable.TotalUnpositionedCourses(),
+            TotalSeparatedLessons = _timetableData.CoursesTimetable.TotalSeparatedLessons(),
+            MaxTeachingHours = _timetableData.TeachersTimetable.MaxTeachingHours()
+        };
     }
 
     private void FindPlaceForLesson(Course course, Round round)

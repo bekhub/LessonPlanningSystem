@@ -17,7 +17,7 @@ var configuration = new PlanConfiguration {
     EducationalYear = "2021-2022",
     NumberOfVariants = 100,
     UnpositionedLessonsCoefficient = 100,
-    SeparatedLessonsCoefficient = 10,
+    SeparatedLessonsCoefficient = 1,
     MaxTeachingHoursCoefficient = 1,
     MaxNumberOfThreads = null,
 };
@@ -32,10 +32,10 @@ stopwatch.Stop();
 Console.WriteLine("Reading data: " + stopwatch.Elapsed);
 var planGenerator = new BestPlanGenerator(configuration, coursesData, classroomData);
 stopwatch.Restart();
-var timetableData = await planGenerator.GenerateBestLessonPlanAsync();
+var bestLessonPlan = await planGenerator.GenerateBestLessonPlanAsync();
 stopwatch.Stop();
 Console.WriteLine("Generating lesson plan: " + stopwatch.Elapsed);
 stopwatch.Restart();
-await timetableService.SaveTimetableAsOriginalAsync(timetableData.timetable.Timetables);
+await timetableService.SaveTimetableAsOriginalAsync(bestLessonPlan.Timetables);
 stopwatch.Stop();
 Console.WriteLine("Saving lesson plan: " + stopwatch.Elapsed);

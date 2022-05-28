@@ -6,6 +6,13 @@ namespace LPS.PlanGenerators.DataStructures.Timetables;
 
 public class CoursesTimetable : ScheduleTimetableDict<int>
 {
+    private readonly IReadOnlyList<Course> _allCourses;
+
+    public CoursesTimetable(ServiceProvider provider)
+    {
+        _allCourses = provider.CoursesData.AllCourses.Values.ToList();
+    }
+    
     /// <summary>
     /// Checks if the course is free at that time (may be the practice lesson at the same time but in the other room)
     /// </summary>
@@ -16,17 +23,6 @@ public class CoursesTimetable : ScheduleTimetableDict<int>
     {
         if (!ContainsKey(courseId)) return true;
         return !this[courseId].ContainsKey(time);
-    }
-    
-    /// <summary>
-    /// This function calculates the total number of separated lessons
-    /// </summary>
-    /// <returns></returns>
-    public int TotalSeparatedLessons()
-    {
-        if (Count == 0) return 0;
-        return Values.Select(x => x.Keys)
-            .Sum(ScheduleTime.CountSeparatedTimesPerDay);
     }
     
     public int UnpositionedTheoryHours(Course course)
@@ -43,5 +39,32 @@ public class CoursesTimetable : ScheduleTimetableDict<int>
             
         return course.PracticeHours - this[course.Id].Values
             .Count(x => x.LessonType == LessonType.Practice);
+    }
+    
+    /// <summary>
+    /// This function calculates the total number of separated lessons
+    /// </summary>
+    /// <returns></returns>
+    public int TotalSeparatedLessons()
+    {
+        if (Count == 0) return 0;
+        return Values.Select(x => x.Keys)
+            .Sum(ScheduleTime.CountSeparatedTimesPerDay);
+    }
+    
+    /// <summary>
+    /// This function calculates the total number of unpositioned lessons
+    /// </summary>
+    public int TotalUnpositionedLessons()
+    {
+        return _allCourses.Sum(x => UnpositionedPracticeHours(x) + UnpositionedTheoryHours(x));
+    }
+    
+    /// <summary>
+    /// This function calculates the total number of unpositioned courses
+    /// </summary>
+    public int TotalUnpositionedCourses()
+    {
+        return _allCourses.Count(x => UnpositionedPracticeHours(x) + UnpositionedTheoryHours(x) > 0);
     }
 }
