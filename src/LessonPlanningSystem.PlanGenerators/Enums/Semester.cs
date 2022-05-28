@@ -2,6 +2,12 @@
 
 public enum Semester
 {
-    Autumn,
-    Spring
+    /// <summary>
+    /// Güz dönemi
+    /// </summary>
+    Autumn = 1,
+    /// <summary>
+    /// Bahar dönemi
+    /// </summary>
+    Spring = 2,
 }

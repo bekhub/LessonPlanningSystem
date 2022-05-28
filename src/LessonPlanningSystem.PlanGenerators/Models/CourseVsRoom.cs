@@ -1,14 +1,11 @@
-﻿namespace LessonPlanningSystem.PlanGenerators.Models;
+﻿using LessonPlanningSystem.PlanGenerators.Enums;
 
-public class CourseVsRoom
+namespace LessonPlanningSystem.PlanGenerators.Models;
+
+public class CourseVsRoom : Entity
 {
-    public int Id { get; set; }
-    public int LessonType { get; set; }
-    public bool Archived { get; set; }
-    public int? ClassroomId { get; set; }
-    public int? CourseId { get; set; }
-    public int? UserId { get; set; }
+    public LessonType LessonType { get; init; }
 
-    public Classroom Classroom { get; set; }
-    public Course Course { get; set; }
+    public Classroom Classroom { get; init; }
+    public Course Course { get; init; }
 }

@@ -2,12 +2,6 @@
 
 public class Course
 {
-    public Course()
-    {
-        CourseVsRooms = new HashSet<CourseVsRoom>();
-        TimeTables = new HashSet<TimeTable>();
-    }
-
     public int Id { get; set; }
     public int TheoryHours { get; set; }
     public int PracticeHours { get; set; }

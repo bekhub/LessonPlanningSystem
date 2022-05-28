@@ -2,12 +2,6 @@
 
 public class Building
 {
-    public Building()
-    {
-        Classrooms = new HashSet<Classroom>();
-        Faculties = new HashSet<Faculty>();
-    }
-
     public int Id { get; set; }
     public string Name { get; set; }
     public string Address { get; set; }

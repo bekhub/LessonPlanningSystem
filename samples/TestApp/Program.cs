@@ -1,50 +1,35 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
+﻿using System.Diagnostics;
+using LessonPlanningSystem.Application;
 using LessonPlanningSystem.DatabaseLayer;
-using LessonPlanningSystem.Utils;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using LessonPlanningSystem.PlanGenerators.Configuration;
+using LessonPlanningSystem.PlanGenerators.Enums;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
-// var host = CreateHostBuilder().Build();
-//
-// using var scope = host.Services.CreateScope();
-//
-// var db = scope.ServiceProvider.GetRequiredService<TimetableV4Context>();
-// foreach (var x in db.Departments.Include(x => x.Faculty)) {
-//     Console.WriteLine($"{x.Name} - {x.Faculty.Name}");
-// }
-// var conDict = new ConcurrentDictionary<int, int>();
-
-var arr = new[] { 1, 2, 3, 4, 5 };
-var encoded  = Encode(string.Join(',', arr));
-Console.WriteLine(encoded);
-Console.WriteLine(Decode(encoded));
-
-IHostBuilder CreateHostBuilder()
-{
-    var hostBuilder = new HostBuilder();
-    hostBuilder.ConfigureAppConfiguration((_, builder) => {
-        builder.AddUserSecrets<CurrentAssembly>();
-    });
-    hostBuilder.ConfigureServices((context, services) => {
-        services.AddTimetableDb(context.Configuration.GetConnectionString("TimetableV4"), "8.0.28");
-    });
-    return hostBuilder;
-}
-
-static string Decode(string base64EncodedData)
-{
-    var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
-    return Encoding.UTF8.GetString(base64EncodedBytes);
-}
-static string Encode(string plainText)
-{
-    var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-    return Convert.ToBase64String(plainTextBytes);
-}
-
-internal class CurrentAssembly { }
+var service = new ServiceCollection();
+var connectionString = "server=localhost;database=timetable_v4;user=root;password=root";
+var version = "8.0.28";
+service.AddTimetableDb(connectionString, Version.Parse(version));
+service.AddApplicationDependencies();
+await using var provider = service.BuildServiceProvider();
+var timetableService = provider.GetRequiredService<TimetableService>();
+var configuration = new PlanConfiguration {
+    IncludeGeneralMandatoryCourses = false,
+    IncludeRemoteEducationCourses = false,
+    Semester = Semester.Autumn,
+    NumberOfVariants = 1,
+    UnpositionedLessonsCoefficient = 100,
+    SeparatedLessonsCoefficient = 10,
+    MaxTeachingHoursCoefficient = 1,
+    MaxNumberOfThreads = null,
+};
+var stopwatch = new Stopwatch();
+stopwatch.Start();
+var coursesData = await timetableService.GetCoursesDataAsync(configuration.Semester);
+var classroomData = await timetableService.GetClassroomsDataAsync(coursesData.AllCourses.Values.ToList());
+stopwatch.Stop();
+Console.WriteLine("Reading data: " + stopwatch.Elapsed);
+var planGenerator = new BestPlanGenerator(configuration, coursesData, classroomData);
+stopwatch.Restart();
+var timetableData = await planGenerator.GenerateBestLessonPlanAsync();
+stopwatch.Stop();
+Console.WriteLine("Generating lesson plan: " + stopwatch.Elapsed);

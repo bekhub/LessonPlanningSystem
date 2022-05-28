@@ -13,6 +13,7 @@ public class TimeTable
     public int? TimeHourId { get; set; }
     public int? UserId { get; set; }
 
+    // Todo: change to collection of classrooms or to two classroom fields
     public Classroom Classroom { get; set; }
     public Course Course { get; set; }
     public LessonType LessonType { get; set; }

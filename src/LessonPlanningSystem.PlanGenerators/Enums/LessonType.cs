@@ -2,6 +2,12 @@
 
 public enum LessonType
 {
+    /// <summary>
+    /// Teoretik Dersi
+    /// </summary>
     Theory = 0,
-    Practice = 1
+    /// <summary>
+    /// Uygulama Dersi
+    /// </summary>
+    Practice = 1,
 }

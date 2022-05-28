@@ -2,7 +2,16 @@
 
 public enum TeacherType
 {
+    /// <summary>
+    /// Tam zamanlı
+    /// </summary>
     FullTime = 0,
+    /// <summary>
+    /// Yarı zamanlı
+    /// </summary>
     PartTime = 1,
-    LessonTimePaid = 2
+    /// <summary>
+    /// Ders saati ücretli (DSÜ)
+    /// </summary>
+    LessonHourlyPaid = 2,
 }

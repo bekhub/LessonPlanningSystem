@@ -14,7 +14,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\LessonPlanningSystem.Application\LessonPlanningSystem.Application.csproj" />
         <ProjectReference Include="..\..\src\LessonPlanningSystem.DatabaseLayer\LessonPlanningSystem.DatabaseLayer.csproj" />
+        <ProjectReference Include="..\..\src\LessonPlanningSystem.PlanGenerators\LessonPlanningSystem.PlanGenerators.csproj" />
         <ProjectReference Include="..\..\src\LessonPlanningSystem.Utils\LessonPlanningSystem.Utils.csproj" />
     </ItemGroup>
 

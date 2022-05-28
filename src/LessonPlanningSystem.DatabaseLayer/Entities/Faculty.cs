@@ -2,12 +2,6 @@
 
 public class Faculty
 {
-    public Faculty()
-    {
-        Departments = new HashSet<Department>();
-        FosUsers = new HashSet<FosUser>();
-    }
-
     public int Id { get; set; }
     public string Name { get; set; }
     public bool Archived { get; set; }

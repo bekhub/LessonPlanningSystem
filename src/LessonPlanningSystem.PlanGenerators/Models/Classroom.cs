@@ -2,22 +2,16 @@
 
 namespace LessonPlanningSystem.PlanGenerators.Models;
 
-public class Classroom
+public class Classroom : Entity
 {
-    public Classroom()
+    public int Capacity { get; init; }
+    public RoomType RoomType { get; init; }
+
+    public Building Building { get; init; }
+    public Department Department { get; init; }
+
+    public override string ToString()
     {
-        CourseVsRooms = new HashSet<CourseVsRoom>();
-        TimeTables = new HashSet<TimeTable>();
+        return $"{Id}";
     }
-
-    public int Id { get; set; }
-    public int Capacity { get; set; }
-    public int BuildingId { get; set; }
-    public int DepartmentId { get; set; }
-    public RoomType RoomType { get; set; }
-
-    public Building Building { get; set; }
-    public Department Department { get; set; }
-    public ICollection<CourseVsRoom> CourseVsRooms { get; set; }
-    public ICollection<TimeTable> TimeTables { get; set; }
 }

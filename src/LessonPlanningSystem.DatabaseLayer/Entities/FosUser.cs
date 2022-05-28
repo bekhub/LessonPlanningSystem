@@ -2,15 +2,6 @@
 
 public class FosUser
 {
-    public FosUser()
-    {
-        Classrooms = new HashSet<Classroom>();
-        CourseVsRooms = new HashSet<CourseVsRoom>();
-        Courses = new HashSet<Course>();
-        Teachers = new HashSet<Teacher>();
-        TimeTables = new HashSet<TimeTable>();
-    }
-
     public int Id { get; set; }
     public string Username { get; set; }
     public string UsernameCanonical { get; set; }
@@ -24,7 +15,7 @@ public class FosUser
     public DateTime? PasswordRequestedAt { get; set; }
 
     /// <summary>
-    ///     (DC2Type:array)
+    /// (DC2Type:array)
     /// </summary>
     public string Roles { get; set; }
 

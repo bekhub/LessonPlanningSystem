@@ -2,13 +2,13 @@
 
 namespace LessonPlanningSystem.PlanGenerators.Models;
 
-public class Teacher
+public class Teacher : Entity
 {
+    public override int Id => Code;
+
     /// <summary>
     /// Teacher's registration number
     /// </summary>
-    public int Code { get; set; }
-    public TeacherType TeacherType { get; set; }
-    
-    public bool IsFree() => false;
+    public int Code { get; init; }
+    public TeacherType TeacherType { get; init; }
 }
