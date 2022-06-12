@@ -1,0 +1,49 @@
+<UserControl
+    Background="#222831"
+    Content="{Binding Content}"
+    Foreground="White"
+    d:DesignHeight="450"
+    d:DesignWidth="600"
+    mc:Ignorable="d"
+    x:Class="LPS.Client.Views.MainView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:rxui="clr-namespace:Avalonia.ReactiveUI;assembly=Avalonia.ReactiveUI"
+    xmlns:viewModels="clr-namespace:LPS.Client.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.DataContext>
+        <viewModels:MainViewModel />
+    </Design.DataContext>
+    <!-- <Grid> -->
+    <!--     <Grid.RowDefinitions> -->
+    <!--         <RowDefinition Height="*" /> -->
+    <!--         <RowDefinition Height="Auto" /> -->
+    <!--     </Grid.RowDefinitions> -->
+    <!--     <rxui:RoutedViewHost Grid.Row="0" Router="{Binding Router}"> -->
+    <!--         <rxui:RoutedViewHost.DefaultContent> -->
+    <!--             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"> -->
+    <!--                 <TextBlock Classes="h1" Text="Sample Avalonia Application" /> -->
+    <!--  <TextBlock  -->
+    <!--  HorizontalAlignment="Center"  -->
+    <!--  Text="Loading..."  -->
+    <!--  TextAlignment="Center" />  -->
+    <!--             </StackPanel> -->
+    <!--         </rxui:RoutedViewHost.DefaultContent> -->
+    <!--     </rxui:RoutedViewHost> -->
+    <!--  <Button  -->
+    <!--  Command="{Binding GoBack}"  -->
+    <!--  Content="Back"  -->
+    <!--  Grid.Row="1"  -->
+    <!--  HorizontalAlignment="Left"  -->
+    <!--  Margin="10"  -->
+    <!--  Width="100" />  -->
+    <!--  <Button  -->
+    <!--  Command="{Binding GoNext}"  -->
+    <!--  Content="Next"  -->
+    <!--  Grid.Row="1"  -->
+    <!--  HorizontalAlignment="Right"  -->
+    <!--  Margin="10"  -->
+    <!--  Width="100" />  -->
+    <!-- </Grid> -->
+</UserControl>

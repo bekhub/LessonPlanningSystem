@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿#nullable enable
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using LPS.Application.Mapping;
 using LPS.DatabaseLayer;
@@ -10,6 +11,8 @@ using LPS.PlanGenerators.Models;
 using Microsoft.EntityFrameworkCore;
 using Classroom = LPS.PlanGenerators.Models.Classroom;
 using Course = LPS.PlanGenerators.Models.Course;
+using Department = LPS.DatabaseLayer.Entities.Department;
+using Faculty = LPS.DatabaseLayer.Entities.Faculty;
 using LessonType = LPS.PlanGenerators.Enums.LessonType;
 
 namespace LPS.Application;
@@ -27,13 +30,24 @@ public class TimetableService
         _configuration = configuration;
     }
 
-    public async Task<CoursesData> GetCoursesDataAsync()
+    public Task<List<Faculty>> GetFaculties()
+    {
+        return _context.Faculties.Where(x => !x.Archived).AsNoTracking().ToListAsync();
+    }
+
+    public Task<List<Department>> GetDepartments()
+    {
+        return _context.Departments.Where(x => !x.Archived).AsNoTracking().ToListAsync();
+    }
+
+    public async Task<CoursesData> GetCoursesDataAsync(List<Department>? departments = null)
     {
         var coursesData = new CoursesData();
         var courses = _context.Courses
             .Where(x => 
                 x.Semester == _configuration.Semester.ToDbValue() &&
                 x.Active &&
+                (departments == null || departments.Contains(x.Department)) &&
                 x.UserId != 12)
             .Include(x => x.Teacher)
             .Include(x => x.Department)
@@ -48,7 +62,7 @@ public class TimetableService
                 .ThenInclude(x => x.Department)
             .Include(x => x.CourseVsRooms).ThenInclude(x => x.Classroom)
                 .ThenInclude(x => x.Building)
-            .AsSplitQuery();
+            .AsSplitQuery().AsNoTracking();
         await foreach (var entity in courses.AsAsyncEnumerable()) {
             var course = _mapper.Map<Course>(entity);
             course.CourseCreated();
@@ -64,7 +78,7 @@ public class TimetableService
             .Include(x => x.RoomType)
             .Include(x => x.Department)
             .Include(x => x.Building)
-            .AsSplitQuery()
+            .AsSplitQuery().AsNoTracking()
             .ProjectTo<Classroom>(_mapper.ConfigurationProvider);
         await foreach (var classroom in classrooms.AsAsyncEnumerable()) {
             classroomsData.Add(classroom);
