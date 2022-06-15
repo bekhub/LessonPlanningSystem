@@ -1,7 +1,9 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using LPS.Client.Helpers;
 using LPS.Client.Models;
@@ -13,27 +15,24 @@ using Splat;
 
 namespace LPS.Client.ViewModels;
 
-public class ConnectionPageViewModel : ViewModelBase
+public class ConnectionPageViewModel : RoutableViewModel
 {
-    // public string? UrlPathSegment { get; } = Guid.NewGuid().ToString().Substring(0, 5);
-    // public IScreen HostScreen { get; }
-    
     [Reactive] public string? Server { get; set; }
     [Reactive] public string? Database { get; set; }
     [Reactive] public string? User { get; set; }
     [Reactive] public string? Password { get; set; }
     [Reactive] public string? MysqlVersion { get; set; }
-    [Reactive] private ConnectionDetails? CurrentConnectionDetails { get; set; }
-    [Reactive] private ConnectionDetails? SelectedConnectionDetails { get; set; }
+    [Reactive] public ConnectionDetails? CurrentConnectionDetails { get; set; }
+    [Reactive] public ConnectionDetails? SelectedConnectionDetails { get; set; }
     public ObservableCollection<ConnectionDetails> SavedConnectionDetailsList { get; }
 
     public ReactiveCommand<Unit, Unit> ConnectToDatabase { get; }
     public ReactiveCommand<Unit, Unit> RemoveConnectionDetails { get; }
-    public ReactiveCommand<Unit, Unit> GoToNextPage { get; }
 
-    public ConnectionPageViewModel() : this(null) { }
+    public ConnectionPageViewModel(RouterViewModel routerViewModel) : this(null, routerViewModel) { }
 
-    public ConnectionPageViewModel(IAppState? appState)
+    public ConnectionPageViewModel(IAppState? appState, RouterViewModel routerViewModel) 
+        : base(routerViewModel, "connection")
     {
         appState ??= Locator.Current.GetService<IAppState>()!;
         SavedConnectionDetailsList = appState.SavedConnectionDetailsList;
@@ -44,15 +43,16 @@ public class ConnectionPageViewModel : ViewModelBase
                     !(server.IsNullOrWhiteSpace() || database.IsNullOrWhiteSpace() || user.IsNullOrWhiteSpace() ||
                       password.IsNullOrWhiteSpace()));
         ConnectToDatabase = ReactiveCommand.CreateFromTask(ConnectToDatabaseImpl, allFieldsAreFilled);
-        ConnectToDatabase.ThrownExceptions.Subscribe(async x => {
-            await MessageBoxHelper.ShowErrorAsync(x.Message);
-        });
         var canRemove = this.WhenAny(x => x.SelectedConnectionDetails, 
             details => details.Value != null);
         RemoveConnectionDetails = ReactiveCommand.Create(RemoveConnectionDetailsImpl, canRemove);
-        var canGoNext = this.WhenAny(x => x.CurrentConnectionDetails, 
-            details => details.Value != null);
-        GoToNextPage = ReactiveCommand.Create(() => { }, canGoNext);
+        RouterViewModel.IsGoNextEnabled = true;
+        // this.WhenActivated(disposable => {
+        //     RouterViewModel.IsGoBackEnabled = false;
+        //     this.WhenAny(x => x.CurrentConnectionDetails, 
+        //             details => details.Value != null)
+        //         .Subscribe(x => RouterViewModel.IsGoNextEnabled = x).DisposeWith(disposable);
+        // });
     }
     
     private async Task ConnectToDatabaseImpl()

@@ -112,15 +112,15 @@
             Width="200">
             Remove
         </Button>
-        <Button
-            Command="{Binding GoToNextPage}"
-            Grid.Row="5"
-            Height="30"
-            HorizontalAlignment="Right"
-            Margin="0,0,10,0"
-            VerticalAlignment="Top"
-            Width="200">
-            Next
-        </Button>
+        <!--  <Button  -->
+        <!--  Command="{Binding GoToNextPage}"  -->
+        <!--  Grid.Row="5"  -->
+        <!--  Height="30"  -->
+        <!--  HorizontalAlignment="Right"  -->
+        <!--  Margin="0,0,10,0"  -->
+        <!--  VerticalAlignment="Top"  -->
+        <!--  Width="200">  -->
+        <!--  Next  -->
+        <!-- </Button> -->
     </Grid>
 </UserControl>

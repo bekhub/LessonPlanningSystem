@@ -1,22 +1,14 @@
-﻿using System.Reactive.Disposables;
-using Avalonia.ReactiveUI;
+﻿using Avalonia.ReactiveUI;
 using ReactiveUI;
 
 namespace LPS.Client;
 
 public class BaseControl<TViewModel>: ReactiveUserControl<TViewModel> where TViewModel: class
 {
-    public BaseControl()
-    {
-        this.WhenActivated(disposables => 
-            Disposable.Create(() => { }).DisposeWith(disposables));
-    }
-    
-    public BaseControl(bool activate)
+    public BaseControl(bool activate = true)
     {
         if (activate) {
-            this.WhenActivated(disposables => 
-                Disposable.Create(() => { }).DisposeWith(disposables));
+            this.WhenActivated(_ => { });
         }
     }
 }

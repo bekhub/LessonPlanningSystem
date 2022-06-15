@@ -20,6 +20,11 @@ public class App : Avalonia.Application
     public override void OnFrameworkInitializationCompleted()
     {
         Locator.CurrentMutable.RegisterLazySingleton(() => new ConventionalViewLocator(), typeof(IViewLocator));
+        
+        Locator.CurrentMutable.Register<IViewFor<ConnectionPageViewModel>>(() => new ConnectionPageView());
+        Locator.CurrentMutable.Register<IViewFor<SelectItemsPageViewModel>>(() => new SelectItemsPageView());
+        Locator.CurrentMutable.Register<IViewFor<ConfigurationPageViewModel>>(() => new ConfigurationPageView());
+        
         var suspension = new AutoSuspendHelper(ApplicationLifetime!);
         RxApp.SuspensionHost.CreateNewAppState = () => new AppState();
         RxApp.SuspensionHost.SetupDefaultSuspendResume(new NewtonsoftJsonSuspensionDriver<AppState>("appstate.json"));

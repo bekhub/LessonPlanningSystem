@@ -1,0 +1,101 @@
+﻿<UserControl
+    d:DesignHeight="580"
+    d:DesignWidth="610"
+    mc:Ignorable="d"
+    x:Class="LPS.Client.Views.ConfigurationPageView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:LPS.Client.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.DataContext>
+        <vm:ConfigurationPageViewModel />
+    </Design.DataContext>
+    <Grid
+        HorizontalAlignment="Left"
+        Margin="20"
+        VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <CheckBox Content="Arrange General Mandatory Courses (OZD)" IsChecked="{Binding GeneralMandatoryCoursesChecked}" />
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <CheckBox Content="Arrange Remote Courses (UE)" IsChecked="{Binding RemoteCoursesChecked}" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <RadioButton
+                Content="Autumn"
+                GroupName="Semester"
+                IsChecked="{Binding AutumnEnabled}" />
+            <RadioButton
+                Content="Spring"
+                GroupName="Semester"
+                IsChecked="{Binding SpringEnabled}" />
+        </StackPanel>
+        <StackPanel Grid.Row="3" Orientation="Horizontal">
+            <DatePicker
+                DayVisible="False"
+                Margin="0,0,5,0"
+                MonthVisible="False"
+                SelectedDate="{Binding EducationYearFrom}"
+                Width="100" />
+            <DatePicker
+                DayVisible="False"
+                IsEnabled="False"
+                MonthVisible="False"
+                SelectedDate="{Binding EducationYearTo}"
+                Width="100" />
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Educational year
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="4" Orientation="Horizontal">
+            <NumericUpDown
+                Height="30"
+                Minimum="1"
+                Value="{Binding NumberOfTries}" />
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Number Of Tries
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="5" Orientation="Horizontal">
+            <NumericUpDown Height="30" Minimum="0" />
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Unpositioned Lessons Coefficient
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="6" Orientation="Horizontal">
+            <NumericUpDown Height="30" Minimum="0" />
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Separated Lessons Coefficient
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="7" Orientation="Horizontal">
+            <NumericUpDown Height="30" Minimum="0" />
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Max Teaching Hours Coefficient
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="8" Orientation="Horizontal">
+            <NumericUpDown
+                Height="30"
+                Maximum="{Binding MaxNumberOfThreads}"
+                Minimum="1"
+                Value="{Binding NumberOfThreads}" />
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Number Of Threads
+            </TextBlock>
+        </StackPanel>
+    </Grid>
+</UserControl>

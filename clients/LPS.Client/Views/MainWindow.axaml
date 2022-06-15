@@ -1,4 +1,5 @@
 <Window
+    Height="580"
     Icon="/Assets/avalonia-logo.ico"
     Title="LPS.Client"
     Width="610"

@@ -1,19 +1,29 @@
-﻿using System.Reactive;
+﻿using System;
+using System.Linq;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 
 namespace LPS.Client.ViewModels;
 
-public class MainViewModel : ViewModelBase
+public class MainViewModel : RouterViewModel
 {
-    // [Reactive] public RoutingState Router { get; } = new();
-    // public ReactiveCommand<Unit, IRoutableViewModel> GoNext { get; }
-    // public ReactiveCommand<Unit, IRoutableViewModel?> GoBack => Router.NavigateBack;
-    public ViewModelBase Content { get; set; }
-
     public MainViewModel()
     {
-        Content = new ConnectionPageViewModel();
-        // Router.Navigate.Execute(new ConnectionPageViewModel(this));
+        GoNext = ReactiveCommand.Create(HandleGoNext);
+        IsGoNextEnabled = true;
+    }
+
+    private void HandleGoNext()
+    {
+        if (Router.NavigationStack.Count == 0) {
+            Router.Navigate.Execute(new ConnectionPageViewModel(this));
+            return;
+        }
+        RoutableViewModel next = Router.NavigationStack.Last().UrlPathSegment switch {
+            "connection" => new SelectItemsPageViewModel(this),
+            "selectItems" => new ConfigurationPageViewModel(this),
+            "configuration" => throw new NotImplementedException(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        Router.Navigate.Execute(next);
     }
 }
