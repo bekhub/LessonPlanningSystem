@@ -9,7 +9,7 @@ public class ConventionalViewLocator : IViewLocator
     public IViewFor? ResolveView<T>(T? viewModel, string? contract = null)
     {
         var viewModelName = viewModel!.GetType().FullName;
-        var viewTypeName = viewModelName!.TrimEnd("Model".ToCharArray());
+        var viewTypeName = viewModelName!.Replace("ViewModel", "View");
 
         try
         {

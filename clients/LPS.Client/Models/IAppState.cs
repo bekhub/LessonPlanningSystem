@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿#nullable enable
+using System.Collections.ObjectModel;
 
 namespace LPS.Client.Models;
 

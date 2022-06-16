@@ -19,25 +19,22 @@ public class App : Avalonia.Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        Locator.CurrentMutable.RegisterLazySingleton(() => new ConventionalViewLocator(), typeof(IViewLocator));
-        
-        Locator.CurrentMutable.Register<IViewFor<ConnectionPageViewModel>>(() => new ConnectionPageView());
-        Locator.CurrentMutable.Register<IViewFor<SelectItemsPageViewModel>>(() => new SelectItemsPageView());
-        Locator.CurrentMutable.Register<IViewFor<ConfigurationPageViewModel>>(() => new ConfigurationPageView());
-        
         var suspension = new AutoSuspendHelper(ApplicationLifetime!);
         RxApp.SuspensionHost.CreateNewAppState = () => new AppState();
         RxApp.SuspensionHost.SetupDefaultSuspendResume(new NewtonsoftJsonSuspensionDriver<AppState>("appstate.json"));
         suspension.OnFrameworkInitializationCompleted();
         var state = RxApp.SuspensionHost.GetAppState<AppState>();
         Locator.CurrentMutable.RegisterLazySingleton<IAppState>(() => state);
-            
+        
+        Locator.CurrentMutable.RegisterLazySingleton(() => new ConventionalViewLocator(), typeof(IViewLocator));
+        Locator.CurrentMutable.RegisterConstant<IScreen>(new MainViewModel());
+
         switch (ApplicationLifetime) {
             case IClassicDesktopStyleApplicationLifetime desktop:
-                desktop.MainWindow = new MainWindow { DataContext = new MainViewModel() };
+                desktop.MainWindow = new MainWindow { DataContext = Locator.Current.GetService<IScreen>() };
                 break;
             case ISingleViewApplicationLifetime singleViewPlatform:
-                singleViewPlatform.MainView = new MainView { DataContext = new MainViewModel() };
+                singleViewPlatform.MainView = new MainView { DataContext = Locator.Current.GetService<IScreen>() };
                 break;
         }
 

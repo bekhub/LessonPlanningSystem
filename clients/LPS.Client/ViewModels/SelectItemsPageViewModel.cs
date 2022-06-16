@@ -12,7 +12,6 @@ using LPS.DatabaseLayer.Entities;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Splat;
 
 namespace LPS.Client.ViewModels;
 
@@ -23,6 +22,7 @@ public class SelectItemsPageViewModel : RoutableViewModel
     public SelectionModel<Faculty> SelectionFaculties { get; set; }
     [Reactive] public List<Department> Departments { get; set; } = new();
     [Reactive] public List<Department> SourceDepartments { get; set; }
+    [Reactive] public List<Department> SelectedDepartments { get; set; }
     [Reactive] public bool AllDepartmentsChecked { get; set; }
     public SelectionModel<Department> SelectionDepartments { get; set; }
 
@@ -37,9 +37,8 @@ public class SelectItemsPageViewModel : RoutableViewModel
         SelectionFaculties.SelectionChanged += AllFacultiesSelectionChanged;
         SelectionDepartments = new SelectionModel<Department> { SingleSelect = false };
         SelectionDepartments.SelectionChanged += AllDepartmentsSelectionChanged;
-        var details = Locator.Current.GetService<ConnectionDetails>() ?? new ConnectionDetails("localhost", 
-            "timetable_v4", "root", "root", "8.0.28");
-        RxApp.MainThreadScheduler.Schedule(async () => await RetrieveDataAsync(details));
+        var details = RouterViewModel.ConfigurationDetails.ConnectionDetails;
+        RxApp.TaskpoolScheduler.Schedule(async () => await RetrieveDataAsync(details));
         this.WhenAny(x => x.Faculties, x => x.SourceDepartments,
                 (faculties, departments) =>
                     faculties.Value == null || departments.Value == null)
@@ -48,8 +47,8 @@ public class SelectItemsPageViewModel : RoutableViewModel
         AllDepartmentsCheckbox = ReactiveCommand.Create(HandleAllDepartmentsCheckbox);
         this.WhenActivated(disposable => {
             RouterViewModel.IsGoBackEnabled = true;
-            this.WhenAny(x => x.SelectionDepartments.SelectedItems,
-                items => items.Value.Count != 0)
+            this.WhenAny(x => x.SelectedDepartments,
+                items => items.Value != null && items.Value.Count != 0)
                 .Subscribe(x => RouterViewModel.IsGoNextEnabled = x).DisposeWith(disposable);
         });
     }
@@ -77,6 +76,7 @@ public class SelectItemsPageViewModel : RoutableViewModel
     {
         if (Departments.Count == 0) AllDepartmentsChecked = false;
         else AllDepartmentsChecked = SelectionDepartments.SelectedItems.Count == Departments!.Count;
+        SelectedDepartments = SelectionDepartments.SelectedItems.ToList();
     }
     
     private async Task RetrieveDataAsync(ConnectionDetails details)

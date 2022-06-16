@@ -46,15 +46,20 @@ public class ConnectionPageViewModel : RoutableViewModel
         var canRemove = this.WhenAny(x => x.SelectedConnectionDetails, 
             details => details.Value != null);
         RemoveConnectionDetails = ReactiveCommand.Create(RemoveConnectionDetailsImpl, canRemove);
-        RouterViewModel.IsGoNextEnabled = true;
-        // this.WhenActivated(disposable => {
-        //     RouterViewModel.IsGoBackEnabled = false;
-        //     this.WhenAny(x => x.CurrentConnectionDetails, 
-        //             details => details.Value != null)
-        //         .Subscribe(x => RouterViewModel.IsGoNextEnabled = x).DisposeWith(disposable);
-        // });
+        this.WhenActivated(disposable => {
+            RouterViewModel.IsGoBackEnabled = false;
+            this.WhenAny(x => x.CurrentConnectionDetails, 
+                    details => details.Value != null)
+                .Subscribe(x => RouterViewModel.IsGoNextEnabled = x).DisposeWith(disposable);
+        });
     }
-    
+
+    public override void OnGoNext()
+    {
+        RouterViewModel.ConfigurationDetails.ConnectionDetails = CurrentConnectionDetails! with {};
+        base.OnGoNext();
+    }
+
     private async Task ConnectToDatabaseImpl()
     {
         var connectionDetails = CreateConnectionDetails();

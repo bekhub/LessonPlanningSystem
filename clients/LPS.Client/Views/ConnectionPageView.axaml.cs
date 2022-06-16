@@ -1,5 +1,4 @@
 ﻿using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using LPS.Client.Models;
 using LPS.Client.ViewModels;
 
@@ -11,12 +10,7 @@ public sealed partial class ConnectionPageView : BaseControl<ConnectionPageViewM
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
-
+    
     private void LsbSavedConnectionDetails_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         ListBox box = (sender as ListBox)!;

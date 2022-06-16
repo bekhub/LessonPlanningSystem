@@ -21,6 +21,8 @@ public class ConfigurationPageViewModel : RoutableViewModel
 
     public ConfigurationPageViewModel(RouterViewModel routerViewModel) : base(routerViewModel, "configuration")
     {
+        RouterViewModel.IsGoNextEnabled = false;
+        RouterViewModel.IsGoBackEnabled = true;
         this.WhenAnyValue(x => x.EducationYearFrom)
             .Subscribe(x => EducationYearTo = EducationYearFrom.AddYears(1));
     }

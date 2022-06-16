@@ -8,7 +8,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:rxui="clr-namespace:Avalonia.ReactiveUI;assembly=Avalonia.ReactiveUI"
+    xmlns:reactiveUi="http://reactiveui.net"
     xmlns:viewModels="clr-namespace:LPS.Client.ViewModels"
     xmlns:vl="clr-namespace:LPS.Client"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -20,11 +20,14 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="50" />
         </Grid.RowDefinitions>
-        <rxui:RoutedViewHost Grid.Row="0" Router="{Binding Router}">
-            <rxui:RoutedViewHost.ViewLocator>
+        <reactiveUi:RoutedViewHost
+            Grid.Row="0"
+            PageTransition="{x:Null}"
+            Router="{Binding Router}">
+            <reactiveUi:RoutedViewHost.ViewLocator>
                 <vl:ConventionalViewLocator />
-            </rxui:RoutedViewHost.ViewLocator>
-        </rxui:RoutedViewHost>
+            </reactiveUi:RoutedViewHost.ViewLocator>
+        </reactiveUi:RoutedViewHost>
         <Button
             Command="{Binding GoBack}"
             Grid.Row="1"

@@ -17,4 +17,6 @@ public abstract class RoutableViewModel : ViewModelBase, IRoutableViewModel
     }
 
     public virtual void OnSwitchedToThis() { }
+    
+    public virtual void OnGoNext() { }
 }
