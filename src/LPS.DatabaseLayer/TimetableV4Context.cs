@@ -27,6 +27,7 @@ public class TimetableV4Context : DbContext
     public DbSet<TimeDay> TimeDays { get; set; } = null!;
     public DbSet<TimeHour> TimeHours { get; set; } = null!;
     public DbSet<TimeTable> TimeTables { get; set; } = null!;
+    public DbSet<TimeTablePreview> TimeTablePreviews { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -625,6 +626,48 @@ public class TimetableV4Context : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_46301C914D506B7F");
+        });
+        
+        modelBuilder.Entity<TimeTablePreview>(entity => {
+            entity.ToTable("time_table_preview");
+
+            entity.HasIndex(e => e.TimeDayId, "IDX_173942909Preview");
+
+            entity.HasIndex(e => e.UserId, "IDX_46301C914Preview");
+
+            entity.HasIndex(e => e.TimeHourId, "IDX_659919431Preview");
+
+            entity.HasIndex(e => e.ClassroomId, "IDX_7B1189B96Preview");
+
+            entity.HasIndex(e => e.CourseId, "IDX_88A7A9AF8Preview");
+
+            entity.HasIndex(e => e.LessonTypeId, "IDX_E11586D37Preview");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+
+            entity.Property(e => e.ClassroomId).HasColumnName("classroom_id");
+
+            entity.Property(e => e.CourseId).HasColumnName("course_id");
+
+            entity.Property(e => e.CreatedTime)
+                .HasColumnType("datetime")
+                .HasColumnName("created_time");
+
+            entity.Property(e => e.EducationalYear)
+                .HasMaxLength(9)
+                .HasColumnName("educational_year");
+
+            entity.Property(e => e.LessonTypeId).HasColumnName("lesson_type_id");
+
+            entity.Property(e => e.Semester)
+                .HasMaxLength(45)
+                .HasColumnName("semester");
+
+            entity.Property(e => e.TimeDayId).HasColumnName("time_day_id");
+
+            entity.Property(e => e.TimeHourId).HasColumnName("time_hour_id");
+
+            entity.Property(e => e.UserId).HasColumnName("user_id");
         });
     }
 }

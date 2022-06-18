@@ -17,7 +17,7 @@
             <RowDefinition Height="50" />
             <RowDefinition Height="50" />
             <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
+            <RowDefinition Height="40" />
             <RowDefinition Height="280" />
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
@@ -73,23 +73,31 @@
             Height="30"
             HorizontalAlignment="Left"
             IsEnabled="False"
-            Margin="10,5,0,0"
+            Margin="10,0,0,0"
             Text="{Binding Path=MysqlVersion, Mode=OneWay}"
             TextWrapping="Wrap"
             VerticalAlignment="Top"
             Watermark="Mysql version"
             Width="200" />
-        <Button
-            Command="{Binding ConnectToDatabase}"
+        <StackPanel
             Grid.Row="3"
-            Height="30"
-            HorizontalAlignment="Left"
-            Margin="10,0,0,0"
-            VerticalAlignment="Top"
-            Width="200">
-            Connect to database
-        </Button>
-
+            Margin="10,0,0,10"
+            Orientation="Horizontal">
+            <Button
+                Command="{Binding ConnectToDatabase}"
+                Height="30"
+                HorizontalAlignment="Left"
+                Margin="0,0,10,0"
+                VerticalAlignment="Top"
+                Width="200">
+                Connect to database
+            </Button>
+            <TextBlock
+                Foreground="{Binding ConnectionTextColor}"
+                HorizontalAlignment="Left"
+                Text="{Binding ConnectionText}"
+                VerticalAlignment="Center" />
+        </StackPanel>
         <ListBox
             Background="#16191f"
             Grid.Row="4"
@@ -112,15 +120,5 @@
             Width="200">
             Remove
         </Button>
-        <!--  <Button  -->
-        <!--  Command="{Binding GoToNextPage}"  -->
-        <!--  Grid.Row="5"  -->
-        <!--  Height="30"  -->
-        <!--  HorizontalAlignment="Right"  -->
-        <!--  Margin="0,0,10,0"  -->
-        <!--  VerticalAlignment="Top"  -->
-        <!--  Width="200">  -->
-        <!--  Next  -->
-        <!-- </Button> -->
     </Grid>
 </UserControl>

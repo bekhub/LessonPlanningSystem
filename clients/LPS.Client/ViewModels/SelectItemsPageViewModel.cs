@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls.Selection;
-using LPS.Client.Models;
+using LPS.Client.Helpers;
 using LPS.Client.Services;
 using LPS.DatabaseLayer.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -37,8 +37,7 @@ public class SelectItemsPageViewModel : RoutableViewModel
         SelectionFaculties.SelectionChanged += AllFacultiesSelectionChanged;
         SelectionDepartments = new SelectionModel<Department> { SingleSelect = false };
         SelectionDepartments.SelectionChanged += AllDepartmentsSelectionChanged;
-        var details = RouterViewModel.ConfigurationDetails.ConnectionDetails;
-        RxApp.TaskpoolScheduler.Schedule(async () => await RetrieveDataAsync(details));
+        Observable.Start(RetrieveDataAsync, RxApp.TaskpoolScheduler);
         this.WhenAny(x => x.Faculties, x => x.SourceDepartments,
                 (faculties, departments) =>
                     faculties.Value == null || departments.Value == null)
@@ -51,6 +50,12 @@ public class SelectItemsPageViewModel : RoutableViewModel
                 items => items.Value != null && items.Value.Count != 0)
                 .Subscribe(x => RouterViewModel.IsGoNextEnabled = x).DisposeWith(disposable);
         });
+    }
+
+    public override void OnGoNext()
+    {
+        RouterViewModel.ConfigurationDetails.Departments = SelectedDepartments;
+        base.OnGoNext();
     }
 
     private void HandleAllFacultiesCheckbox()
@@ -79,11 +84,15 @@ public class SelectItemsPageViewModel : RoutableViewModel
         SelectedDepartments = SelectionDepartments.SelectedItems.ToList();
     }
     
-    private async Task RetrieveDataAsync(ConnectionDetails details)
+    private async Task RetrieveDataAsync()
     {
-        await DatabaseService.UsingContextAsync(details, async context => {
-            Faculties = await context.Faculties.AsNoTracking().ToListAsync();
-            SourceDepartments = await context.Departments.AsNoTracking().ToListAsync();
-        });
+        try {
+            await DatabaseService.UsingContextAsync(ConfigurationDetails.ConnectionDetails, async context => {
+                Faculties = await context.Faculties.AsNoTracking().ToListAsync();
+                SourceDepartments = await context.Departments.AsNoTracking().ToListAsync();
+            });
+        } catch (Exception ex) {
+            Observable.Start(() => MessageBoxHelper.ShowErrorAsync(ex.Message), RxApp.MainThreadScheduler);
+        }
     }
 }

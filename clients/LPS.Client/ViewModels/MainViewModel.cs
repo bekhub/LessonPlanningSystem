@@ -21,7 +21,7 @@ public class MainViewModel : RouterViewModel
         RoutableViewModel next = CurrentViewModel switch {
             ConnectionPageViewModel => new SelectItemsPageViewModel(this),
             SelectItemsPageViewModel => new ConfigurationPageViewModel(this),
-            ConfigurationPageViewModel => throw new NotImplementedException(),
+            ConfigurationPageViewModel => new TimetableGeneratorViewModel(this),
             _ => throw new ArgumentOutOfRangeException()
         };
         this.NavigateTo(next);

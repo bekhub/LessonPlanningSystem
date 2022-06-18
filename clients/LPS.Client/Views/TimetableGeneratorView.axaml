@@ -1,0 +1,137 @@
+﻿<UserControl
+    d:DesignHeight="580"
+    d:DesignWidth="610"
+    mc:Ignorable="d"
+    x:Class="LPS.Client.Views.TimetableGeneratorView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:LPS.Client.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.DataContext>
+        <vm:TimetableGeneratorViewModel />
+    </Design.DataContext>
+    <Panel>
+        <ProgressBar
+            HorizontalAlignment="Center"
+            IsIndeterminate="True"
+            IsVisible="{Binding IsDataPulling}"
+            MaxHeight="200"
+            MaxWidth="200"
+            Orientation="Horizontal"
+            VerticalAlignment="Center" />
+        <Grid
+            ColumnDefinitions="*,*"
+            IsVisible="{Binding !IsDataPulling}"
+            Margin="10"
+            RowDefinitions="50,50,50,100,30">
+            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <TextBox
+                    Height="30"
+                    IsEnabled="False"
+                    Margin="0,0,10,0"
+                    Text="{Binding TotalFreeHoursOfRooms}"
+                    Width="100" />
+                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center">
+                    Total free hours of rooms
+                </TextBlock>
+            </StackPanel>
+            <StackPanel
+                Grid.Column="1"
+                Grid.Row="0"
+                Orientation="Horizontal">
+                <TextBox
+                    Height="30"
+                    HorizontalAlignment="Left"
+                    IsEnabled="False"
+                    Margin="0,0,10,0"
+                    Text="{Binding TotalUnpositionedLessons}"
+                    Width="100" />
+                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center">
+                    Total unpositioned lessons
+                </TextBlock>
+            </StackPanel>
+            <StackPanel
+                Grid.Column="0"
+                Grid.Row="1"
+                Orientation="Horizontal">
+                <TextBox
+                    Height="30"
+                    IsEnabled="False"
+                    Margin="0,0,10,0"
+                    Text="{Binding TotalUnpositionedCourses}"
+                    Width="100" />
+                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center">
+                    Total unpositioned courses
+                </TextBlock>
+            </StackPanel>
+            <StackPanel
+                Grid.Column="1"
+                Grid.Row="1"
+                Orientation="Horizontal">
+                <TextBox
+                    Height="30"
+                    HorizontalAlignment="Left"
+                    IsEnabled="False"
+                    Margin="0,0,10,0"
+                    Text="{Binding TotalSeparatedLessons}"
+                    Width="100" />
+                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center">
+                    Total separated lessons
+                </TextBlock>
+            </StackPanel>
+            <StackPanel
+                Grid.Column="0"
+                Grid.Row="2"
+                Orientation="Horizontal">
+                <TextBox
+                    Height="30"
+                    HorizontalAlignment="Left"
+                    IsEnabled="False"
+                    Margin="0,0,10,0"
+                    Text="{Binding MaxTeachingHours}"
+                    Width="100" />
+                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center">
+                    Max teaching hours
+                </TextBlock>
+            </StackPanel>
+            <StackPanel
+                Grid.Column="0"
+                Grid.Row="3"
+                HorizontalAlignment="Center"
+                Margin="5,0,0,0"
+                Orientation="Horizontal"
+                Spacing="20">
+                <Button
+                    Command="{Binding GenerateLessonPlan}"
+                    IsEnabled="{Binding !IsDataPulling}"
+                    Width="180">
+                    Generate timetable
+                </Button>
+                <Button
+                    Command="{Binding SaveAsPreview}"
+                    IsEnabled="{Binding CanSave}"
+                    Width="180">
+                    Save to preview table
+                </Button>
+                <Button
+                    Command="{Binding SaveAsOriginal}"
+                    IsEnabled="{Binding CanSave}"
+                    Width="180">
+                    Save timetable
+                </Button>
+            </StackPanel>
+            <ProgressBar
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Grid.Row="4"
+                HorizontalAlignment="Center"
+                IsIndeterminate="True"
+                IsVisible="{Binding IsProgressActive}"
+                MaxHeight="200"
+                MaxWidth="200"
+                Orientation="Horizontal"
+                VerticalAlignment="Center" />
+        </Grid>
+    </Panel>
+</UserControl>

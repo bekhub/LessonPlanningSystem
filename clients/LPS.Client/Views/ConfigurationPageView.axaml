@@ -70,19 +70,31 @@
             </TextBlock>
         </StackPanel>
         <StackPanel Grid.Row="5" Orientation="Horizontal">
-            <NumericUpDown Height="30" Minimum="0" />
+            <NumericUpDown
+                Height="30"
+                Maximum="100"
+                Minimum="0"
+                Value="{Binding UnpositionedLessonsCoefficient}" />
             <TextBlock Margin="10,0" VerticalAlignment="Center">
                 Unpositioned Lessons Coefficient
             </TextBlock>
         </StackPanel>
         <StackPanel Grid.Row="6" Orientation="Horizontal">
-            <NumericUpDown Height="30" Minimum="0" />
+            <NumericUpDown
+                Height="30"
+                Maximum="100"
+                Minimum="0"
+                Value="{Binding SeparatedLessonsCoefficient}" />
             <TextBlock Margin="10,0" VerticalAlignment="Center">
                 Separated Lessons Coefficient
             </TextBlock>
         </StackPanel>
         <StackPanel Grid.Row="7" Orientation="Horizontal">
-            <NumericUpDown Height="30" Minimum="0" />
+            <NumericUpDown
+                Height="30"
+                Maximum="100"
+                Minimum="0"
+                Value="{Binding MaxTeachingCoefficient}" />
             <TextBlock Margin="10,0" VerticalAlignment="Center">
                 Max Teaching Hours Coefficient
             </TextBlock>

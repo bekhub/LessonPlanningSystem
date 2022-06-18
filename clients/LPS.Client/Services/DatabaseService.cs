@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using LPS.Application;
 using LPS.Client.Models;
 using LPS.DatabaseLayer;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,5 +17,18 @@ public class DatabaseService
         await using var scope = provider.CreateAsyncScope();
         var context = scope.ServiceProvider.GetService<TimetableV4Context>()!;
         await action.Invoke(context);
+    }
+    
+    public static async Task UsingTimetableServiceAsync(ConfigurationDetails details, Func<TimetableService, Task> action)
+    {
+        var services = new ServiceCollection();
+        var connection = details.ConnectionDetails;
+        services.AddTimetableDb(connection.GetConnectionString(), connection.GetMysqlVersion());
+        services.AddApplicationDependencies();
+        services.AddSingleton(details.PlanConfiguration);
+        await using var provider = services.BuildServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+        var service = scope.ServiceProvider.GetService<TimetableService>()!;
+        await action.Invoke(service);
     }
 }

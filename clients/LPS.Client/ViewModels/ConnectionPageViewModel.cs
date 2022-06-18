@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using LPS.Client.Helpers;
 using LPS.Client.Models;
 using LPS.Utils.Extensions;
@@ -24,6 +25,8 @@ public class ConnectionPageViewModel : RoutableViewModel
     [Reactive] public string? MysqlVersion { get; set; }
     [Reactive] public ConnectionDetails? CurrentConnectionDetails { get; set; }
     [Reactive] public ConnectionDetails? SelectedConnectionDetails { get; set; }
+    [ObservableAsProperty] public string ConnectionText { get; }
+    [ObservableAsProperty] public IBrush ConnectionTextColor { get; }
     public ObservableCollection<ConnectionDetails> SavedConnectionDetailsList { get; }
 
     public ReactiveCommand<Unit, Unit> ConnectToDatabase { get; }
@@ -46,6 +49,12 @@ public class ConnectionPageViewModel : RoutableViewModel
         var canRemove = this.WhenAny(x => x.SelectedConnectionDetails, 
             details => details.Value != null);
         RemoveConnectionDetails = ReactiveCommand.Create(RemoveConnectionDetailsImpl, canRemove);
+        this.WhenAny(x => x.CurrentConnectionDetails, 
+                details => details.Value != null ? "Connection valid" : "Check connection")
+            .ToPropertyEx(this, x => x.ConnectionText);
+        this.WhenAny(x => x.CurrentConnectionDetails, 
+                details => details.Value != null ? Brushes.Green : Brushes.Red)
+            .ToPropertyEx(this, x => x.ConnectionTextColor);
         this.WhenActivated(disposable => {
             RouterViewModel.IsGoBackEnabled = false;
             this.WhenAny(x => x.CurrentConnectionDetails, 
@@ -89,7 +98,7 @@ public class ConnectionPageViewModel : RoutableViewModel
         User = details?.User;
         Password = details?.Password;
         MysqlVersion = details?.MysqlVersion;
-        CurrentConnectionDetails = details;
+        CurrentConnectionDetails = null;
     }
 
     private void RemoveConnectionDetailsImpl()

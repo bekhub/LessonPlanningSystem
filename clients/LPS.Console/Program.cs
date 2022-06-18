@@ -39,6 +39,6 @@ stopwatch.Stop();
 Console.WriteLine("Generating lesson plan: " + stopwatch.Elapsed);
 
 stopwatch.Restart();
-await timetableService.SaveTimetableAsOriginalAsync(bestLessonPlan.Timetables);
+await timetableService.SaveTimetableAsPreviewAsync(bestLessonPlan.Timetables);
 stopwatch.Stop();
 Console.WriteLine("Saving lesson plan: " + stopwatch.Elapsed);

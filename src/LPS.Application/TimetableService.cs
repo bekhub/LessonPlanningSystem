@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using Classroom = LPS.PlanGenerators.Models.Classroom;
 using Course = LPS.PlanGenerators.Models.Course;
 using Department = LPS.DatabaseLayer.Entities.Department;
-using Faculty = LPS.DatabaseLayer.Entities.Faculty;
 using LessonType = LPS.PlanGenerators.Enums.LessonType;
 
 namespace LPS.Application;
@@ -28,16 +27,6 @@ public class TimetableService
         _context = context;
         _mapper = mapper;
         _configuration = configuration;
-    }
-
-    public Task<List<Faculty>> GetFaculties()
-    {
-        return _context.Faculties.Where(x => !x.Archived).AsNoTracking().ToListAsync();
-    }
-
-    public Task<List<Department>> GetDepartments()
-    {
-        return _context.Departments.Where(x => !x.Archived).AsNoTracking().ToListAsync();
     }
 
     public async Task<CoursesData> GetCoursesDataAsync(List<Department>? departments = null)
@@ -138,9 +127,19 @@ public class TimetableService
         await _context.SaveChangesAsync();
     }
 
-    public Task SaveTimetableAsPreviewAsync(IEnumerable<Timetable> timetables)
+    public async Task SaveTimetableAsPreviewAsync(IEnumerable<Timetable> timetables)
     {
-        throw new NotImplementedException();
+        await EnsureEnumValuesInDatabaseAsync();
+        await TruncatePreviewTimetableAsync();
+        foreach (var timetable in timetables) {
+            var timeTable = _mapper.Map<TimeTablePreview>(timetable);
+            timeTable.CreatedTime = DateTime.Now;
+            timeTable.Semester = _configuration.Semester.ToDbValue();
+            timeTable.EducationalYear = _configuration.EducationalYear;
+            _context.TimeTablePreviews.Add(timeTable);
+        }
+        
+        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteCurrentSemesterTimetablesAsync()
@@ -148,5 +147,11 @@ public class TimetableService
         const string sql = "delete from time_table where `educational_year` = {0} and `semester` = {1}";
         await _context.Database.ExecuteSqlRawAsync(sql, _configuration.EducationalYear,
             _configuration.Semester.ToDbValue());
+    }
+
+    public async Task TruncatePreviewTimetableAsync()
+    {
+        const string sql = "truncate table time_table_preview";
+        await _context.Database.ExecuteSqlRawAsync(sql);
     }
 }
