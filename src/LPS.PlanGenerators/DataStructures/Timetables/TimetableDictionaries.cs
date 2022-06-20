@@ -8,8 +8,9 @@ public class ScheduleTimetableDict<TKey> : Dictionary<TKey, ScheduleTimetable> w
     public virtual void Add(TKey key, Timetable timetable)
     {
         if (ContainsKey(key)) {
+            //Todo: fix this
             if (!this[key].TryAdd(timetable.ScheduleTime, timetable))
-                Console.WriteLine($"{key} - courseId is already added");
+                Console.WriteLine($"{key} Id - some model is already added");
             return;
         }
         this[key] = new ScheduleTimetable {

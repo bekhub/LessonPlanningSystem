@@ -24,7 +24,6 @@ public class ScheduleTimeRange : ValueObject
     /// <summary>
     /// Gives all time ranges by duration
     /// </summary>
-    /// <returns></returns>
     public static IEnumerable<ScheduleTimeRange> GetWeekScheduleTimeRanges(int duration)
     {
         foreach (var time in ScheduleTime.GetWeekScheduleTimes()) {

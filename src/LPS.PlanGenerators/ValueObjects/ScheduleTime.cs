@@ -6,7 +6,7 @@ namespace LPS.PlanGenerators.ValueObjects;
 /// <summary>
 /// Value object representing the time on weekdays
 /// </summary>
-public class ScheduleTime : ValueObject
+public readonly struct ScheduleTime
 {
     public Weekdays Weekday { get; }
     public int Hour { get; }
@@ -103,10 +103,29 @@ public class ScheduleTime : ValueObject
             : Hour + hoursNeeded <= HoursPerDay;
     }
 
-    protected override IEnumerable<object> GetEqualityComponents()
+    public bool Equals(ScheduleTime other)
     {
-        yield return Weekday;
-        yield return Hour;
+        return Weekday == other.Weekday && Hour == other.Hour;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is ScheduleTime other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine((int)Weekday, Hour);
+    }
+
+    public static bool operator ==(ScheduleTime left, ScheduleTime right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(ScheduleTime left, ScheduleTime right)
+    {
+        return !(left == right);
     }
 
     public override string ToString()

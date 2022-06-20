@@ -45,7 +45,7 @@ public class TimetableData
     }
 
     /// <summary>
-    /// 
+    /// Add timetable for single course
     /// </summary>
     public void AddTimetable(Course course, LessonType lessonType, ScheduleTimeRange timeRange, 
         IReadOnlyList<Classroom> rooms)
@@ -58,7 +58,7 @@ public class TimetableData
     }
     
     /// <summary>
-    /// 
+    /// Add timetable for multiple courses
     /// </summary>
     public void AddTimetable(IReadOnlyList<Course> courses, LessonType lessonType, ScheduleTimeRange timeRange, 
         IReadOnlyList<Classroom> rooms)
@@ -99,7 +99,7 @@ public class TimetableData
     }
 
     /// <summary>
-    /// 
+    /// Returns proper rooms for course by lesson type and round
     /// </summary>
     public IReadOnlyList<Classroom> GetRoomsByCourse(Course course, LessonType lessonType, Round round)
     {
@@ -110,7 +110,7 @@ public class TimetableData
     }
     
     /// <summary>
-    /// 
+    /// Returns free rooms from given rooms by time range
     /// </summary>
     public IReadOnlyList<Classroom> GetFreeRooms(IEnumerable<Classroom> rooms, ScheduleTimeRange timeRange)
     {
@@ -118,7 +118,7 @@ public class TimetableData
     }
 
     /// <summary>
-    /// 
+    /// Returns free rooms by course, lesson type, time range, and round
     /// </summary>
     public IReadOnlyList<Classroom> GetFreeRoomsByCourse(Course course, LessonType lessonType, 
         ScheduleTimeRange timeRange, Round round)
@@ -131,7 +131,7 @@ public class TimetableData
     }
     
     /// <summary>
-    /// 
+    /// Returns free rooms by courses, lesson type, time range, and round
     /// </summary>
     public IReadOnlyList<Classroom> GetFreeRoomsByCourses(IReadOnlyList<Course> courses, LessonType lessonType, 
         ScheduleTimeRange timeRange, Round round)
@@ -188,6 +188,9 @@ public class TimetableData
         _ => throw new ArgumentOutOfRangeException(nameof(lessonType), lessonType, "Not handled all lesson types!"),
     };
     
+    /// <summary>
+    /// Merges courses by course code, faculty, and subgroup merge mode
+    /// </summary>
     public IReadOnlyList<Course> MergeCoursesByCourse(Course course)
     {
         return _allCourses.Where(x =>

@@ -13,6 +13,18 @@ public class CoursesTimetable : ScheduleTimetableDict<int>
         _allCourses = provider.CoursesData.AllCourses.Values.ToList();
     }
     
+    public override void Add(int key, Timetable timetable)
+    {
+        if (ContainsKey(key)) {
+            if (!this[key].TryAdd(timetable.ScheduleTime, timetable))
+                Console.WriteLine($"{key} - courseId is already added");
+            return;
+        }
+        this[key] = new ScheduleTimetable {
+            [timetable.ScheduleTime] = timetable,
+        };
+    }
+    
     /// <summary>
     /// Checks if the course is free at that time (may be the practice lesson at the same time but in the other room)
     /// </summary>
@@ -44,7 +56,6 @@ public class CoursesTimetable : ScheduleTimetableDict<int>
     /// <summary>
     /// This function calculates the total number of separated lessons
     /// </summary>
-    /// <returns></returns>
     public int TotalSeparatedLessons()
     {
         if (Count == 0) return 0;
