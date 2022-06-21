@@ -5,7 +5,21 @@ public class ScheduleTimeRange : ValueObject
     public ScheduleTime Time { get; }
     public int Duration { get; }
 
+    private static readonly Dictionary<(ScheduleTime, int), ScheduleTimeRange> AllScheduleTimeRanges;
+
     private readonly List<ScheduleTime> _times = new();
+
+    static ScheduleTimeRange()
+    {
+        var weekScheduleTimes = ScheduleTime.GetWeekScheduleTimes().ToList();
+        AllScheduleTimeRanges = new Dictionary<(ScheduleTime, int), ScheduleTimeRange>(8 * weekScheduleTimes.Count);
+        for (int duration = 1; duration <= 8; duration++) {
+            foreach (var time in weekScheduleTimes) {
+                if (!time.NotLunchOrEndOfDay(duration) || time.Hour + duration > 11) continue;
+                AllScheduleTimeRanges.Add((time, duration), new ScheduleTimeRange(time, duration));
+            }
+        }
+    }
 
     public ScheduleTimeRange(ScheduleTime time, int duration)
     {
@@ -28,7 +42,11 @@ public class ScheduleTimeRange : ValueObject
     {
         foreach (var time in ScheduleTime.GetWeekScheduleTimes()) {
             if (!time.NotLunchOrEndOfDay(duration) || time.Hour + duration > 11) continue;
-            yield return new ScheduleTimeRange(time, duration);
+            if (AllScheduleTimeRanges.TryGetValue((time, duration), out var timeRange)) {
+                yield return timeRange;
+            } else {
+                yield return new ScheduleTimeRange(time, duration);
+            }
         }
     }
 

@@ -22,7 +22,7 @@ public class CoursesBySgModeTests
             Id = 2,
             SubgroupMode = SubgroupMode.Mode6,
         };
-        var coursesBySgMode = new CoursesBySgMode();
+        var coursesBySgMode = new CoursesBySubgroupMode();
         coursesBySgMode.AddBySubgroupMode(courseMode5);
         coursesBySgMode.SubgroupMode5N6Courses.Count.Should().Be(1);
         coursesBySgMode.AddBySubgroupMode(courseMode6);
@@ -40,7 +40,7 @@ public class CoursesBySgModeTests
             Id = 1,
             SubgroupMode = SubgroupMode.Mode4,
         };
-        var coursesBySgMode = new CoursesBySgMode();
+        var coursesBySgMode = new CoursesBySubgroupMode();
         coursesBySgMode.AddBySubgroupMode(course);
         coursesBySgMode.SubgroupMode4Courses.Count.Should().Be(1);
         coursesBySgMode.SubgroupMode5N6Courses.Should().BeEmpty();
@@ -56,7 +56,7 @@ public class CoursesBySgModeTests
             Id = 1,
             SubgroupMode = SubgroupMode.Mode3,
         };
-        var coursesBySgMode = new CoursesBySgMode();
+        var coursesBySgMode = new CoursesBySubgroupMode();
         coursesBySgMode.AddBySubgroupMode(course);
         coursesBySgMode.SubgroupMode3Courses.Count.Should().Be(1);
         coursesBySgMode.SubgroupMode5N6Courses.Should().BeEmpty();
@@ -76,7 +76,7 @@ public class CoursesBySgModeTests
             new() { Id = 2, SubgroupMode = SubgroupMode.Mode1, CourseVsRooms = courseVsRoomsFaker.Generate(2) },
             new() { Id = 3, SubgroupMode = SubgroupMode.Mode2, CourseVsRooms = courseVsRoomsFaker.Generate(3) },
         };
-        var coursesBySgMode = new CoursesBySgMode();
+        var coursesBySgMode = new CoursesBySubgroupMode();
         foreach (var course in courses) {
             coursesBySgMode.AddBySubgroupMode(course);
         }
@@ -95,7 +95,7 @@ public class CoursesBySgModeTests
             new() { Id = 2, SubgroupMode = SubgroupMode.Mode1, CourseVsRooms = new List<CourseVsRoom>() },
             new() { Id = 3, SubgroupMode = SubgroupMode.Mode2, CourseVsRooms = new List<CourseVsRoom>() },
         };
-        var coursesBySgMode = new CoursesBySgMode();
+        var coursesBySgMode = new CoursesBySubgroupMode();
         foreach (var course in courses) {
             coursesBySgMode.AddBySubgroupMode(course);
         }
@@ -117,7 +117,7 @@ public class CoursesBySgModeTests
                 .WithSkip<Faculty>())
             .RuleFor(course => course.CourseVsRooms, faker => courseVsRoomsFaker.Generate(faker.Random.Int(0, 2)))
             .RuleFor(course => course.Id, faker => faker.Random.Int(1, 300));
-        var coursesBySgMode = new CoursesBySgMode();
+        var coursesBySgMode = new CoursesBySubgroupMode();
         foreach (var course in courseFaker.Generate(200)) {
             coursesBySgMode.AddBySubgroupMode(course);
         }

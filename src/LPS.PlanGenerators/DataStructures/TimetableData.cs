@@ -41,7 +41,7 @@ public class TimetableData
         StudentsTimetable = new StudentsTimetable();
         _timetables = new List<Timetable>();
         _classroomsData = provider.ClassroomsData;
-        _allCourses = provider.CoursesData.AllCourses.Values.ToList();
+        _allCourses = provider.CoursesData.AllCourseList;
     }
 
     /// <summary>

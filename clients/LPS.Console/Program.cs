@@ -28,7 +28,7 @@ var timetableService = provider.GetRequiredService<TimetableService>();
 var stopwatch = new Stopwatch();
 stopwatch.Start();
 var coursesData = await timetableService.GetCoursesDataAsync();
-var classroomData = await timetableService.GetClassroomsDataAsync(coursesData.AllCourses.Values.ToList());
+var classroomData = await timetableService.GetClassroomsDataAsync(coursesData.AllCourseList);
 stopwatch.Stop();
 Console.WriteLine("Reading data: " + stopwatch.Elapsed);
 

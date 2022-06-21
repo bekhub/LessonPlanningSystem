@@ -4,7 +4,7 @@ using LPS.Utils;
 
 namespace LPS.PlanGenerators.DataStructures;
 
-public class CoursesBySgMode
+public class CoursesBySubgroupMode
 {
     private readonly List<Course> _subgroupMode5N6Courses;
     private readonly List<Course> _subgroupMode4Courses;
@@ -33,7 +33,7 @@ public class CoursesBySgMode
     /// </summary>
     public IReadOnlyList<Course> NormalCourses => _normalCourses;
 
-    public CoursesBySgMode()
+    public CoursesBySubgroupMode()
     {
         _subgroupMode5N6Courses = new List<Course>();
         _subgroupMode4Courses = new List<Course>();
