@@ -10,7 +10,7 @@ public class CoursesTimetable : ScheduleTimetableDict<int>
 
     public CoursesTimetable(ServiceProvider provider)
     {
-        _allCourses = provider.CoursesData.AllCourses.Values.ToList();
+        _allCourses = provider.CoursesData.AllCourseList;
     }
     
     public override void Add(int key, Timetable timetable)

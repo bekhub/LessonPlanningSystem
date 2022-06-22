@@ -15,6 +15,7 @@ public class ClassroomsData
     private ImmutableList<Classroom> _sortedByCapacity;
 
     public IReadOnlyDictionary<int, Classroom> AllClassrooms => _allClassrooms;
+    public IReadOnlyList<Classroom> AllClassroomList => _allClassrooms.Values.ToList();
 
     public ClassroomsData()
     {
@@ -48,12 +49,9 @@ public class ClassroomsData
 
     private void GenerateRoomListForCourses(IReadOnlyList<Course> courses)
     {
-        var options = new ParallelOptions {
-            MaxDegreeOfParallelism = Environment.ProcessorCount - 1,
-        };
         var concurrentTheoryClassrooms = new ConcurrentDictionary<(int, Round), IReadOnlyList<Classroom>>();
         var concurrentPracticeClassrooms = new ConcurrentDictionary<(int, Round), IReadOnlyList<Classroom>>();
-        Parallel.ForEach(courses, options, course => {
+        Parallel.ForEach(courses, course => {
             for (var round = Round.Third; round <= Round.Fifth; round++) {
                 concurrentTheoryClassrooms[(course.Id, round)] = GenerateRooms(course, LessonType.Theory, round).ToList();
                 concurrentPracticeClassrooms[(course.Id, round)] = GenerateRooms(course, LessonType.Practice, round).ToList();

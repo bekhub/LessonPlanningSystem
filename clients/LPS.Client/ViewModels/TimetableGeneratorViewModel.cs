@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -45,7 +44,7 @@ public class TimetableGeneratorViewModel : RoutableViewModel
         RouterViewModel.IsGoBackEnabled = true;
         CreateObservables();
         CreateCommands();
-        Observable.StartAsync(PullAllDataAsync, RxApp.TaskpoolScheduler);
+        PullData();
     }
 
     private void CreateObservables()
@@ -91,6 +90,11 @@ public class TimetableGeneratorViewModel : RoutableViewModel
     {
         return Observable.Start(GenerateTimetableAsync, RxApp.TaskpoolScheduler);
     }
+    
+    private void PullData()
+    {
+        Observable.Start(PullAllDataAsync, RxApp.TaskpoolScheduler).ObserveOn(RxApp.MainThreadScheduler);
+    }
 
     private async Task GenerateTimetableAsync()
     {
@@ -100,9 +104,11 @@ public class TimetableGeneratorViewModel : RoutableViewModel
             var planGenerator = new BestPlanGenerator(ConfigurationDetails.PlanConfiguration, CoursesData, ClassroomsData);
             GeneratedLessonPlan = await planGenerator.GenerateBestLessonPlanAsync();
             stopwatch.Stop();
-            await MessageBoxHelper.ShowSuccessAsync("Lesson plan generated in " + stopwatch.Elapsed);
+            await Observable.Start(
+                () => MessageBoxHelper.ShowSuccessAsync("Lesson plan generated in " + stopwatch.Elapsed),
+                RxApp.MainThreadScheduler);
         } catch (Exception ex) {
-            await MessageBoxHelper.ShowErrorAsync(ex.Message);
+            await Observable.Start(() => MessageBoxHelper.ShowErrorAsync(ex.Message), RxApp.MainThreadScheduler);
         }
     }
 
@@ -135,10 +141,10 @@ public class TimetableGeneratorViewModel : RoutableViewModel
         try {
             await UsingTimetableServiceAsync(ConfigurationDetails, async service => {
                 CoursesData = await service.GetCoursesDataAsync(ConfigurationDetails.Departments);
-                ClassroomsData = await service.GetClassroomsDataAsync(CoursesData.AllCourses.Values.ToList());
+                ClassroomsData = await service.GetClassroomsDataAsync(CoursesData.AllCourseList);
             });
         } catch (Exception ex) {
-            Observable.StartAsync(() => MessageBoxHelper.ShowErrorAsync(ex.Message), RxApp.MainThreadScheduler);
+            await Observable.Start(() => MessageBoxHelper.ShowErrorAsync(ex.Message), RxApp.MainThreadScheduler);
         }
     }
 }
