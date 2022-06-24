@@ -27,9 +27,6 @@ public class CoursesTimetable : ScheduleTimetableDict<int>
     /// <summary>
     /// Checks if the course is free at that time (may be the practice lesson at the same time but in the other room)
     /// </summary>
-    /// <param name="courseId"></param>
-    /// <param name="time"></param>
-    /// <returns>True if the course is free</returns>
     public bool CourseIsFree(int courseId, ScheduleTime time)
     {
         if (!ContainsKey(courseId)) return true;

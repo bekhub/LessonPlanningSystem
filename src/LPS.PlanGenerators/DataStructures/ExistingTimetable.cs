@@ -24,6 +24,8 @@ public class ExistingTimetable
     /// Timetables by students(department id and grade year). Students can be in multiple rooms at the same time
     /// </summary>
     public readonly StudentsTimetable StudentsTimetable;
+    public IReadOnlyList<Timetable> Timetables => _timetables;
+    private readonly List<Timetable> _timetables;
 
     public ExistingTimetable(CoursesData coursesData, ClassroomsData classroomsData, IEnumerable<Timetable> timetables)
     {
@@ -31,11 +33,14 @@ public class ExistingTimetable
         ClassroomsTimetable = new ClassroomsTimetable(classroomsData);
         TeachersTimetable = new TeachersTimetable();
         StudentsTimetable = new StudentsTimetable();
+        _timetables = new List<Timetable>();
         foreach (var timetable in timetables) {
             CoursesTimetable.Add(timetable.Course.Id, timetable);
             TeachersTimetable.Add(timetable.Course.Teacher.Code, timetable);
             StudentsTimetable.Add((timetable.Course.Department.Id, timetable.Course.GradeYear), timetable);
             ClassroomsTimetable.Add(timetable.Classroom.Id, timetable);
+            if (timetable.AdditionalClassroom != null) ClassroomsTimetable.Add(timetable.AdditionalClassroom.Id, timetable);
+            _timetables.Add(timetable);
         }
     }
 }

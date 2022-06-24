@@ -27,8 +27,8 @@ public class OneTeacherManyLabStrategy : ILessonPlacingStrategy
             
             var freeRooms = _timetableData.GetFreeRoomsByCourse(course, lessonType, timeRange, round);
             var matchedRooms = freeRooms.RoomsWithMatchedCapacity(course, lessonType);
-            if (matchedRooms == null || matchedRooms.Count == 0) continue;
-            _timetableData.AddTimetable(course, lessonType, timeRange, matchedRooms);
+            if (matchedRooms == null) continue;
+            _timetableData.AddTimetable(course, lessonType, timeRange, matchedRooms.Value);
             hoursNeeded = _timetableData.RemainingHoursByLessonType(course, lessonType);
             if (hoursNeeded <= 0) break;
         }

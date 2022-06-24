@@ -1,4 +1,5 @@
 #nullable enable
+using LPS.PlanGenerators.DataStructures.Extensions;
 using LPS.PlanGenerators.DataStructures.Timetables;
 using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
@@ -16,33 +17,41 @@ public class TimetableData
     /// <summary>
     /// Timetables by course id
     /// </summary>
-    public readonly CoursesTimetable CoursesTimetable;
+    public (CoursesTimetable Current, CoursesTimetable Existing) CoursesTimetable => 
+        (_coursesTimetable, _existingTimetable.CoursesTimetable);
+    private readonly CoursesTimetable _coursesTimetable;
     /// <summary>
     /// Timetables by classroom id. There may be two classrooms at the same time
     /// </summary>
-    public readonly ClassroomsTimetable ClassroomsTimetable;
+    public (ClassroomsTimetable Current, ClassroomsTimetable Existing) ClassroomsTimetable =>
+        (_classroomsTimetable, _existingTimetable.ClassroomsTimetable);
+    private readonly ClassroomsTimetable _classroomsTimetable;
     /// <summary>
     /// Timetables by teacher code. Teacher can be in only one room at the same time
     /// </summary>
-    public readonly TeachersTimetable TeachersTimetable;
+    public (TeachersTimetable Current, TeachersTimetable Existing) TeachersTimetable =>
+        (_teachersTimetable, _existingTimetable.TeachersTimetable);
+    private readonly TeachersTimetable _teachersTimetable;
     /// <summary>
     /// Timetables by students(department id and grade year). Students can be in multiple rooms at the same time
     /// </summary>
-    public readonly StudentsTimetable StudentsTimetable;
+    public (StudentsTimetable Current, StudentsTimetable Existing) StudentsTimetable =>
+        (_studentsTimetable, _existingTimetable.StudentsTimetable);
+    private readonly StudentsTimetable _studentsTimetable;
     /// <summary>
     /// All timetables
     /// </summary>
     public IReadOnlyList<Timetable> Timetables => _timetables;
 
-    public TimetableData(ServiceProvider provider, ExistingTimetable existingTimetable)
+    public TimetableData(GeneratorServiceProvider provider, ExistingTimetable existingTimetable)
     {
         _existingTimetable = existingTimetable;
         _classroomsData = provider.ClassroomsData;
         _allCourses = provider.CoursesData.AllCourseList;
-        CoursesTimetable = new CoursesTimetable(provider.CoursesData);
-        ClassroomsTimetable = new ClassroomsTimetable(provider.ClassroomsData);
-        TeachersTimetable = new TeachersTimetable();
-        StudentsTimetable = new StudentsTimetable();
+        _coursesTimetable = new CoursesTimetable(provider.CoursesData);
+        _classroomsTimetable = new ClassroomsTimetable(provider.ClassroomsData);
+        _teachersTimetable = new TeachersTimetable();
+        _studentsTimetable = new StudentsTimetable();
         _timetables = new List<Timetable>();
     }
 
@@ -50,13 +59,11 @@ public class TimetableData
     /// Add timetable for single course
     /// </summary>
     public void AddTimetable(Course course, LessonType lessonType, ScheduleTimeRange timeRange, 
-        IReadOnlyList<Classroom> rooms)
+        (Classroom, Classroom?) rooms)
     {
-        //Todo: This won't work, there can be only one same course and time in CoursesTimetable. Should be changed
         foreach (var time in timeRange.GetScheduleTimes()) {
-            foreach (var room in rooms) {
-                AddTimetable(new Timetable(course, lessonType, time, room));
-            }
+            var (room, additional) = rooms;
+            AddTimetable(new Timetable(course, lessonType, time, room, additional));
         }
     }
     
@@ -64,25 +71,22 @@ public class TimetableData
     /// Add timetable for multiple courses
     /// </summary>
     public void AddTimetable(IReadOnlyList<Course> courses, LessonType lessonType, ScheduleTimeRange timeRange, 
-        IReadOnlyList<Classroom> rooms)
+        (Classroom, Classroom?) rooms)
     {
         // Todo: Almost old logic
         foreach (var time in timeRange.GetScheduleTimes()) {
             var firstCourse = courses[0];
-            var firstRoom = rooms[0];
+            var (room, additional) = rooms;
             
-            var timetable = new Timetable(firstCourse, lessonType, time, firstRoom);
-            TeachersTimetable.Add(firstCourse.Teacher.Code, timetable);
-            
-            foreach (var room in rooms) {
-                timetable = new Timetable(firstCourse, lessonType, time, room);
-                ClassroomsTimetable.Add(room.Id, timetable);
-                _timetables.Add(timetable);
-            }
+            var timetable = new Timetable(firstCourse, lessonType, time, room, additional);
+            _teachersTimetable.Add(firstCourse.Teacher.Code, timetable);
+            _classroomsTimetable.Add(room.Id, timetable);
+            if (additional != null) _classroomsTimetable.Add(additional.Id, timetable);
+            _timetables.Add(timetable);
             foreach (var course in courses) {
-                timetable = new Timetable(course, lessonType, time, firstRoom);
-                CoursesTimetable.Add(course.Id, timetable);
-                StudentsTimetable.Add((course.Department.Id, course.GradeYear), timetable);
+                timetable = new Timetable(course, lessonType, time, room);
+                _coursesTimetable.Add(course.Id, timetable);
+                _studentsTimetable.Add((course.Department.Id, course.GradeYear), timetable);
                 if (course.Id != firstCourse.Id) _timetables.Add(timetable);
             }
         }
@@ -93,10 +97,11 @@ public class TimetableData
     /// </summary>
     public void AddTimetable(Timetable timetable)
     {
-        CoursesTimetable.Add(timetable.Course.Id, timetable);
-        TeachersTimetable.Add(timetable.Course.Teacher.Code, timetable);
-        StudentsTimetable.Add((timetable.Course.Department.Id, timetable.Course.GradeYear), timetable);
-        ClassroomsTimetable.Add(timetable.Classroom.Id, timetable);
+        _coursesTimetable.Add(timetable.Course.Id, timetable);
+        _teachersTimetable.Add(timetable.Course.Teacher.Code, timetable);
+        _studentsTimetable.Add((timetable.Course.Department.Id, timetable.Course.GradeYear), timetable);
+        _classroomsTimetable.Add(timetable.Classroom.Id, timetable);
+        if (timetable.AdditionalClassroom != null) _classroomsTimetable.Add(timetable.AdditionalClassroom.Id, timetable);
         _timetables.Add(timetable);
     }
 
@@ -129,7 +134,7 @@ public class TimetableData
         var rooms = roomsForSpecialCourses.Any() ? roomsForSpecialCourses 
             : _classroomsData.GetClassroomsByCourse(course, lessonType, round);
         return rooms.Any(x => x == null) ? new List<Classroom>() 
-            : rooms.Where(x => ClassroomsTimetable.RoomIsFree(x, timeRange)).ToList();
+            : GetFreeRooms(rooms, timeRange);
     }
     
     /// <summary>
@@ -138,16 +143,14 @@ public class TimetableData
     public IReadOnlyList<Classroom> GetFreeRoomsByCourses(IReadOnlyList<Course> courses, LessonType lessonType, 
         ScheduleTimeRange timeRange, Round round)
     {
-        var rooms = courses
-            .SelectMany(x => x.GetRoomsForSpecialCourses(lessonType)).Distinct()
-            .Where(x => ClassroomsTimetable.RoomIsFree(x, timeRange)).ToList();
+        var rooms = GetFreeRooms(courses
+            .SelectMany(x => x.GetRoomsForSpecialCourses(lessonType)).Distinct(), timeRange);
         if (rooms.Count != 0) return rooms;
 
         var coursesClassrooms = courses
             .Select(x => _classroomsData.GetClassroomsByCourse(x, lessonType, round)).ToList();
         if (coursesClassrooms.Any(x => x.Count == 0)) return rooms;
-        rooms = coursesClassrooms.SelectMany(x => x).Distinct()
-            .Where(x => ClassroomsTimetable.RoomIsFree(x, timeRange)).ToList();
+        rooms = GetFreeRooms(coursesClassrooms.SelectMany(x => x).Distinct(), timeRange);
 
         return rooms;
     }

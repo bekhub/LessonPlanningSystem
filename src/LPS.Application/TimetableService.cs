@@ -77,13 +77,25 @@ public class TimetableService
         return classroomsData;
     }
 
+    //Todo: Change to handle new logic in Timetable
     public async Task<ExistingTimetable> GetExistingTimetable(CoursesData coursesData, ClassroomsData classroomsData)
     {
         var courses = coursesData.AllCourses;
         var classrooms = classroomsData.AllClassrooms;
         var courseIds = courses.Values.Select(x => x.Id);
         var timetableEntities = await _context.TimeTables
-            .Where(x => courseIds.Contains(x.CourseId)).ToListAsync();
+            .Where(x => x.EducationalYear == _configuration.EducationalYear &&
+                        x.Semester == _configuration.Semester.ToDbValue() &&
+                        courseIds.Contains(x.CourseId)).ToListAsync();
+        static int MakeHashcode(int courseId, int lessonType, int timeDay, int timeHour)
+        {
+            return HashCode.Combine(courseId, lessonType, timeDay, timeHour);
+        }
+
+        var timetableDict = new Dictionary<int, Timetable>();
+        foreach (var timeTable in timetableEntities) {
+            
+        }
         var timetables = from entity in timetableEntities
             let course = courses[entity.CourseId]
             let lessonType = MapHelper.Parse<LessonType>(entity.LessonTypeId!.Value)
@@ -134,12 +146,9 @@ public class TimetableService
     {
         await EnsureEnumValuesInDatabaseAsync();
         var timetablesToInsert = timetables.Where(x => x.Id == null);
-        await _context.TimeTables.BulkInsertAsync(timetablesToInsert.Select(x => {
-            var timeTable = _mapper.Map<TimeTable>(x);
-            timeTable.CreatedTime = DateTime.Now;
-            timeTable.Semester = _configuration.Semester.ToDbValue();
-            timeTable.EducationalYear = _configuration.EducationalYear;
-            return timeTable;
+        await _context.TimeTables.BulkInsertAsync(timetablesToInsert.SelectMany(x => {
+            var timeTable = MapHelper.MapTimetable(x, _configuration);
+            return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
         }));
     }
 
@@ -147,12 +156,9 @@ public class TimetableService
     {
         await EnsureEnumValuesInDatabaseAsync();
         await TruncatePreviewTimetableAsync();
-        await _context.TimeTablePreviews.BulkInsertAsync(timetables.Select(x => {
-            var timeTable = _mapper.Map<TimeTablePreview>(x);
-            timeTable.CreatedTime = DateTime.Now;
-            timeTable.Semester = _configuration.Semester.ToDbValue();
-            timeTable.EducationalYear = _configuration.EducationalYear;
-            return timeTable;
+        await _context.TimeTablePreviews.BulkInsertAsync(timetables.SelectMany(x => {
+            var timeTable = MapHelper.MapTimetablePreview(x, _configuration);
+            return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
         }));
     }
 

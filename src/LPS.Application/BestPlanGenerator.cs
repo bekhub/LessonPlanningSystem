@@ -8,12 +8,12 @@ namespace LPS.Application;
 public class BestPlanGenerator
 {
     private readonly PlanConfiguration _configuration;
-    private readonly ServiceProvider _provider;
+    private readonly GeneratorServiceProvider _provider;
     
     private readonly BlockingCollection<(int inefficiency, GeneratedLessonPlan lessonPlan)> _blockingCollection = new();
     private (int inefficiency, GeneratedLessonPlan lessonPlan)? _bestLessonPlan;
     
-    public BestPlanGenerator(ServiceProvider serviceProvider)
+    public BestPlanGenerator(GeneratorServiceProvider serviceProvider)
     {
         _configuration = serviceProvider.PlanConfiguration;
         _provider = serviceProvider;

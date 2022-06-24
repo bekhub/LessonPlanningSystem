@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using LPS.Application;
 using LPS.DatabaseLayer;
+using LPS.PlanGenerators;
 using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.Enums;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,10 +30,13 @@ var stopwatch = new Stopwatch();
 stopwatch.Start();
 var coursesData = await timetableService.GetCoursesDataAsync();
 var classroomData = await timetableService.GetClassroomsDataAsync(coursesData.AllCourseList);
+var existingTimetable = await timetableService.GetExistingTimetable(coursesData, classroomData);
 stopwatch.Stop();
 Console.WriteLine("Reading data: " + stopwatch.Elapsed);
 
-var planGenerator = new BestPlanGenerator(configuration, coursesData, classroomData);
+var generatorProvider = new GeneratorServiceProvider(configuration, coursesData, classroomData, existingTimetable);
+
+var planGenerator = new BestPlanGenerator(generatorProvider);
 stopwatch.Restart();
 var bestLessonPlan = await planGenerator.GenerateBestLessonPlanAsync();
 stopwatch.Stop();
