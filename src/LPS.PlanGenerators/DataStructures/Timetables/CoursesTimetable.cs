@@ -7,10 +7,9 @@ namespace LPS.PlanGenerators.DataStructures.Timetables;
 public class CoursesTimetable : ScheduleTimetableDict<int>
 {
     private readonly IReadOnlyList<Course> _allCourses;
-
-    public CoursesTimetable(ServiceProvider provider)
+    public CoursesTimetable(CoursesData coursesData)
     {
-        _allCourses = provider.CoursesData.AllCourseList;
+        _allCourses = coursesData.AllCourseList;
     }
     
     public override void Add(int key, Timetable timetable)

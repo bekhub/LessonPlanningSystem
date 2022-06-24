@@ -8,8 +8,8 @@ public class ClassroomsTimetable : ScheduleTimetablesDict<int>
 {
     private readonly ClassroomsData _classroomsData;
     
-    public ClassroomsTimetable(ServiceProvider provider) {
-        _classroomsData = provider.ClassroomsData;
+    public ClassroomsTimetable(ClassroomsData classroomsData) {
+        _classroomsData = classroomsData;
     }
 
     /// <summary>

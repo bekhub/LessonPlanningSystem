@@ -84,4 +84,15 @@ public class CoursesData
 
         return true;
     }
+    
+    /// <summary>
+    /// Merges courses by course code, faculty, and subgroup merge mode
+    /// </summary>
+    public IReadOnlyList<Course> MergeCoursesByCourse(Course course)
+    {
+        return AllCourseList.Where(x =>
+            x.Code == course.Code &&
+            x.Department.Faculty.Id == course.Department.Faculty.Id &&
+            x.SubgroupMode == course.SubgroupMode).ToList();
+    }
 }

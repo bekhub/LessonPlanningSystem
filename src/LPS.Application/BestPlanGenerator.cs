@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using LPS.PlanGenerators;
 using LPS.PlanGenerators.Configuration;
-using LPS.PlanGenerators.DataStructures;
 using LPS.PlanGenerators.Generators;
 
 namespace LPS.Application;
@@ -14,10 +13,10 @@ public class BestPlanGenerator
     private readonly BlockingCollection<(int inefficiency, GeneratedLessonPlan lessonPlan)> _blockingCollection = new();
     private (int inefficiency, GeneratedLessonPlan lessonPlan)? _bestLessonPlan;
     
-    public BestPlanGenerator(PlanConfiguration configuration, CoursesData coursesData, ClassroomsData classroomsData)
+    public BestPlanGenerator(ServiceProvider serviceProvider)
     {
-        _configuration = configuration;
-        _provider = new ServiceProvider(configuration, coursesData, classroomsData);
+        _configuration = serviceProvider.PlanConfiguration;
+        _provider = serviceProvider;
     }
 
     public async Task<GeneratedLessonPlan> GenerateBestLessonPlanAsync()

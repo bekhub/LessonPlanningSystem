@@ -4,7 +4,6 @@ using AutoMapper.QueryableExtensions;
 using LPS.Application.Mapping;
 using LPS.DatabaseLayer;
 using LPS.DatabaseLayer.Entities;
-using LPS.PlanGenerators;
 using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.DataStructures;
 using LPS.PlanGenerators.Enums;
@@ -78,21 +77,21 @@ public class TimetableService
         return classroomsData;
     }
 
-    public async Task GetTimetableData(CoursesData coursesData, ClassroomsData classroomsData)
+    public async Task<ExistingTimetable> GetExistingTimetable(CoursesData coursesData, ClassroomsData classroomsData)
     {
-        // var timetableData = new TimetableData();
         var courses = coursesData.AllCourses;
         var classrooms = classroomsData.AllClassrooms;
         var courseIds = courses.Values.Select(x => x.Id);
-        var timetables = await _context.TimeTables
+        var timetableEntities = await _context.TimeTables
             .Where(x => courseIds.Contains(x.CourseId)).ToListAsync();
-        foreach (var entity in timetables) {
-            var course = courses[entity.CourseId];
-            var lessonType = MapHelper.Parse<LessonType>(entity.LessonTypeId!.Value);
-            var time = ScheduleTime.GetByWeekAndHour(MapHelper.Parse<Weekdays>(entity.TimeDayId!.Value), entity.TimeHourId!.Value);
-            var classroom = classrooms[entity.ClassroomId!.Value];
-            var timetable = new Timetable(course, lessonType, time, classroom);
-        }
+        var timetables = from entity in timetableEntities
+            let course = courses[entity.CourseId]
+            let lessonType = MapHelper.Parse<LessonType>(entity.LessonTypeId!.Value)
+            let time = ScheduleTime.GetByWeekAndHour(MapHelper.Parse<Weekdays>(entity.TimeDayId!.Value),
+                entity.TimeHourId!.Value - 1)
+            let classroom = classrooms[entity.ClassroomId!.Value]
+            select new Timetable(entity.Id, course, lessonType, time, classroom);
+        return new ExistingTimetable(coursesData, classroomsData, timetables);
     }
     
     public async Task EnsureEnumValuesInDatabaseAsync()
@@ -131,11 +130,11 @@ public class TimetableService
         }
     }
     
-    public async Task SaveTimetableAsOriginalAsync(IEnumerable<Timetable> timetables)
+    public async Task SaveTimetableAsOriginalAsync(IReadOnlyList<Timetable> timetables)
     {
         await EnsureEnumValuesInDatabaseAsync();
-        await DeleteCurrentSemesterTimetablesAsync();
-        await _context.TimeTables.BulkInsertAsync(timetables.Select(x => {
+        var timetablesToInsert = timetables.Where(x => x.Id == null);
+        await _context.TimeTables.BulkInsertAsync(timetablesToInsert.Select(x => {
             var timeTable = _mapper.Map<TimeTable>(x);
             timeTable.CreatedTime = DateTime.Now;
             timeTable.Semester = _configuration.Semester.ToDbValue();

@@ -20,6 +20,15 @@ public class Timetable
         ScheduleTime = scheduleTime;
         Classroom = classroom;
     }
+    
+    public Timetable(int id, Course course, LessonType lessonType, ScheduleTime scheduleTime, Classroom classroom)
+    {
+        Id = id;
+        Course = course;
+        LessonType = lessonType;
+        ScheduleTime = scheduleTime;
+        Classroom = classroom;
+    }
 
     public override string ToString()
     {

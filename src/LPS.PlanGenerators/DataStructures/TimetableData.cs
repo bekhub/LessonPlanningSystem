@@ -11,6 +11,7 @@ public class TimetableData
     private readonly ClassroomsData _classroomsData;
     private readonly IReadOnlyList<Course> _allCourses;
     private readonly List<Timetable> _timetables;
+    private readonly ExistingTimetable _existingTimetable;
     
     /// <summary>
     /// Timetables by course id
@@ -33,15 +34,16 @@ public class TimetableData
     /// </summary>
     public IReadOnlyList<Timetable> Timetables => _timetables;
 
-    public TimetableData(ServiceProvider provider)
+    public TimetableData(ServiceProvider provider, ExistingTimetable existingTimetable)
     {
-        CoursesTimetable = new CoursesTimetable(provider);
-        ClassroomsTimetable = new ClassroomsTimetable(provider);
+        _existingTimetable = existingTimetable;
+        _classroomsData = provider.ClassroomsData;
+        _allCourses = provider.CoursesData.AllCourseList;
+        CoursesTimetable = new CoursesTimetable(provider.CoursesData);
+        ClassroomsTimetable = new ClassroomsTimetable(provider.ClassroomsData);
         TeachersTimetable = new TeachersTimetable();
         StudentsTimetable = new StudentsTimetable();
         _timetables = new List<Timetable>();
-        _classroomsData = provider.ClassroomsData;
-        _allCourses = provider.CoursesData.AllCourseList;
     }
 
     /// <summary>
@@ -50,6 +52,7 @@ public class TimetableData
     public void AddTimetable(Course course, LessonType lessonType, ScheduleTimeRange timeRange, 
         IReadOnlyList<Classroom> rooms)
     {
+        //Todo: This won't work, there can be only one same course and time in CoursesTimetable. Should be changed
         foreach (var time in timeRange.GetScheduleTimes()) {
             foreach (var room in rooms) {
                 AddTimetable(new Timetable(course, lessonType, time, room));
@@ -73,7 +76,6 @@ public class TimetableData
             
             foreach (var room in rooms) {
                 timetable = new Timetable(firstCourse, lessonType, time, room);
-                if (room == null) throw new Exception("What the hell!?");
                 ClassroomsTimetable.Add(room.Id, timetable);
                 _timetables.Add(timetable);
             }
