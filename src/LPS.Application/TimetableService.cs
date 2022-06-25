@@ -76,8 +76,7 @@ public class TimetableService
         classroomsData.AddingEnded(courses);
         return classroomsData;
     }
-
-    //Todo: Change to handle new logic in Timetable
+    
     public async Task<ExistingTimetable> GetExistingTimetable(CoursesData coursesData, ClassroomsData classroomsData)
     {
         var courses = coursesData.AllCourses;
@@ -87,23 +86,24 @@ public class TimetableService
             .Where(x => x.EducationalYear == _configuration.EducationalYear &&
                         x.Semester == _configuration.Semester.ToDbValue() &&
                         courseIds.Contains(x.CourseId)).ToListAsync();
-        static int MakeHashcode(int courseId, int lessonType, int timeDay, int timeHour)
-        {
-            return HashCode.Combine(courseId, lessonType, timeDay, timeHour);
-        }
-
+        
         var timetableDict = new Dictionary<int, Timetable>();
-        foreach (var timeTable in timetableEntities) {
-            
+        foreach (var entity in timetableEntities) {
+            //Todo: Should be tested
+            var hash = HashCode.Combine(entity.CourseId, entity.LessonTypeId, entity.TimeDayId,
+                entity.TimeHourId);
+            if (!timetableDict.ContainsKey(hash)) {
+                var course = courses[entity.CourseId];
+                var lessonType = MapHelper.Parse<LessonType>(entity.LessonTypeId!.Value);
+                var time = ScheduleTime.GetByWeekAndHour(MapHelper.Parse<Weekdays>(entity.TimeDayId!.Value),
+                    entity.TimeHourId!.Value - 1);
+                var classroom = classrooms[entity.ClassroomId!.Value];
+                timetableDict.Add(hash, new Timetable(course, lessonType, time, classroom));
+            } else {
+                timetableDict[hash].AdditionalClassroom = classrooms[entity.ClassroomId!.Value];
+            }
         }
-        var timetables = from entity in timetableEntities
-            let course = courses[entity.CourseId]
-            let lessonType = MapHelper.Parse<LessonType>(entity.LessonTypeId!.Value)
-            let time = ScheduleTime.GetByWeekAndHour(MapHelper.Parse<Weekdays>(entity.TimeDayId!.Value),
-                entity.TimeHourId!.Value - 1)
-            let classroom = classrooms[entity.ClassroomId!.Value]
-            select new Timetable(entity.Id, course, lessonType, time, classroom);
-        return new ExistingTimetable(coursesData, classroomsData, timetables);
+        return new ExistingTimetable(coursesData, classroomsData, timetableDict.Values);
     }
     
     public async Task EnsureEnumValuesInDatabaseAsync()
