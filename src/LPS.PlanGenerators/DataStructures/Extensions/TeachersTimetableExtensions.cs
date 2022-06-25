@@ -31,7 +31,6 @@ public static class TeachersTimetableExtensions
     public static bool TeacherIsFree(this (TeachersTimetable, TeachersTimetable) teachersTimetable, Teacher teacher, 
         ScheduleTimeRange timeRange)
     {
-        var (first, second) = teachersTimetable;
-        return first.TeacherIsFree(teacher, timeRange) && second.TeacherIsFree(teacher, timeRange);
+        return timeRange.GetScheduleTimes().All(x => teachersTimetable.TeacherIsFree(teacher, x));
     }
 }

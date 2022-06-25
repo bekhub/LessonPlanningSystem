@@ -23,7 +23,6 @@ public static class StudentsTimetableExtensions
     public static bool StudentsAreFree(this (StudentsTimetable, StudentsTimetable) studentsTimetable, Course course, 
         ScheduleTimeRange timeRange, Round round)
     {
-        var (first, second) = studentsTimetable;
-        return first.StudentsAreFree(course, timeRange, round) && second.StudentsAreFree(course, timeRange, round);
+        return timeRange.GetScheduleTimes().All(time => studentsTimetable.StudentsAreFree(course, time, round));
     }
 }

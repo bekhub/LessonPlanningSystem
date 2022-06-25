@@ -1,4 +1,5 @@
 ﻿using LPS.PlanGenerators.DataStructures.Timetables;
+using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.ValueObjects;
 
@@ -18,13 +19,17 @@ public static class CoursesTimetableExtensions
     public static int UnpositionedTheoryHours(this (CoursesTimetable, CoursesTimetable) coursesTimetable, Course course)
     {
         var (first, second) = coursesTimetable;
-        return first.UnpositionedTheoryHours(course) + second.UnpositionedTheoryHours(course);
+        if (!first.ContainsKey(course.Id) && !second.ContainsKey(course.Id)) return course.TheoryHours;
+        var takenHours = first.TakenHours(course, LessonType.Theory) + second.TakenHours(course, LessonType.Theory);
+        return course.TheoryHours - takenHours;
     }
 
     public static int UnpositionedPracticeHours(this (CoursesTimetable, CoursesTimetable) coursesTimetable, Course course)
     {
         var (first, second) = coursesTimetable;
-        return first.UnpositionedPracticeHours(course) + second.UnpositionedPracticeHours(course);
+        if (!first.ContainsKey(course.Id) && !second.ContainsKey(course.Id)) return course.PracticeHours;
+        var takenHours = first.TakenHours(course, LessonType.Practice) + second.TakenHours(course, LessonType.Practice);
+        return course.PracticeHours - takenHours;
     }
     
     /// <summary>
@@ -41,8 +46,9 @@ public static class CoursesTimetableExtensions
     /// </summary>
     public static int TotalUnpositionedLessons(this (CoursesTimetable, CoursesTimetable) coursesTimetable)
     {
-        var (first, second) = coursesTimetable;
-        return first.TotalUnpositionedLessons() + second.TotalUnpositionedLessons();
+        var (first, _) = coursesTimetable;
+        return first.AllCourses.Sum(x =>
+            coursesTimetable.UnpositionedTheoryHours(x) + coursesTimetable.UnpositionedPracticeHours(x));
     }
     
     /// <summary>
@@ -50,7 +56,8 @@ public static class CoursesTimetableExtensions
     /// </summary>
     public static int TotalUnpositionedCourses(this (CoursesTimetable, CoursesTimetable) coursesTimetable)
     {
-        var (first, second) = coursesTimetable;
-        return first.TotalUnpositionedCourses() + second.TotalUnpositionedCourses();
+        var (first, _) = coursesTimetable;
+        return first.AllCourses.Count(x =>
+            coursesTimetable.UnpositionedTheoryHours(x) + coursesTimetable.UnpositionedPracticeHours(x) > 0);
     }
 }

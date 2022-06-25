@@ -6,10 +6,10 @@ namespace LPS.PlanGenerators.DataStructures.Timetables;
 
 public class CoursesTimetable : ScheduleTimetableDict<int>
 {
-    private readonly IReadOnlyList<Course> _allCourses;
+    public IReadOnlyList<Course> AllCourses { get; }
     public CoursesTimetable(CoursesData coursesData)
     {
-        _allCourses = coursesData.AllCourseList;
+        AllCourses = coursesData.AllCourseList;
     }
     
     public override void Add(int key, Timetable timetable)
@@ -58,13 +58,19 @@ public class CoursesTimetable : ScheduleTimetableDict<int>
         return Values.Select(x => x.Keys)
             .Sum(ScheduleTime.CountSeparatedTimesPerDay);
     }
+
+    public int TakenHours(Course course, LessonType lessonType)
+    {
+        return TryGetValue(course.Id, out var timetable) ? timetable.Values
+            .Count(x => x.LessonType == lessonType) : 0;
+    }
     
     /// <summary>
     /// This function calculates the total number of unpositioned lessons
     /// </summary>
     public int TotalUnpositionedLessons()
     {
-        return _allCourses.Sum(x => UnpositionedPracticeHours(x) + UnpositionedTheoryHours(x));
+        return AllCourses.Sum(x => UnpositionedPracticeHours(x) + UnpositionedTheoryHours(x));
     }
     
     /// <summary>
@@ -72,6 +78,6 @@ public class CoursesTimetable : ScheduleTimetableDict<int>
     /// </summary>
     public int TotalUnpositionedCourses()
     {
-        return _allCourses.Count(x => UnpositionedPracticeHours(x) + UnpositionedTheoryHours(x) > 0);
+        return AllCourses.Count(x => UnpositionedPracticeHours(x) + UnpositionedTheoryHours(x) > 0);
     }
 }
