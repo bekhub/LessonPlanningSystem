@@ -4,7 +4,6 @@ using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.Strategies.Interfaces;
 using LPS.PlanGenerators.ValueObjects;
-using LPS.Utils;
 
 namespace LPS.PlanGenerators.Strategies;
 
@@ -51,8 +50,8 @@ public class ManyDepartmentsJointLesson : ILessonPlacingStrategy
                 if (freeRooms.Count == 0) continue;
                 var matchedRooms = freeRooms.RoomsWithMatchedCapacity(firstCourse, type, 
                     (_, roomCapacity) => totalStudentsNumber <= roomCapacity + 10);
-                if (matchedRooms.IsNullOrEmpty()) continue;
-                _timetableData.AddTimetable(mergedCourses, type, timeRange, matchedRooms!);
+                if (matchedRooms == null) continue;
+                _timetableData.AddTimetable(mergedCourses, type, timeRange, matchedRooms.Value);
                 break;
             }
         }

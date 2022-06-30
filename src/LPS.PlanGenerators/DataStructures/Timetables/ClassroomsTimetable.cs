@@ -6,10 +6,10 @@ namespace LPS.PlanGenerators.DataStructures.Timetables;
 
 public class ClassroomsTimetable : ScheduleTimetablesDict<int>
 {
-    private readonly ClassroomsData _classroomsData;
+    public ClassroomsData ClassroomsData { get; }
     
-    public ClassroomsTimetable(ServiceProvider provider) {
-        _classroomsData = provider.ClassroomsData;
+    public ClassroomsTimetable(ClassroomsData classroomsData) {
+        ClassroomsData = classroomsData;
     }
 
     /// <summary>
@@ -28,6 +28,11 @@ public class ClassroomsTimetable : ScheduleTimetablesDict<int>
     {
         return timeRange.GetScheduleTimes().All(x => RoomIsFree(classroom, x));
     }
+
+    public int TakenHoursByClassroom(Classroom classroom)
+    {
+        return TryGetValue(classroom.Id, out var timetables) ? timetables.Count : 0;
+    }
     
     /// <summary>
     /// This function calculates the total free hours of the rooms
@@ -35,7 +40,7 @@ public class ClassroomsTimetable : ScheduleTimetablesDict<int>
     public int TotalFreeHoursOfRooms()
     {
         var totalHours = ScheduleTime.GetWeekScheduleTimes().Count();
-        return _classroomsData.AllClassrooms.Values.Where(x => 
+        return ClassroomsData.AllClassrooms.Values.Where(x => 
                 x.RoomType is not (RoomType.WithComputers or RoomType.Laboratory or RoomType.Gym))
             .Sum(x => ContainsKey(x.Id) ? totalHours - this[x.Id].Count : totalHours);
     }

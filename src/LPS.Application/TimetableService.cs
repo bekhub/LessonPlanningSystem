@@ -4,7 +4,6 @@ using AutoMapper.QueryableExtensions;
 using LPS.Application.Mapping;
 using LPS.DatabaseLayer;
 using LPS.DatabaseLayer.Entities;
-using LPS.PlanGenerators;
 using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.DataStructures;
 using LPS.PlanGenerators.Enums;
@@ -77,22 +76,34 @@ public class TimetableService
         classroomsData.AddingEnded(courses);
         return classroomsData;
     }
-
-    public async Task GetTimetableData(CoursesData coursesData, ClassroomsData classroomsData)
+    
+    public async Task<ExistingTimetable> GetExistingTimetable(CoursesData coursesData, ClassroomsData classroomsData)
     {
-        // var timetableData = new TimetableData();
         var courses = coursesData.AllCourses;
         var classrooms = classroomsData.AllClassrooms;
         var courseIds = courses.Values.Select(x => x.Id);
-        var timetables = await _context.TimeTables
-            .Where(x => courseIds.Contains(x.CourseId)).ToListAsync();
-        foreach (var entity in timetables) {
-            var course = courses[entity.CourseId];
-            var lessonType = MapHelper.Parse<LessonType>(entity.LessonTypeId!.Value);
-            var time = ScheduleTime.GetByWeekAndHour(MapHelper.Parse<Weekdays>(entity.TimeDayId!.Value), entity.TimeHourId!.Value);
-            var classroom = classrooms[entity.ClassroomId!.Value];
-            var timetable = new Timetable(course, lessonType, time, classroom);
+        var timetableEntities = await _context.TimeTables
+            .Where(x => x.EducationalYear == _configuration.EducationalYear &&
+                        x.Semester == _configuration.Semester.ToDbValue() &&
+                        courseIds.Contains(x.CourseId)).ToListAsync();
+        
+        var timetableDict = new Dictionary<int, Timetable>();
+        foreach (var entity in timetableEntities) {
+            //Todo: Should be tested
+            var hash = HashCode.Combine(entity.CourseId, entity.LessonTypeId, entity.TimeDayId,
+                entity.TimeHourId);
+            if (!timetableDict.ContainsKey(hash)) {
+                var course = courses[entity.CourseId];
+                var lessonType = MapHelper.Parse<LessonType>(entity.LessonTypeId!.Value);
+                var time = ScheduleTime.GetByWeekAndHour(MapHelper.Parse<Weekdays>(entity.TimeDayId!.Value),
+                    entity.TimeHourId!.Value - 1);
+                var classroom = classrooms[entity.ClassroomId!.Value];
+                timetableDict.Add(hash, new Timetable(course, lessonType, time, classroom));
+            } else {
+                timetableDict[hash].AdditionalClassroom = classrooms[entity.ClassroomId!.Value];
+            }
         }
+        return new ExistingTimetable(coursesData, classroomsData, timetableDict.Values);
     }
     
     public async Task EnsureEnumValuesInDatabaseAsync()
@@ -131,16 +142,13 @@ public class TimetableService
         }
     }
     
-    public async Task SaveTimetableAsOriginalAsync(IEnumerable<Timetable> timetables)
+    public async Task SaveTimetableAsOriginalAsync(IReadOnlyList<Timetable> timetables)
     {
         await EnsureEnumValuesInDatabaseAsync();
-        await DeleteCurrentSemesterTimetablesAsync();
-        await _context.TimeTables.BulkInsertAsync(timetables.Select(x => {
-            var timeTable = _mapper.Map<TimeTable>(x);
-            timeTable.CreatedTime = DateTime.Now;
-            timeTable.Semester = _configuration.Semester.ToDbValue();
-            timeTable.EducationalYear = _configuration.EducationalYear;
-            return timeTable;
+        var timetablesToInsert = timetables.Where(x => x.Id == null);
+        await _context.TimeTables.BulkInsertAsync(timetablesToInsert.SelectMany(x => {
+            var timeTable = MapHelper.MapTimetable(x, _configuration);
+            return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
         }));
     }
 
@@ -148,12 +156,9 @@ public class TimetableService
     {
         await EnsureEnumValuesInDatabaseAsync();
         await TruncatePreviewTimetableAsync();
-        await _context.TimeTablePreviews.BulkInsertAsync(timetables.Select(x => {
-            var timeTable = _mapper.Map<TimeTablePreview>(x);
-            timeTable.CreatedTime = DateTime.Now;
-            timeTable.Semester = _configuration.Semester.ToDbValue();
-            timeTable.EducationalYear = _configuration.EducationalYear;
-            return timeTable;
+        await _context.TimeTablePreviews.BulkInsertAsync(timetables.SelectMany(x => {
+            var timeTable = MapHelper.MapTimetablePreview(x, _configuration);
+            return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
         }));
     }
 
