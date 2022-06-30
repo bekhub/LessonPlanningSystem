@@ -1,5 +1,6 @@
 ﻿using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.DataStructures;
+using LPS.PlanGenerators.DataStructures.Extensions;
 using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.Strategies;
@@ -12,14 +13,14 @@ public class RandomPlanGenerator
     private readonly PlanConfiguration _configuration;
     private readonly StrategyOrchestrator _strategyOrchestrator;
     
-    private RandomPlanGenerator(ServiceProvider provider)
+    private RandomPlanGenerator(GeneratorServiceProvider provider)
     {
         _configuration = provider.PlanConfiguration;
         _timetableData = provider.GetNewTimetableData();
         _strategyOrchestrator = new StrategyOrchestrator(_timetableData);
     }
 
-    public static GeneratedLessonPlan GenerateLessonPlan(ServiceProvider provider)
+    public static GeneratedLessonPlan GenerateLessonPlan(GeneratorServiceProvider provider)
     {
         var coursesList = provider.CoursesData.GenerateRandomizedCoursesLists();
         var generator = new RandomPlanGenerator(provider);
@@ -40,10 +41,10 @@ public class RandomPlanGenerator
         }
         
         return new GeneratedLessonPlan {
-            CoursesTimetable = _timetableData.CoursesTimetable,
-            ClassroomsTimetable = _timetableData.ClassroomsTimetable,
-            TeachersTimetable = _timetableData.TeachersTimetable,
-            StudentsTimetable = _timetableData.StudentsTimetable,
+            CoursesTimetable = _timetableData.CoursesTimetable.Current,
+            ClassroomsTimetable = _timetableData.ClassroomsTimetable.Current,
+            TeachersTimetable = _timetableData.TeachersTimetable.Current,
+            StudentsTimetable = _timetableData.StudentsTimetable.Current,
             Timetables = _timetableData.Timetables,
             GeneratedCoursesList = coursesList,
             TotalFreeHoursOfRooms = _timetableData.ClassroomsTimetable.TotalFreeHoursOfRooms(),

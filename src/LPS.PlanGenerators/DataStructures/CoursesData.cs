@@ -10,44 +10,45 @@ public class CoursesData
     /// <summary>
     /// Courses with <see cref="CourseType.RemoteEducation"/> course type (UED)
     /// </summary>
-    public readonly CoursesBySgMode RemoteEducationCourses;
+    public readonly CoursesBySubgroupMode RemoteEducationCourses;
     /// <summary>
     /// Courses with <see cref="CourseType.DepartmentMandatory"/> course type (BZD)
     /// </summary>
-    public readonly CoursesBySgMode DepartmentMandatoryCourses;
+    public readonly CoursesBySubgroupMode DepartmentMandatoryCourses;
     /// <summary>
     /// Courses with <see cref="CourseType.DepartmentElective"/> course type (BİSD)
     /// </summary>
-    public readonly CoursesBySgMode DepartmentElectiveCourses;
+    public readonly CoursesBySubgroupMode DepartmentElectiveCourses;
     /// <summary>
     /// Courses with <see cref="CourseType.GeneralMandatory"/> course type (OZD)
     /// </summary>
-    public readonly CoursesBySgMode GeneralMandatoryCourses;
+    public readonly CoursesBySubgroupMode GeneralMandatoryCourses;
     /// <summary>
     /// Courses with <see cref="CourseType.DepartmentMandatory"/> course type (BZD) and
     /// <see cref="TeacherType.LessonHourlyPaid"/> teacher type (DSÜ)
     /// </summary>
-    public readonly CoursesBySgMode DepartmentMandatoryCoursesLHP;
+    public readonly CoursesBySubgroupMode DepartmentMandatoryCoursesLHP;
     /// <summary>
     /// Courses with <see cref="CourseType.DepartmentElective"/> course type (BİSD) and
     /// <see cref="TeacherType.LessonHourlyPaid"/> teacher type (DSÜ)
     /// </summary>
-    public readonly CoursesBySgMode DepartmentElectiveCoursesLHP;
+    public readonly CoursesBySubgroupMode DepartmentElectiveCoursesLHP;
 
     /// <summary>
     /// Dictionary of all courses. For key is id
     /// </summary>
     public IReadOnlyDictionary<int, Course> AllCourses => _allCourses;
+    public IReadOnlyList<Course> AllCourseList => _allCourses.Values.ToList();
 
     public CoursesData()
     {
         _allCourses = new Dictionary<int, Course>();
-        RemoteEducationCourses = new CoursesBySgMode();
-        DepartmentMandatoryCourses = new CoursesBySgMode();
-        DepartmentElectiveCourses = new CoursesBySgMode();
-        GeneralMandatoryCourses = new CoursesBySgMode();
-        DepartmentMandatoryCoursesLHP = new CoursesBySgMode();
-        DepartmentElectiveCoursesLHP = new CoursesBySgMode();
+        RemoteEducationCourses = new CoursesBySubgroupMode();
+        DepartmentMandatoryCourses = new CoursesBySubgroupMode();
+        DepartmentElectiveCourses = new CoursesBySubgroupMode();
+        GeneralMandatoryCourses = new CoursesBySubgroupMode();
+        DepartmentMandatoryCoursesLHP = new CoursesBySubgroupMode();
+        DepartmentElectiveCoursesLHP = new CoursesBySubgroupMode();
     }
 
     public CoursesList GenerateRandomizedCoursesLists()
@@ -82,5 +83,16 @@ public class CoursesData
         }
 
         return true;
+    }
+    
+    /// <summary>
+    /// Merges courses by course code, faculty, and subgroup merge mode
+    /// </summary>
+    public IReadOnlyList<Course> MergeCoursesByCourse(Course course)
+    {
+        return AllCourseList.Where(x =>
+            x.Code == course.Code &&
+            x.Department.Faculty.Id == course.Department.Faculty.Id &&
+            x.SubgroupMode == course.SubgroupMode).ToList();
     }
 }

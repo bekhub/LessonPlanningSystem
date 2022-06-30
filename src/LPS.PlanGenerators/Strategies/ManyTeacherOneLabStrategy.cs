@@ -69,19 +69,19 @@ public class ManyTeacherOneLabStrategy : ILessonPlacingStrategy
                 
                 var freeRoomList = _timetableData.GetFreeRooms(roomListForTheoryLessonsFirst, timeRange);
                 var matchedTheoryList = freeRoomList.RoomsWithMatchedCapacity(mergedCourses[0], LessonType.Theory);
-                if (matchedTheoryList.IsNullOrEmpty()) continue;
+                if (matchedTheoryList == null) continue;
                 
                 freeRoomList = _timetableData.GetFreeRooms(roomListForPracticeLessonsSecond, timeRange);
                 var matchedPracticeList = freeRoomList.RoomsWithMatchedCapacity(mergedCourses[0], LessonType.Practice);
-                if (matchedPracticeList.IsNullOrEmpty()) continue;
+                if (matchedPracticeList == null) continue;
                 
                 foreach (var time in timeRange.GetScheduleTimes()) {
                     var subgroup = time.Hour >= neededPracticeHoursFirst ? 1 : 0;
                     var subgroup2 = time.Hour < neededPracticeHoursFirst ? 1 : 0;
                     var timetableFirst = new Timetable(mergedCourses[subgroup], LessonType.Theory, time, 
-                        matchedTheoryList![0]);
+                        matchedTheoryList.Value.Room);
                     var timetableSecond = new Timetable(mergedCourses[subgroup2], LessonType.Practice, time,
-                        matchedPracticeList![0]);
+                        matchedPracticeList.Value.Room);
                     _timetableData.AddTimetable(timetableFirst);
                     _timetableData.AddTimetable(timetableSecond);
                 }
@@ -103,16 +103,16 @@ public class ManyTeacherOneLabStrategy : ILessonPlacingStrategy
                     if (freeRoomList.Count < 2) continue;
                     
                     var matchedTheoryList1 = freeRoomList.RoomsWithMatchedCapacity(mergedCourses[0], LessonType.Theory);
-                    if (matchedTheoryList1.IsNullOrEmpty()) continue;
-                    freeRoomList = freeRoomList.Where(x => x.Id != matchedTheoryList1![0].Id).ToList();
+                    if (matchedTheoryList1 == null) continue;
+                    freeRoomList = freeRoomList.Where(x => x.Id != matchedTheoryList1.Value.Room.Id).ToList();
                     var matchedTheoryList2 = freeRoomList.RoomsWithMatchedCapacity(mergedCourses[1], LessonType.Theory);
-                    if (matchedTheoryList2.IsNullOrEmpty()) continue;
+                    if (matchedTheoryList2 == null) continue;
                     
                     foreach (var time in timeRange.GetScheduleTimes()) {
                         var timetableFirst = new Timetable(mergedCourses[0], LessonType.Theory, time, 
-                            matchedTheoryList1![0]);
+                            matchedTheoryList1.Value.Room);
                         var timetableSecond = new Timetable(mergedCourses[1], LessonType.Theory, time,
-                            matchedTheoryList2![0]);
+                            matchedTheoryList2.Value.Room);
                         _timetableData.AddTimetable(timetableFirst);
                         _timetableData.AddTimetable(timetableSecond);
                     }
@@ -133,11 +133,11 @@ public class ManyTeacherOneLabStrategy : ILessonPlacingStrategy
 
                         var matchedPracticeList =
                             freeRoomList.RoomsWithMatchedCapacity(mergedCourse, LessonType.Practice);
-                        if (matchedPracticeList.IsNullOrEmpty()) continue;
+                        if (matchedPracticeList == null) continue;
 
                         foreach (var time in timeRange.GetScheduleTimes()) {
                             var timetable = new Timetable(mergedCourse, LessonType.Practice, time, 
-                                matchedPracticeList![0]);
+                                matchedPracticeList.Value.Room);
                             _timetableData.AddTimetable(timetable);
                         }
                         break;

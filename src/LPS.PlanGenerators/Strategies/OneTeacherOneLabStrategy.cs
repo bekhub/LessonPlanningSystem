@@ -30,8 +30,8 @@ public class OneTeacherOneLabStrategy : ILessonPlacingStrategy
             var freeRooms = _timetableData.GetFreeRoomsByCourse(course, lessonType, timeRange, round);
             var matchedRooms = freeRooms.RoomsWithMatchedCapacity(course, lessonType, 
                 (courseStudentsNumber, roomCapacity) => courseStudentsNumber / 2 <= roomCapacity + 10);
-            if (matchedRooms == null || matchedRooms.Count == 0) continue;
-            _timetableData.AddTimetable(course, lessonType, timeRange, matchedRooms);
+            if (matchedRooms == null) continue;
+            _timetableData.AddTimetable(course, lessonType, timeRange, matchedRooms.Value);
             if (_timetableData.RemainingHoursByLessonType(course, lessonType) <= 0) break;
         }
     }

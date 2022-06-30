@@ -1,4 +1,5 @@
-﻿using LPS.PlanGenerators.Enums;
+﻿#nullable enable
+using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.ValueObjects;
 
 namespace LPS.PlanGenerators.Models;
@@ -10,15 +11,22 @@ public class Timetable
     public LessonType LessonType { get; init; }
     public ScheduleTime ScheduleTime { get; init; }
     public Classroom Classroom { get; set; }
-
-    public Timetable() { }
-
-    public Timetable(Course course, LessonType lessonType, ScheduleTime scheduleTime, Classroom classroom)
+    public Classroom? AdditionalClassroom { get; set; }
+    
+    public Timetable(Course course, LessonType lessonType, ScheduleTime scheduleTime, Classroom classroom, 
+        Classroom? additionalClassroom = null)
     {
         Course = course;
         LessonType = lessonType;
         ScheduleTime = scheduleTime;
         Classroom = classroom;
+        AdditionalClassroom = additionalClassroom;
+    }
+    
+    public Timetable(int id, Course course, LessonType lessonType, ScheduleTime scheduleTime, Classroom classroom, 
+        Classroom? additionalClassroom = null) : this(course, lessonType, scheduleTime, classroom, additionalClassroom)
+    {
+        Id = id;
     }
 
     public override string ToString()

@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -19,6 +18,7 @@ public class TimetableGeneratorViewModel : RoutableViewModel
 {
     [Reactive] private CoursesData? CoursesData { get; set; }
     [Reactive] private ClassroomsData? ClassroomsData { get; set; }
+    [Reactive] private ExistingTimetable? ExistingTimetable { get; set; }
     [Reactive] private GeneratedLessonPlan? GeneratedLessonPlan { get; set; }
 
     [ObservableAsProperty] public bool IsDataPulling { get; }
@@ -45,7 +45,7 @@ public class TimetableGeneratorViewModel : RoutableViewModel
         RouterViewModel.IsGoBackEnabled = true;
         CreateObservables();
         CreateCommands();
-        Observable.StartAsync(PullAllDataAsync, RxApp.TaskpoolScheduler);
+        PullData();
     }
 
     private void CreateObservables()
@@ -91,18 +91,27 @@ public class TimetableGeneratorViewModel : RoutableViewModel
     {
         return Observable.Start(GenerateTimetableAsync, RxApp.TaskpoolScheduler);
     }
+    
+    private void PullData()
+    {
+        Observable.Start(PullAllDataAsync, RxApp.TaskpoolScheduler).ObserveOn(RxApp.MainThreadScheduler);
+    }
 
     private async Task GenerateTimetableAsync()
     {
         try {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var planGenerator = new BestPlanGenerator(ConfigurationDetails.PlanConfiguration, CoursesData, ClassroomsData);
+            var provider = new GeneratorServiceProvider(ConfigurationDetails.PlanConfiguration, CoursesData,
+                ClassroomsData, ExistingTimetable);
+            var planGenerator = new BestPlanGenerator(provider);
             GeneratedLessonPlan = await planGenerator.GenerateBestLessonPlanAsync();
             stopwatch.Stop();
-            await MessageBoxHelper.ShowSuccessAsync("Lesson plan generated in " + stopwatch.Elapsed);
+            await Observable.Start(
+                () => MessageBoxHelper.ShowSuccessAsync("Lesson plan generated in " + stopwatch.Elapsed),
+                RxApp.MainThreadScheduler);
         } catch (Exception ex) {
-            await MessageBoxHelper.ShowErrorAsync(ex.Message);
+            await Observable.Start(() => MessageBoxHelper.ShowErrorAsync(ex.Message), RxApp.MainThreadScheduler);
         }
     }
 
@@ -135,10 +144,11 @@ public class TimetableGeneratorViewModel : RoutableViewModel
         try {
             await UsingTimetableServiceAsync(ConfigurationDetails, async service => {
                 CoursesData = await service.GetCoursesDataAsync(ConfigurationDetails.Departments);
-                ClassroomsData = await service.GetClassroomsDataAsync(CoursesData.AllCourses.Values.ToList());
+                ClassroomsData = await service.GetClassroomsDataAsync(CoursesData.AllCourseList);
+                ExistingTimetable = await service.GetExistingTimetable(CoursesData, ClassroomsData);
             });
         } catch (Exception ex) {
-            Observable.StartAsync(() => MessageBoxHelper.ShowErrorAsync(ex.Message), RxApp.MainThreadScheduler);
+            await Observable.Start(() => MessageBoxHelper.ShowErrorAsync(ex.Message), RxApp.MainThreadScheduler);
         }
     }
 }
