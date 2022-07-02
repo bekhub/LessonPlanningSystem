@@ -30,9 +30,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LPS.Console", "clients\LPS.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LPS.Application.Tests", "tests\LPS.Application.Tests\LPS.Application.Tests.csproj", "{4E681A74-9055-4A36-A32A-F24B59DEEC9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LPS.Client", "clients\LPS.Client\LPS.Client.csproj", "{4A070541-D032-48D5-90D5-9CA82AA2FFA2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LPS.Client.Desktop", "clients\LPS.Client.Desktop\LPS.Client.Desktop.csproj", "{0F16EFB4-0A68-4536-BBB9-98D7DD6BE57C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LPS.Desktop", "clients\LPS.Desktop\LPS.Desktop.csproj", "{4A070541-D032-48D5-90D5-9CA82AA2FFA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,10 +70,6 @@ Global
 		{4A070541-D032-48D5-90D5-9CA82AA2FFA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A070541-D032-48D5-90D5-9CA82AA2FFA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A070541-D032-48D5-90D5-9CA82AA2FFA2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0F16EFB4-0A68-4536-BBB9-98D7DD6BE57C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F16EFB4-0A68-4536-BBB9-98D7DD6BE57C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F16EFB4-0A68-4536-BBB9-98D7DD6BE57C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0F16EFB4-0A68-4536-BBB9-98D7DD6BE57C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -89,7 +83,6 @@ Global
 		{D6C49B88-26A7-4162-A7C4-354E072E0F23} = {44D933E6-E47A-459D-90F1-3B4A6282C4C5}
 		{4E681A74-9055-4A36-A32A-F24B59DEEC9A} = {59AFE825-8916-4C23-BE77-B0B36A8F419A}
 		{4A070541-D032-48D5-90D5-9CA82AA2FFA2} = {44D933E6-E47A-459D-90F1-3B4A6282C4C5}
-		{0F16EFB4-0A68-4536-BBB9-98D7DD6BE57C} = {44D933E6-E47A-459D-90F1-3B4A6282C4C5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FBFC3017-6D8E-465C-8E59-A7221A285109}
