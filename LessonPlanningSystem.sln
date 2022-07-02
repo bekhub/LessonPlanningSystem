@@ -14,8 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{676C0C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{59AFE825-8916-4C23-BE77-B0B36A8F419A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{CF73876F-08F4-4D42-BBEE-D06E7FF72CA4}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LPS.DatabaseLayer", "src\LPS.DatabaseLayer\LPS.DatabaseLayer.csproj", "{E963E8F6-91EC-4164-93B6-ECCCAC617714}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LPS.PlanGenerators", "src\LPS.PlanGenerators\LPS.PlanGenerators.csproj", "{9F9ED0A7-71D9-4FB7-9E49-B21493E9F7E6}"
