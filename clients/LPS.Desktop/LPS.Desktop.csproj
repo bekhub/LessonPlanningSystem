@@ -25,4 +25,9 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\LPS.Application\LPS.Application.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <None Update="appstate.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>

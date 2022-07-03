@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -7,11 +7,12 @@ using ReactiveUI;
 
 namespace LPS.Desktop.Services;
 
-public class NewtonsoftJsonSuspensionDriver<TState> : ISuspensionDriver where TState: class
+public class NewtonsoftJsonSuspensionDriver<TState> : ISuspensionDriver where TState: class, new()
 {
     private readonly string _file;
     private readonly JsonSerializerSettings _settings = new() {
-        TypeNameHandling = TypeNameHandling.All
+        TypeNameHandling = TypeNameHandling.All,
+
     };
 
     public NewtonsoftJsonSuspensionDriver(string file) => _file = file;
@@ -27,7 +28,7 @@ public class NewtonsoftJsonSuspensionDriver<TState> : ISuspensionDriver where TS
     {
         var lines = File.ReadAllText(_file);
         var state = JsonConvert.DeserializeObject<TState>(lines, _settings);
-        return Observable.Return(state);
+        return Observable.Return(state ?? new TState());
     }
 
     public IObservable<Unit> SaveState(object state)
