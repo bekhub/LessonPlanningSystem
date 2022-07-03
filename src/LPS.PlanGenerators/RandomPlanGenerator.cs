@@ -1,18 +1,18 @@
-﻿using LPS.PlanGenerators.Configuration;
+using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.DataStructures;
 using LPS.PlanGenerators.DataStructures.Extensions;
 using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.Strategies;
 
-namespace LPS.PlanGenerators.Generators;
+namespace LPS.PlanGenerators;
 
 public class RandomPlanGenerator
 {
     private readonly TimetableData _timetableData;
     private readonly PlanConfiguration _configuration;
     private readonly StrategyOrchestrator _strategyOrchestrator;
-    
+
     private RandomPlanGenerator(GeneratorServiceProvider provider)
     {
         _configuration = provider.PlanConfiguration;
@@ -29,9 +29,9 @@ public class RandomPlanGenerator
 
     private GeneratedLessonPlan GenerateLessonPlan(CoursesList coursesList)
     {
-        if (_configuration.IncludeRemoteEducationCourses) 
+        if (_configuration.IncludeRemoteEducationCourses)
             FindPlaceForRemoteLesson(coursesList.RemoteEducationCourses);
-        if (_configuration.IncludeGeneralMandatoryCourses) 
+        if (_configuration.IncludeGeneralMandatoryCourses)
             FindPlaceForGeneralMandatoryLessons(coursesList.GeneralMandatoryCourses);
 
         // Round 4 - search from same building, round 5 - search from other buildings
@@ -39,7 +39,7 @@ public class RandomPlanGenerator
             // Placing DSU teachers courses then Tam Zamanli teachers courses
             foreach (var course in coursesList.MainCourses) FindPlaceForLesson(course, round);
         }
-        
+
         return new GeneratedLessonPlan {
             CoursesTimetable = _timetableData.CoursesTimetable.Current,
             ClassroomsTimetable = _timetableData.ClassroomsTimetable.Current,
