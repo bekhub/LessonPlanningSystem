@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using LPS.Application;
 using LPS.DatabaseLayer;
 using LPS.PlanGenerators;
@@ -43,6 +43,6 @@ stopwatch.Stop();
 Console.WriteLine("Generating lesson plan: " + stopwatch.Elapsed);
 
 stopwatch.Restart();
-await timetableService.SaveTimetableAsPreviewAsync(bestLessonPlan.Timetables);
+await timetableService.SaveTimetableAsPreviewAsync(bestLessonPlan);
 stopwatch.Stop();
 Console.WriteLine("Saving lesson plan: " + stopwatch.Elapsed);

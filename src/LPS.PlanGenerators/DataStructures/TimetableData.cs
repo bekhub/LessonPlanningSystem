@@ -39,9 +39,13 @@ public class TimetableData
         (_studentsTimetable, _existingTimetable.StudentsTimetable);
     private readonly StudentsTimetable _studentsTimetable;
     /// <summary>
+    /// New generated timetables
+    /// </summary>
+    public IReadOnlyList<Timetable> GeneratedTimetables => _timetables;
+    /// <summary>
     /// All timetables
     /// </summary>
-    public IReadOnlyList<Timetable> Timetables => _timetables;
+    public IReadOnlyList<Timetable> AllTimetables => _timetables.Concat(_existingTimetable.Timetables).ToList();
 
     public TimetableData(GeneratorServiceProvider provider, ExistingTimetable existingTimetable)
     {

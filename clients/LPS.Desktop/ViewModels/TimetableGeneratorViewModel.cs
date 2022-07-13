@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Diagnostics;
 using System.Reactive;
@@ -119,7 +119,7 @@ public class TimetableGeneratorViewModel : RoutableViewModel
     {
         try {
             await UsingTimetableServiceAsync(ConfigurationDetails, async service => {
-                await service.SaveTimetableAsOriginalAsync(GeneratedLessonPlan!.Timetables);
+                await service.SaveTimetableAsOriginalAsync(GeneratedLessonPlan!);
             });
             await MessageBoxHelper.ShowSuccessAsync("Lesson plan saved to original table");
         } catch (Exception ex) {
@@ -131,7 +131,7 @@ public class TimetableGeneratorViewModel : RoutableViewModel
     {
         try {
             await UsingTimetableServiceAsync(ConfigurationDetails, async service => {
-                await service.SaveTimetableAsPreviewAsync(GeneratedLessonPlan!.Timetables);
+                await service.SaveTimetableAsPreviewAsync(GeneratedLessonPlan!);
             });
             await MessageBoxHelper.ShowSuccessAsync("Lesson plan saved to preview table");
         } catch (Exception ex) {
