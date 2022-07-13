@@ -1,0 +1,81 @@
+﻿<UserControl
+    d:DesignHeight="580"
+    d:DesignWidth="610"
+    mc:Ignorable="d"
+    x:Class="LPS.Desktop.Views.SelectItemsPageView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:LPS.Desktop.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.DataContext>
+        <vm:SelectItemsPageViewModel />
+    </Design.DataContext>
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="200" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="200" />
+        </Grid.RowDefinitions>
+        <ProgressBar
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            IsIndeterminate="True"
+            IsVisible="{Binding IsLoading}"
+            MaxHeight="200"
+            MaxWidth="200"
+            Orientation="Horizontal"
+            VerticalAlignment="Center" />
+        <StackPanel
+            Grid.Row="0"
+            IsVisible="{Binding !IsLoading}"
+            Orientation="Horizontal">
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Choose all faculties:
+            </TextBlock>
+            <CheckBox Command="{Binding AllFacultiesCheckbox}" IsChecked="{Binding AllFacultiesChecked}" />
+        </StackPanel>
+        <ListBox
+            Background="#16191f"
+            Grid.Row="1"
+            IsVisible="{Binding !IsLoading}"
+            Items="{Binding Path=Faculties, Mode=TwoWay}"
+            Margin="10,0,10,10"
+            Name="LsbFaculties"
+            Selection="{Binding SelectionFaculties}"
+            SelectionMode="Multiple, Toggle"
+            Width="590">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <StackPanel
+            Grid.Row="2"
+            IsVisible="{Binding !IsLoading}"
+            Orientation="Horizontal">
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Choose all departments:
+            </TextBlock>
+            <CheckBox Command="{Binding AllDepartmentsCheckbox}" IsChecked="{Binding AllDepartmentsChecked}" />
+        </StackPanel>
+        <ListBox
+            Background="#16191f"
+            Grid.Row="3"
+            IsVisible="{Binding !IsLoading}"
+            Items="{Binding Path=Departments, Mode=TwoWay}"
+            Margin="10,0,10,0"
+            Name="LsbDepartments"
+            Selection="{Binding SelectionDepartments}"
+            SelectionMode="Multiple, Toggle"
+            Width="590">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>

@@ -1,6 +1,6 @@
 ﻿using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
-using LPS.Utils;
+using LPS.Utils.Extensions;
 
 namespace LPS.PlanGenerators.DataStructures;
 

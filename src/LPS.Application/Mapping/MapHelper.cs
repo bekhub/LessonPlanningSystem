@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using LPS.DatabaseLayer.Entities;
 using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.Enums;
@@ -35,7 +35,27 @@ public static class MapHelper
 
     public static (TimeTable, TimeTable?) MapTimetable(Timetable timetable, PlanConfiguration configuration)
     {
-        return MapTimetablePreview(timetable, configuration);
+        var first = new TimeTable {
+            EducationalYear = configuration.EducationalYear,
+            Semester = configuration.Semester.ToDbValue(),
+            CreatedTime = DateTime.Now,
+            ClassroomId = timetable.Classroom.Id,
+            CourseId = timetable.Course.Id,
+            LessonTypeId = timetable.LessonType.AsInt(),
+            TimeDayId = timetable.ScheduleTime.Weekday.AsInt(),
+            TimeHourId = timetable.ScheduleTime.Hour + 1
+        };
+        if (timetable.AdditionalClassroom == null) return (first, null);
+        return (first, new TimeTable {
+            EducationalYear = configuration.EducationalYear,
+            Semester = configuration.Semester.ToDbValue(),
+            CreatedTime = DateTime.Now,
+            ClassroomId = timetable.AdditionalClassroom.Id,
+            CourseId = timetable.Course.Id,
+            LessonTypeId = timetable.LessonType.AsInt(),
+            TimeDayId = timetable.ScheduleTime.Weekday.AsInt(),
+            TimeHourId = timetable.ScheduleTime.Hour + 1
+        });
     }
     
     public static TEnum Parse<TEnum>(int value) where TEnum : struct, Enum

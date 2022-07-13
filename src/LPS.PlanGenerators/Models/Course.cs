@@ -1,4 +1,4 @@
-﻿using LPS.PlanGenerators.Enums;
+using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.ValueObjects;
 using static LPS.PlanGenerators.Configuration.StaticConfiguration;
 
@@ -62,7 +62,8 @@ public class Course : Entity
     /// <param name="time"></param>
     /// <param name="round"></param>
     /// <returns></returns>
-    public bool TimeIsConvenientForCourse(ScheduleTime time, Round round) {
+    public bool TimeIsConvenientForCourse(ScheduleTime time, Round round)
+    {
         // This rule is not acceptable after first round
         // This rule is not acceptable for the courses other than BZD
         if (round > Round.Second || CourseType != CourseType.DepartmentMandatory)
@@ -74,7 +75,7 @@ public class Course : Entity
             _ => true,
         };
     }
-    
+
     /// <summary>
     /// Ensures that BZD of 1'st and 3'd level are positioned before noon,
     /// and BZD of 2'nd and 4'th level are positioned after noon
@@ -82,19 +83,15 @@ public class Course : Entity
     /// <param name="timeRange"></param>
     /// <param name="round"></param>
     /// <returns></returns>
-    public bool TimeRangeIsConvenientForCourse(ScheduleTimeRange timeRange, Round round) {
-        return timeRange.GetScheduleTimes().All(x => TimeIsConvenientForCourse(x, round));
-    }
+    public bool TimeRangeIsConvenientForCourse(ScheduleTimeRange timeRange, Round round) =>
+        timeRange.GetScheduleTimes().All(x => TimeIsConvenientForCourse(x, round));
 
     /// <summary>
     /// Room type by lesson type
     /// </summary>
     /// <param name="lessonType"></param>
     /// <returns></returns>
-    public RoomType? NeededRoomType(LessonType lessonType)
-    {
-        return lessonType == LessonType.Theory ? TheoryRoomType : PracticeRoomType;
-    }
+    public RoomType? NeededRoomType(LessonType lessonType) => lessonType == LessonType.Theory ? TheoryRoomType : PracticeRoomType;
 
     /// <summary>
     /// Lesson hours by lesson type
