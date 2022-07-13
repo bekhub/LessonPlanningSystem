@@ -4,7 +4,7 @@ using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.Strategies.Interfaces;
 using LPS.PlanGenerators.ValueObjects;
-using LPS.Utils;
+using LPS.Utils.Extensions;
 
 namespace LPS.PlanGenerators.Strategies;
 

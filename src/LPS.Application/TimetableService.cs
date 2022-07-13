@@ -1,9 +1,10 @@
-﻿#nullable enable
+#nullable enable
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using LPS.Application.Mapping;
 using LPS.DatabaseLayer;
 using LPS.DatabaseLayer.Entities;
+using LPS.PlanGenerators;
 using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.DataStructures;
 using LPS.PlanGenerators.Enums;
@@ -142,24 +143,29 @@ public class TimetableService
         }
     }
     
-    public async Task SaveTimetableAsOriginalAsync(IReadOnlyList<Timetable> timetables)
+    public async Task SaveTimetableAsOriginalAsync(GeneratedLessonPlan lessonPlan)
     {
         await EnsureEnumValuesInDatabaseAsync();
-        var timetablesToInsert = timetables.Where(x => x.Id == null);
-        await _context.TimeTables.BulkInsertAsync(timetablesToInsert.SelectMany(x => {
+        await _context.TimeTables.BulkInsertAsync(lessonPlan.NewTimetables.SelectMany(x => {
             var timeTable = MapHelper.MapTimetable(x, _configuration);
             return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
         }));
     }
 
-    public async Task SaveTimetableAsPreviewAsync(IEnumerable<Timetable> timetables)
+    public async Task SaveTimetableAsPreviewAsync(GeneratedLessonPlan lessonPlan)
     {
         await EnsureEnumValuesInDatabaseAsync();
         await TruncatePreviewTimetableAsync();
-        await _context.TimeTablePreviews.BulkInsertAsync(timetables.SelectMany(x => {
-            var timeTable = MapHelper.MapTimetablePreview(x, _configuration);
-            return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
-        }));
+        //await _context.TimeTablePreviews.BulkInsertAsync(lessonPlan.AllTimetables.SelectMany(x => {
+        //    var timeTable = MapHelper.MapTimetablePreview(x, _configuration);
+        //    return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
+        //}));
+        foreach (var timetable in lessonPlan.AllTimetables) {
+            var timeTable = MapHelper.MapTimetablePreview(timetable, _configuration);
+            _context.TimeTablePreviews.Add(timeTable.Item1);
+            if (timeTable.Item2 != null) _context.TimeTablePreviews.Add(timeTable.Item2);
+        }
+        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteCurrentSemesterTimetablesAsync()

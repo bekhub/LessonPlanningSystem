@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="LPS.PlanGenerators.Models.Building">
+    <Position X="7.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Building.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LPS.PlanGenerators.Models.Classroom">
+    <Position X="7.25" Y="2" Width="1.5" />
+    <Members>
+      <Method Name="ToString" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAACABAAAAAAAAAEAAAAAAACEAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Classroom.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LPS.PlanGenerators.Models.Course">
+    <Position X="9" Y="2" Width="2.5" />
+    <Members>
+      <Method Name="CourseCreated" Hidden="true" />
+      <Method Name="GenerateSpecialRooms" Hidden="true" />
+      <Method Name="GetRoomsForSpecialCourses" Hidden="true" />
+      <Method Name="HoursByLessonType" Hidden="true" />
+      <Method Name="NeededRoomType" Hidden="true" />
+      <Method Name="TimeIsConvenientForCourse" Hidden="true" />
+      <Method Name="TimeRangeIsConvenientForCourse" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>gCMCAQAGAEoCAAAIIAAgAQQAEAABAAAABQAIAAAAAAI=</HashCode>
+      <FileName>Models\Course.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LPS.PlanGenerators.Models.CourseVsRoom">
+    <Position X="5.5" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAgAAAAAAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>Models\CourseVsRoom.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LPS.PlanGenerators.Models.Faculty">
+    <Position X="3.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Faculty.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LPS.PlanGenerators.Models.Teacher">
+    <Position X="5.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Teacher.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LPS.PlanGenerators.Models.Timetable">
+    <Position X="5.25" Y="6" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAEAIAAAQgAAAAQAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>Models\Timetable.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LPS.PlanGenerators.Models.Department">
+    <Position X="3.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Department.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

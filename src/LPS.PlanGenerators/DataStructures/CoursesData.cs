@@ -1,4 +1,4 @@
-﻿using LPS.PlanGenerators.Enums;
+using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 
 namespace LPS.PlanGenerators.DataStructures;
@@ -35,7 +35,7 @@ public class CoursesData
     public readonly CoursesBySubgroupMode DepartmentElectiveCoursesLHP;
 
     /// <summary>
-    /// Dictionary of all courses. For key is id
+    /// Dictionary of all courses. Key is id
     /// </summary>
     public IReadOnlyDictionary<int, Course> AllCourses => _allCourses;
     public IReadOnlyList<Course> AllCourseList => _allCourses.Values.ToList();
