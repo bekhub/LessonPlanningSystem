@@ -72,6 +72,15 @@ public class TimetableData
     }
     
     /// <summary>
+    /// Add timetable for single course
+    /// </summary>
+    public void AddTimetable(Course course, LessonType lessonType, ScheduleTimeRange timeRange, int roomId)
+    {
+        var room = _classroomsData.AllClassrooms[roomId];
+        AddTimetable(course, lessonType, timeRange, (room, null));
+    }
+    
+    /// <summary>
     /// Add timetable for multiple courses
     /// </summary>
     public void AddTimetable(IReadOnlyList<Course> courses, LessonType lessonType, ScheduleTimeRange timeRange, 
