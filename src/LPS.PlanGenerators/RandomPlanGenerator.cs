@@ -41,13 +41,14 @@ public class RandomPlanGenerator
         }
 
         return new GeneratedLessonPlan {
-            CoursesTimetable = _timetableData.CoursesTimetable.Current,
-            ClassroomsTimetable = _timetableData.ClassroomsTimetable.Current,
-            TeachersTimetable = _timetableData.TeachersTimetable.Current,
-            StudentsTimetable = _timetableData.StudentsTimetable.Current,
+            NewCoursesTimetable = _timetableData.CoursesTimetable.Current,
+            NewClassroomsTimetable = _timetableData.ClassroomsTimetable.Current,
+            NewTeachersTimetable = _timetableData.TeachersTimetable.Current,
+            NewStudentsTimetable = _timetableData.StudentsTimetable.Current,
             AllTimetables = _timetableData.AllTimetables,
             NewTimetables = _timetableData.GeneratedTimetables,
             GeneratedCoursesList = coursesList,
+            UnpositionedCourses = _timetableData.CoursesTimetable.UnpositionedCourses(),
             TotalFreeHoursOfRooms = _timetableData.ClassroomsTimetable.TotalFreeHoursOfRooms(),
             TotalUnpositionedLessons = _timetableData.CoursesTimetable.TotalUnpositionedLessons(),
             TotalUnpositionedCourses = _timetableData.CoursesTimetable.TotalUnpositionedCourses(),
@@ -58,9 +59,11 @@ public class RandomPlanGenerator
 
     private void FindPlaceForLesson(Course course, Round round)
     {
-        if (_timetableData.RemainingHoursByLessonType(course, LessonType.Theory) > 0)
+        var remainingTheoryHours = _timetableData.RemainingHoursByLessonType(course, LessonType.Theory);
+        var remainingPracticeHours = _timetableData.RemainingHoursByLessonType(course, LessonType.Practice);
+        if (remainingTheoryHours > 0)
             _strategyOrchestrator.ExecuteStrategy(course, LessonType.Theory, round); // Find place for TEORIK lesson
-        if (_timetableData.RemainingHoursByLessonType(course, LessonType.Practice) > 0)
+        if (remainingPracticeHours > 0)
             _strategyOrchestrator.ExecuteStrategy(course, LessonType.Practice, round); // Find place for UYGULAMA lesson
     }
 

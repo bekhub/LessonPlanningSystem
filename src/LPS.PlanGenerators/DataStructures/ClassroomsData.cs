@@ -52,9 +52,10 @@ public class ClassroomsData
         var concurrentTheoryClassrooms = new ConcurrentDictionary<(int, Round), IReadOnlyList<Classroom>>();
         var concurrentPracticeClassrooms = new ConcurrentDictionary<(int, Round), IReadOnlyList<Classroom>>();
         Parallel.ForEach(courses, course => {
-            for (var round = Round.Third; round <= Round.Fifth; round++) {
-                concurrentTheoryClassrooms[(course.Id, round)] = GenerateRooms(course, LessonType.Theory, round).ToList();
-                concurrentPracticeClassrooms[(course.Id, round)] = GenerateRooms(course, LessonType.Practice, round).ToList();
+            for (var round = Round.Second; round <= Round.Fifth; round++) {
+                var roundForDict = round <= Round.Third ? Round.Third : round;
+                concurrentTheoryClassrooms[(course.Id, roundForDict)] = GenerateRooms(course, LessonType.Theory, round).ToList();
+                concurrentPracticeClassrooms[(course.Id, roundForDict)] = GenerateRooms(course, LessonType.Practice, round).ToList();
             }
         });
         _theoryClassrooms = concurrentTheoryClassrooms;
@@ -91,7 +92,7 @@ public class ClassroomsData
     /// <param name="round"></param>
     /// <returns></returns>
     private bool RoomTypeCheck(RoomType? roomTypeNeeded, RoomType currentRoomType, Round round) => round switch {
-        // If room type needed is equal to 1, it meens "herhangi bir oda"
+        // If room type needed is equal to 1, it means "herhangi bir oda"
         <= Round.Second when roomTypeNeeded == RoomType.Normal => 
             currentRoomType is RoomType.Normal or RoomType.WithTwoBoards or RoomType.WithProjector,
         //check for the room type needed for the TEORIK lessons of the current course

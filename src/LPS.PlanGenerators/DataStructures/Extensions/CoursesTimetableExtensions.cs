@@ -32,6 +32,14 @@ public static class CoursesTimetableExtensions
         return course.PracticeHours - takenHours;
     }
     
+    public static IReadOnlyList<Course> UnpositionedCourses(this (CoursesTimetable, CoursesTimetable) coursesTimetable)
+    {
+        var (first, _) = coursesTimetable;
+        var allCourses = first.AllCourses;
+        return allCourses.Where(x => 
+            coursesTimetable.UnpositionedTheoryHours(x) + coursesTimetable.UnpositionedPracticeHours(x) > 0).ToList();
+    }
+    
     /// <summary>
     /// This function calculates the total number of separated lessons
     /// </summary>
@@ -57,7 +65,8 @@ public static class CoursesTimetableExtensions
     public static int TotalUnpositionedCourses(this (CoursesTimetable, CoursesTimetable) coursesTimetable)
     {
         var (first, _) = coursesTimetable;
-        return first.AllCourses.Count(x =>
+        var totalUnpositionedCourses = first.AllCourses.Count(x =>
             coursesTimetable.UnpositionedTheoryHours(x) + coursesTimetable.UnpositionedPracticeHours(x) > 0);
+        return totalUnpositionedCourses;
     }
 }

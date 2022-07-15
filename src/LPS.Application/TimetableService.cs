@@ -13,6 +13,7 @@ using LPS.PlanGenerators.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Classroom = LPS.PlanGenerators.Models.Classroom;
 using Course = LPS.PlanGenerators.Models.Course;
+using CourseType = LPS.PlanGenerators.Enums.CourseType;
 using Department = LPS.DatabaseLayer.Entities.Department;
 using LessonType = LPS.PlanGenerators.Enums.LessonType;
 
@@ -38,7 +39,9 @@ public class TimetableService
             .Where(x => 
                 x.Semester == _configuration.Semester.ToDbValue() &&
                 x.Active &&
-                (departments == null || departments.Contains(x.Department)) &&
+                (_configuration.IncludeGeneralMandatoryCourses || x.CourseType.TypeCode != (int)CourseType.GeneralMandatory) &&
+                (_configuration.IncludeRemoteEducationCourses || x.CourseType.TypeCode != (int)CourseType.RemoteEducation) &&
+                (departments == null || departments.Contains(x.Department!)) &&
                 x.UserId != 12)
             .Include(x => x.Teacher)
             .Include(x => x.Department)
@@ -55,13 +58,13 @@ public class TimetableService
                 .ThenInclude(x => x.Building)
             .AsSplitQuery().AsNoTracking();
         await foreach (var entity in courses.AsAsyncEnumerable()) {
-            var course = _mapper.Map<Course>(entity);
+            var course = EntitiesToModels.MapCourse(entity, _mapper);
             course.CourseCreated();
             coursesData.Add(course);
         }
         return coursesData;
     }
-
+    
     public async Task<ClassroomsData> GetClassroomsDataAsync(IReadOnlyList<Course> courses)
     {
         var classroomsData = new ClassroomsData();
@@ -147,11 +150,11 @@ public class TimetableService
     {
         await EnsureEnumValuesInDatabaseAsync();
         await _context.TimeTables.BulkInsertAsync(lessonPlan.NewTimetables.SelectMany(x => {
-            var timeTable = MapHelper.MapTimetable(x, _configuration);
+            var timeTable = ModelsToEntities.MapTimetable(x, _configuration);
             return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
         }));
     }
-
+    
     public async Task SaveTimetableAsPreviewAsync(GeneratedLessonPlan lessonPlan)
     {
         await EnsureEnumValuesInDatabaseAsync();
@@ -161,13 +164,13 @@ public class TimetableService
         //    return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
         //}));
         foreach (var timetable in lessonPlan.AllTimetables) {
-            var timeTable = MapHelper.MapTimetablePreview(timetable, _configuration);
+            var timeTable = ModelsToEntities.MapTimetablePreview(timetable, _configuration);
             _context.TimeTablePreviews.Add(timeTable.Item1);
             if (timeTable.Item2 != null) _context.TimeTablePreviews.Add(timeTable.Item2);
         }
         await _context.SaveChangesAsync();
     }
-
+    
     public async Task DeleteCurrentSemesterTimetablesAsync()
     {
         const string sql = "delete from time_table where `educational_year` = {0} and `semester` = {1}";
