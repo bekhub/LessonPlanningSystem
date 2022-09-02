@@ -93,7 +93,6 @@ public class TimetableService
         
         var timetableDict = new Dictionary<int, Timetable>();
         foreach (var entity in timetableEntities) {
-            //Todo: Should be tested
             var hash = HashCode.Combine(entity.CourseId, entity.LessonTypeId, entity.TimeDayId,
                 entity.TimeHourId);
             if (!timetableDict.ContainsKey(hash)) {
@@ -149,10 +148,17 @@ public class TimetableService
     public async Task SaveTimetableAsOriginalAsync(GeneratedLessonPlan lessonPlan)
     {
         await EnsureEnumValuesInDatabaseAsync();
-        await _context.TimeTables.BulkInsertAsync(lessonPlan.NewTimetables.SelectMany(x => {
-            var timeTable = ModelsToEntities.MapTimetable(x, _configuration);
-            return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
-        }));
+        // await _context.TimeTables.BulkInsertAsync(lessonPlan.NewTimetables.SelectMany(x => {
+        //     var timeTable = ModelsToEntities.MapTimetable(x, _configuration);
+        //     return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
+        // }));
+        foreach (var timetable in lessonPlan.AllTimetables) {
+            var timeTable = ModelsToEntities.MapTimetable(timetable, _configuration);
+            _context.TimeTables.Add(timeTable.Item1);
+            if (timeTable.Item2 != null) _context.TimeTables.Add(timeTable.Item2);
+        }
+        await _context.SaveChangesAsync();
+        await UpdateUnpositionedHoursAsync(lessonPlan);
     }
     
     public async Task SaveTimetableAsPreviewAsync(GeneratedLessonPlan lessonPlan)
@@ -167,6 +173,17 @@ public class TimetableService
             var timeTable = ModelsToEntities.MapTimetablePreview(timetable, _configuration);
             _context.TimeTablePreviews.Add(timeTable.Item1);
             if (timeTable.Item2 != null) _context.TimeTablePreviews.Add(timeTable.Item2);
+        }
+        await _context.SaveChangesAsync();
+        await UpdateUnpositionedHoursAsync(lessonPlan);
+    }
+    
+    public async Task UpdateUnpositionedHoursAsync(GeneratedLessonPlan lessonPlan)
+    {
+        foreach (var course in lessonPlan.GeneratedCoursesList.MainCourses) {
+            var dbCourse = await _context.Courses.FindAsync(course.Id);
+            dbCourse!.UnpositionedPracticeHours = lessonPlan.NewCoursesTimetable.UnpositionedPracticeHours(course);
+            dbCourse.UnpositionedTheoryHours = lessonPlan.NewCoursesTimetable.UnpositionedTheoryHours(course);
         }
         await _context.SaveChangesAsync();
     }
