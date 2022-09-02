@@ -70,14 +70,14 @@ public class RandomPlanGenerator
 
     private void FindPlaceForRemoteLessons(IReadOnlyList<Course> courses)
     {
-        if (!_configuration.RemoteEducationCourseTime.HasValue) return;
+        if (!_configuration.RemoteEducationLessonTime.HasValue) return;
         if (!_configuration.RemoteEducationClassroomId.HasValue) return;
-        var chosenTime = _configuration.RemoteEducationCourseTime.Value;
+        var chosenTime = _configuration.RemoteEducationLessonTime.Value;
         var chosenRoomId = _configuration.RemoteEducationClassroomId.Value;
         foreach (var course in courses) {
             var hoursNeeded = course.TheoryHours + course.PracticeHours;
             var timeRange = ScheduleTimeRange.GetScheduleTimeRange(chosenTime, hoursNeeded);
-            _timetableData.AddTimetable(course, LessonType.Theory, timeRange, chosenRoomId);
+            _timetableData.AddTimetableForRemoteCourse(course, LessonType.Theory, timeRange, chosenRoomId);
         }
     }
     

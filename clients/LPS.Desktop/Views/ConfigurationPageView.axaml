@@ -25,15 +25,47 @@
             <RowDefinition Height="50" />
             <RowDefinition Height="50" />
             <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <CheckBox Content="Arrange General Mandatory Courses (OZD)" IsChecked="{Binding GeneralMandatoryCoursesChecked}" />
-        </StackPanel>
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
             <CheckBox Content="Arrange Remote Courses (UE)" IsChecked="{Binding RemoteCoursesChecked}" />
         </StackPanel>
-        <StackPanel Grid.Row="2" Orientation="Horizontal">
+        <StackPanel
+            Grid.Row="1"
+            IsVisible="{Binding RemoteCoursesChecked}"
+            Orientation="Horizontal">
+            <NumericUpDown
+                Height="30"
+                Minimum="1"
+                Value="{Binding SelectedRemoteEducationClassroomId}" />
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Classroom ID
+            </TextBlock>
+        </StackPanel>
+        <StackPanel
+            Grid.Row="2"
+            IsVisible="{Binding RemoteCoursesChecked}"
+            Orientation="Horizontal"
+            Spacing="5"
+            VerticalAlignment="Center">
+            <ComboBox SelectedIndex="{Binding SelectedRemoteEducationWeekday}">
+                <ComboBoxItem>Monday</ComboBoxItem>
+                <ComboBoxItem>Tuesday</ComboBoxItem>
+                <ComboBoxItem>Wednesday</ComboBoxItem>
+                <ComboBoxItem>Thursday</ComboBoxItem>
+                <ComboBoxItem>Friday</ComboBoxItem>
+            </ComboBox>
+            <NumericUpDown
+                Height="30"
+                Maximum="11"
+                Minimum="0"
+                Value="{Binding SelectedRemoteEducationHour}" />
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Schedule time
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Orientation="Horizontal">
             <RadioButton
                 Content="Autumn"
                 GroupName="Semester"
@@ -43,7 +75,7 @@
                 GroupName="Semester"
                 IsChecked="{Binding SpringEnabled}" />
         </StackPanel>
-        <StackPanel Grid.Row="3" Orientation="Horizontal">
+        <StackPanel Grid.Row="4" Orientation="Horizontal">
             <DatePicker
                 DayVisible="False"
                 Margin="0,0,5,0"
@@ -60,7 +92,7 @@
                 Educational year
             </TextBlock>
         </StackPanel>
-        <StackPanel Grid.Row="4" Orientation="Horizontal">
+        <StackPanel Grid.Row="5" Orientation="Horizontal">
             <NumericUpDown
                 Height="30"
                 Minimum="1"
@@ -69,7 +101,7 @@
                 Number Of Tries
             </TextBlock>
         </StackPanel>
-        <StackPanel Grid.Row="5" Orientation="Horizontal">
+        <StackPanel Grid.Row="6" Orientation="Horizontal">
             <NumericUpDown
                 Height="30"
                 Maximum="100"
@@ -79,7 +111,7 @@
                 Unpositioned Lessons Coefficient
             </TextBlock>
         </StackPanel>
-        <StackPanel Grid.Row="6" Orientation="Horizontal">
+        <StackPanel Grid.Row="7" Orientation="Horizontal">
             <NumericUpDown
                 Height="30"
                 Maximum="100"
@@ -89,7 +121,7 @@
                 Separated Lessons Coefficient
             </TextBlock>
         </StackPanel>
-        <StackPanel Grid.Row="7" Orientation="Horizontal">
+        <StackPanel Grid.Row="8" Orientation="Horizontal">
             <NumericUpDown
                 Height="30"
                 Maximum="100"
@@ -99,7 +131,7 @@
                 Max Teaching Hours Coefficient
             </TextBlock>
         </StackPanel>
-        <StackPanel Grid.Row="8" Orientation="Horizontal">
+        <StackPanel Grid.Row="9" Orientation="Horizontal">
             <NumericUpDown
                 Height="30"
                 Maximum="{Binding MaxNumberOfThreads}"

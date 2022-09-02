@@ -26,13 +26,13 @@ var configuration = new PlanConfiguration {
 };
 service.AddSingleton(configuration);
 await using var provider = service.BuildServiceProvider();
-var db = provider.GetRequiredService<TimetableV4Context>();
+// var db = provider.GetRequiredService<TimetableV4Context>();
 var timetableService = provider.GetRequiredService<TimetableService>();
 
 var stopwatch = new Stopwatch();
 stopwatch.Start();
-var department = await db.Departments.FirstAsync(x => x.Id == 9);
-var coursesData = await timetableService.GetCoursesDataAsync(new List<Department> {department});
+// var department = await db.Departments.FirstAsync(x => x.Id == 9);
+var coursesData = await timetableService.GetCoursesDataAsync();
 var classroomData = await timetableService.GetClassroomsDataAsync(coursesData.AllCourseList);
 var existingTimetable = await timetableService.GetExistingTimetable(coursesData, classroomData);
 stopwatch.Stop();

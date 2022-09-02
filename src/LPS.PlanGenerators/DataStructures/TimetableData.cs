@@ -12,6 +12,7 @@ public class TimetableData
     private readonly ClassroomsData _classroomsData;
     private readonly IReadOnlyList<Course> _allCourses;
     private readonly List<Timetable> _timetables;
+    private readonly List<Timetable> _timetablesForRemoteCourses;
     private readonly ExistingTimetable _existingTimetable;
     
     /// <summary>
@@ -41,11 +42,11 @@ public class TimetableData
     /// <summary>
     /// New generated timetables
     /// </summary>
-    public IReadOnlyList<Timetable> GeneratedTimetables => _timetables;
+    public IReadOnlyList<Timetable> GeneratedTimetables => _timetables.Concat(_timetablesForRemoteCourses).ToList();
     /// <summary>
     /// All timetables
     /// </summary>
-    public IReadOnlyList<Timetable> AllTimetables => _timetables.Concat(_existingTimetable.Timetables).ToList();
+    public IReadOnlyList<Timetable> AllTimetables => GeneratedTimetables.Concat(_existingTimetable.Timetables).ToList();
 
     public TimetableData(GeneratorServiceProvider provider, ExistingTimetable existingTimetable)
     {
@@ -57,6 +58,7 @@ public class TimetableData
         _teachersTimetable = new TeachersTimetable();
         _studentsTimetable = new StudentsTimetable();
         _timetables = new List<Timetable>();
+        _timetablesForRemoteCourses = new List<Timetable>();
     }
 
     /// <summary>
@@ -71,13 +73,12 @@ public class TimetableData
         }
     }
     
-    /// <summary>
-    /// Add timetable for single course
-    /// </summary>
-    public void AddTimetable(Course course, LessonType lessonType, ScheduleTimeRange timeRange, int roomId)
+    public void AddTimetableForRemoteCourse(Course course, LessonType lessonType, ScheduleTimeRange timeRange, int roomId)
     {
         var room = _classroomsData.AllClassrooms[roomId];
-        AddTimetable(course, lessonType, timeRange, (room, null));
+        foreach (var time in timeRange.GetScheduleTimes()) {
+            _timetablesForRemoteCourses.Add(new Timetable(course, lessonType, time, room));
+        }
     }
     
     /// <summary>
