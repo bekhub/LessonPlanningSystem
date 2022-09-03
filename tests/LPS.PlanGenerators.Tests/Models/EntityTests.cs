@@ -6,7 +6,7 @@ namespace LPS.PlanGenerators.Tests.Models;
 
 public class EntityTests
 {
-    class TestEntity : Entity { }
+    class TestModel : Model { }
 
     [Fact]
     public void TestEquality()
@@ -17,7 +17,7 @@ public class EntityTests
     [Fact]
     public void TestIfNull()
     {
-        TestEntity tst = null;
+        TestModel tst = null;
         (tst == null).Should().BeTrue();
         (tst != null).Should().BeFalse();
     }

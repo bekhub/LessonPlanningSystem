@@ -4,6 +4,7 @@ using LPS.PlanGenerators.DataStructures.Extensions;
 using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.Strategies;
+using LPS.PlanGenerators.ValueObjects;
 
 namespace LPS.PlanGenerators;
 
@@ -12,25 +13,25 @@ public class RandomPlanGenerator
     private readonly TimetableData _timetableData;
     private readonly PlanConfiguration _configuration;
     private readonly StrategyOrchestrator _strategyOrchestrator;
-
+    
     private RandomPlanGenerator(GeneratorServiceProvider provider)
     {
         _configuration = provider.PlanConfiguration;
         _timetableData = provider.GetNewTimetableData();
         _strategyOrchestrator = new StrategyOrchestrator(_timetableData);
     }
-
+    
     public static GeneratedLessonPlan GenerateLessonPlan(GeneratorServiceProvider provider)
     {
         var coursesList = provider.CoursesData.GenerateRandomizedCoursesLists();
         var generator = new RandomPlanGenerator(provider);
         return generator.GenerateLessonPlan(coursesList);
     }
-
+    
     private GeneratedLessonPlan GenerateLessonPlan(CoursesList coursesList)
     {
         if (_configuration.IncludeRemoteEducationCourses)
-            FindPlaceForRemoteLesson(coursesList.RemoteEducationCourses);
+            FindPlaceForRemoteLessons(coursesList.RemoteEducationCourses);
         if (_configuration.IncludeGeneralMandatoryCourses)
             FindPlaceForGeneralMandatoryLessons(coursesList.GeneralMandatoryCourses);
 
@@ -41,13 +42,14 @@ public class RandomPlanGenerator
         }
 
         return new GeneratedLessonPlan {
-            CoursesTimetable = _timetableData.CoursesTimetable.Current,
-            ClassroomsTimetable = _timetableData.ClassroomsTimetable.Current,
-            TeachersTimetable = _timetableData.TeachersTimetable.Current,
-            StudentsTimetable = _timetableData.StudentsTimetable.Current,
+            NewCoursesTimetable = _timetableData.CoursesTimetable.Current,
+            NewClassroomsTimetable = _timetableData.ClassroomsTimetable.Current,
+            NewTeachersTimetable = _timetableData.TeachersTimetable.Current,
+            NewStudentsTimetable = _timetableData.StudentsTimetable.Current,
             AllTimetables = _timetableData.AllTimetables,
             NewTimetables = _timetableData.GeneratedTimetables,
             GeneratedCoursesList = coursesList,
+            UnpositionedCourses = _timetableData.CoursesTimetable.UnpositionedCourses(),
             TotalFreeHoursOfRooms = _timetableData.ClassroomsTimetable.TotalFreeHoursOfRooms(),
             TotalUnpositionedLessons = _timetableData.CoursesTimetable.TotalUnpositionedLessons(),
             TotalUnpositionedCourses = _timetableData.CoursesTimetable.TotalUnpositionedCourses(),
@@ -55,16 +57,29 @@ public class RandomPlanGenerator
             MaxTeachingHours = _timetableData.TeachersTimetable.MaxTeachingHours()
         };
     }
-
+    
     private void FindPlaceForLesson(Course course, Round round)
     {
-        if (_timetableData.RemainingHoursByLessonType(course, LessonType.Theory) > 0)
+        var remainingTheoryHours = _timetableData.RemainingHoursByLessonType(course, LessonType.Theory);
+        var remainingPracticeHours = _timetableData.RemainingHoursByLessonType(course, LessonType.Practice);
+        if (remainingTheoryHours > 0)
             _strategyOrchestrator.ExecuteStrategy(course, LessonType.Theory, round); // Find place for TEORIK lesson
-        if (_timetableData.RemainingHoursByLessonType(course, LessonType.Practice) > 0)
+        if (remainingPracticeHours > 0)
             _strategyOrchestrator.ExecuteStrategy(course, LessonType.Practice, round); // Find place for UYGULAMA lesson
     }
 
-    private void FindPlaceForRemoteLesson(IReadOnlyList<Course> coursesListRemoteEducationCourses) { }
-
-    private void FindPlaceForGeneralMandatoryLessons(IReadOnlyList<Course> coursesListGeneralMandatoryCourses) { }
+    private void FindPlaceForRemoteLessons(IReadOnlyList<Course> courses)
+    {
+        if (!_configuration.RemoteEducationLessonTime.HasValue) return;
+        if (!_configuration.RemoteEducationClassroomId.HasValue) return;
+        var chosenTime = _configuration.RemoteEducationLessonTime.Value;
+        var chosenRoomId = _configuration.RemoteEducationClassroomId.Value;
+        foreach (var course in courses) {
+            var hoursNeeded = course.TheoryHours + course.PracticeHours;
+            var timeRange = ScheduleTimeRange.GetScheduleTimeRange(chosenTime, hoursNeeded);
+            _timetableData.AddTimetableForRemoteCourse(course, LessonType.Theory, timeRange, chosenRoomId);
+        }
+    }
+    
+    private void FindPlaceForGeneralMandatoryLessons(IReadOnlyList<Course> courses) { }
 }

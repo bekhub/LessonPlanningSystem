@@ -1,6 +1,6 @@
 ﻿namespace LPS.PlanGenerators.Models;
 
-public class Department : Entity
+public class Department : Model
 {
     public Faculty Faculty { get; init; }
 }

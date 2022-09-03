@@ -6,13 +6,14 @@ namespace LPS.PlanGenerators;
 
 public class GeneratedLessonPlan
 {
-    public CoursesTimetable CoursesTimetable { get; init; }
-    public ClassroomsTimetable ClassroomsTimetable { get; init; }
-    public TeachersTimetable TeachersTimetable { get; init; }
-    public StudentsTimetable StudentsTimetable { get; init; }
+    public CoursesTimetable NewCoursesTimetable { get; init; }
+    public ClassroomsTimetable NewClassroomsTimetable { get; init; }
+    public TeachersTimetable NewTeachersTimetable { get; init; }
+    public StudentsTimetable NewStudentsTimetable { get; init; }
     public IReadOnlyList<Timetable> AllTimetables { get; init; }
     public IReadOnlyList<Timetable> NewTimetables { get; init; }
     public CoursesList GeneratedCoursesList { get; init; }
+    public IReadOnlyList<Course> UnpositionedCourses { get; set; }
     public int TotalFreeHoursOfRooms { get; init; }
     public int TotalUnpositionedLessons { get; init; }
     public int TotalUnpositionedCourses { get; init; }

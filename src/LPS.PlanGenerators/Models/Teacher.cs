@@ -2,7 +2,7 @@
 
 namespace LPS.PlanGenerators.Models;
 
-public class Teacher : Entity
+public class Teacher : Model
 {
     public override int Id => Code;
 

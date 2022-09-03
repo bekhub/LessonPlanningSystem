@@ -80,7 +80,7 @@ public class SelectItemsPageViewModel : RoutableViewModel
     private void AllDepartmentsSelectionChanged(object sender, SelectionModelSelectionChangedEventArgs e)
     {
         if (Departments.Count == 0) AllDepartmentsChecked = false;
-        else AllDepartmentsChecked = SelectionDepartments.SelectedItems.Count == Departments!.Count;
+        else AllDepartmentsChecked = SelectionDepartments.SelectedItems.Count == Departments.Count;
         SelectedDepartments = SelectionDepartments.SelectedItems.ToList();
     }
     

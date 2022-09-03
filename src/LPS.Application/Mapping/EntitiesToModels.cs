@@ -51,4 +51,26 @@ public class EntitiesToModels : Profile
             .ForMember(x => x.Distance, expression => 
                 expression.MapFrom(x => x.DistanceNumber));
     }
+    
+    public static Models.Course MapCourse(Entities.Course entity, IMapper mapper)
+    {
+        return new Models.Course {
+            Id = entity.Id,
+            TheoryHours = entity.TheoryHours,
+            PracticeHours = entity.PracticeHours,
+            MaxStudentsNumber = entity.MaxStudents,
+            Code = entity.Code,
+            Credits = entity.Credits,
+            SubgroupMode = MapHelper.Parse<SubgroupMode>(entity.SubgroupMode),
+            Semester = MapHelper.ParseSemester(entity.Semester),
+            GradeYear = MapHelper.Parse<GradeYear>(entity.GradeYear),
+            DivideTheoryPractice = entity.DivideTheoryPractice,
+            CourseType = MapHelper.Parse<CourseType>(entity.CourseType!.TypeCode),
+            PracticeRoomType = MapHelper.Parse<RoomType>(entity.PracticeRoomType?.TypeCode ?? 1),
+            TheoryRoomType = MapHelper.Parse<RoomType>(entity.TheoryRoomType?.TypeCode ?? 1),
+            Teacher = mapper.Map<Models.Teacher>(entity.Teacher),
+            Department = mapper.Map<Models.Department>(entity.Department),
+            CourseVsRooms = mapper.Map<List<Models.CourseVsRoom>>(entity.CourseVsRooms),
+        };
+    }
 }

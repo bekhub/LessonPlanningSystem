@@ -2,7 +2,7 @@
 
 namespace LPS.PlanGenerators.Models;
 
-public class Classroom : Entity
+public class Classroom : Model
 {
     public int Capacity { get; init; }
     public RoomType RoomType { get; init; }

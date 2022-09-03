@@ -50,6 +50,13 @@ public class ScheduleTimeRange : ValueObject
         }
     }
 
+    public static ScheduleTimeRange GetScheduleTimeRange(ScheduleTime time, int duration)
+    {
+        return AllScheduleTimeRanges.TryGetValue((time, duration), out var timeRange) 
+            ? timeRange 
+            : new ScheduleTimeRange(time, duration);
+    }
+
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Time;

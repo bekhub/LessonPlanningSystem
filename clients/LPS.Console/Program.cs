@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using LPS.Application;
 using LPS.DatabaseLayer;
+using LPS.DatabaseLayer.Entities;
 using LPS.PlanGenerators;
 using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.Enums;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 var service = new ServiceCollection();
@@ -16,18 +18,20 @@ var configuration = new PlanConfiguration {
     IncludeRemoteEducationCourses = false,
     Semester = Semester.Autumn,
     EducationalYear = "2021-2022",
-    NumberOfVariants = 100,
+    NumberOfVariants = 1,
     UnpositionedLessonsCoefficient = 100,
     SeparatedLessonsCoefficient = 1,
     MaxTeachingHoursCoefficient = 1,
-    MaxNumberOfThreads = null,
+    MaxNumberOfThreads = 1,
 };
 service.AddSingleton(configuration);
 await using var provider = service.BuildServiceProvider();
+// var db = provider.GetRequiredService<TimetableV4Context>();
 var timetableService = provider.GetRequiredService<TimetableService>();
 
 var stopwatch = new Stopwatch();
 stopwatch.Start();
+// var department = await db.Departments.FirstAsync(x => x.Id == 9);
 var coursesData = await timetableService.GetCoursesDataAsync();
 var classroomData = await timetableService.GetClassroomsDataAsync(coursesData.AllCourseList);
 var existingTimetable = await timetableService.GetExistingTimetable(coursesData, classroomData);

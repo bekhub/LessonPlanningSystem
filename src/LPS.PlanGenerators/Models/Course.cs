@@ -4,7 +4,7 @@ using static LPS.PlanGenerators.Configuration.StaticConfiguration;
 
 namespace LPS.PlanGenerators.Models;
 
-public class Course : Entity
+public class Course : Model
 {
     public int TheoryHours { get; init; }
     public int PracticeHours { get; init; }
