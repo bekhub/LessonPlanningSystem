@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{676C0C
 		.gitignore = .gitignore
 		README.md = README.md
 		.editorconfig = .editorconfig
+		.github\workflows\release-pipeline.yml = .github\workflows\release-pipeline.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{59AFE825-8916-4C23-BE77-B0B36A8F419A}"
