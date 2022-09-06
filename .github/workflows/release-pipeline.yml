@@ -60,3 +60,15 @@ jobs:
         with:
           name: LPS.Desktop_${{matrix.os}}
           path: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}.zip
+          
+  release:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: publish
+    
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+      - name: Display structure of downloaded files
+        run: ls -R
