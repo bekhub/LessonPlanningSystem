@@ -62,8 +62,7 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}.zip
           
   release:
-    permissions:
-      contents: none
+    permissions: write-all
     runs-on: ubuntu-latest
     needs: publish
     
