@@ -47,9 +47,16 @@ jobs:
         
       - name: dotnet publish
         run: dotnet publish clients/LPS.Desktop -c Release -r ${{matrix.os}} --sc true -o ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}} -p:PublishSingleFile=true
+        
+      - name: zip publish files
+        uses: vimtor/action-zip@v1
+        with: 
+          files: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}
+          recursive: false
+          dest: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}.zip
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: LPS.Desktop_${{matrix.os}}
-          path: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}
+          path: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}.zip
