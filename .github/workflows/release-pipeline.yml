@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [linux-x64, win-x64, osx-x64]
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     env:
       Solution_Name: LessonPlanningSystem.sln
