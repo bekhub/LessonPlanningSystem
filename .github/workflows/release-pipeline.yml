@@ -1,0 +1,70 @@
+﻿name: Release Desktop Application
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  publish:
+
+    strategy:
+      matrix:
+        os: [linux-x64, win-x64, osx-x64]
+
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: LessonPlanningSystem.sln
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Install .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Set up dependency caching for faster builds
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+        
+      - name: dotnet publish
+        run: dotnet publish clients/LPS.Desktop -c Release -r ${{matrix.os}} --sc true -o ${{env.DOTNET_ROOT}}\LPS.Desktop_${{matrix.os}} -p:PublishSingleFile=true -p:DebugSymbols=false -p:DebugType=None
+        
+      - name: zip publish files
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'zip'
+          directory: ${{env.DOTNET_ROOT}}\LPS.Desktop_${{matrix.os}}\
+          filename: ${{env.DOTNET_ROOT}}\LPS.Desktop_${{matrix.os}}.zip
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: LPS.Desktop_${{matrix.os}}
+          path: ${{env.DOTNET_ROOT}}\LPS.Desktop_${{matrix.os}}.zip
+          
+  release:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    needs: publish
+    
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+      - name: Current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d.%s')"
+      - name: Create release and upload artifacts
+        uses: ncipollo/release-action@v1
+        with: 
+          tag: ${{steps.date.outputs.date}}
+          artifacts: "LPS.Desktop_*/*.zip"
+          token: ${{secrets.GITHUB_TOKEN}}

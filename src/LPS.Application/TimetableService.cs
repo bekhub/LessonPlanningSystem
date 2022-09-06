@@ -152,7 +152,7 @@ public class TimetableService
         //     var timeTable = ModelsToEntities.MapTimetable(x, _configuration);
         //     return timeTable.Item2 == null ? new[] {timeTable.Item1} : new[] {timeTable.Item1, timeTable.Item2};
         // }));
-        foreach (var timetable in lessonPlan.AllTimetables) {
+        foreach (var timetable in lessonPlan.NewTimetables) {
             var timeTable = ModelsToEntities.MapTimetable(timetable, _configuration);
             _context.TimeTables.Add(timeTable.Item1);
             if (timeTable.Item2 != null) _context.TimeTables.Add(timeTable.Item2);
