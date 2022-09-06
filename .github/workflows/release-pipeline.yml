@@ -70,5 +70,12 @@ jobs:
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
-      - name: Display structure of downloaded files
-        run: ls -R
+      - name: Current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
+      - name: Create release and upload artifacts
+        uses: ncipollo/release-action@v1
+        with: 
+          tag: ${{steps.date.outputs.date}}
+          artifacts: "*.zip"
+          token: ${{secrets.GITHUB_TOKEN}}
