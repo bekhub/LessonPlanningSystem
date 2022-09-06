@@ -49,10 +49,11 @@ jobs:
         run: dotnet publish clients/LPS.Desktop -c Release -r ${{matrix.os}} --sc true -o ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}} -p:PublishSingleFile=true
         
       - name: zip publish files
-        uses: vimtor/action-zip@v1
-        with: 
-          files: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}/
-          dest: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}.zip
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'zip'
+          path: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}/
+          filename: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}.zip
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
