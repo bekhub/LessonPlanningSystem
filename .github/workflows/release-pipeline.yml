@@ -51,8 +51,7 @@ jobs:
       - name: zip publish files
         uses: vimtor/action-zip@v1
         with: 
-          files: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}
-          recursive: false
+          files: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}/
           dest: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}.zip
 
       - name: Upload artifact for deployment job
