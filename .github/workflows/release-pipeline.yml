@@ -3,8 +3,6 @@
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   publish:
@@ -36,12 +34,6 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
-
-      - name: Execute unit tests
-        run: dotnet test
-
-      - name: Build with dotnet
-        run: dotnet build -c Release
         
       - name: dotnet publish
         run: dotnet publish clients/LPS.Desktop -c Release -r ${{matrix.os}} --sc true -o ${{env.DOTNET_ROOT}}\LPS.Desktop_${{matrix.os}} -p:PublishSingleFile=true -p:DebugSymbols=false -p:DebugType=None
