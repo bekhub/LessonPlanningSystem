@@ -76,5 +76,5 @@ jobs:
         uses: ncipollo/release-action@v1
         with: 
           tag: ${{steps.date.outputs.date}}
-          artifacts: "*.zip"
+          artifacts: "*"
           token: ${{secrets.GITHUB_TOKEN}}
