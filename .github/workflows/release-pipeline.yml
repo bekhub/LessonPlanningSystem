@@ -52,14 +52,14 @@ jobs:
         uses: thedoctor0/zip-release@main
         with:
           type: 'zip'
-          path: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}/
-          filename: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}.zip
+          directory: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}/
+          filename: LPS.Desktop_${{matrix.os}}.zip
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: LPS.Desktop_${{matrix.os}}
-          path: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}.zip
+          path: LPS.Desktop_${{matrix.os}}.zip
           
   release:
     permissions: write-all
