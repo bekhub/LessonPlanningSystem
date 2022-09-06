@@ -2,9 +2,9 @@
 
 on:
   push:
-    branches: [ "configureGithubActions" ]
-#  pull_request:
-#    branches: [ "main" ]
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   publish:
@@ -22,8 +22,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          # Todo: delete
-          ref: 'configureGithubActions'
           fetch-depth: 0
       
       - name: Install .NET Core
@@ -46,7 +44,7 @@ jobs:
         run: dotnet build -c Release
         
       - name: dotnet publish
-        run: dotnet publish clients/LPS.Desktop -c Release -r ${{matrix.os}} --sc true -o ${{env.DOTNET_ROOT}}\LPS.Desktop_${{matrix.os}} -p:PublishSingleFile=true
+        run: dotnet publish clients/LPS.Desktop -c Release -r ${{matrix.os}} --sc true -o ${{env.DOTNET_ROOT}}\LPS.Desktop_${{matrix.os}} -p:PublishSingleFile=true -p:DebugSymbols=false -p:DebugType=None
         
       - name: zip publish files
         uses: thedoctor0/zip-release@main
