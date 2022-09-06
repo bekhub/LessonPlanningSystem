@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        configuration: [Release]
+        os: [linux-x64, win-x64, osx-x64]
 
     runs-on: windows-latest
 
@@ -30,9 +30,6 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 6.0.x
-          
-      - name: Install dependencies
-        run: dotnet restore
 
       - name: Set up dependency caching for faster builds
         uses: actions/cache@v3
@@ -43,16 +40,16 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Execute unit tests
-        run: dotnet test --no-restore --verbosity normal
+        run: dotnet test
 
       - name: Build with dotnet
-        run: dotnet build -c Release --no-restore
+        run: dotnet build -c Release
         
       - name: dotnet publish
-        run: dotnet publish clients/LPS.Desktop -c Release -r win-x64 --sc true -o ${{env.DOTNET_ROOT}}/desktop_app -p:PublishSingleFile=true --no-restore
+        run: dotnet publish clients/LPS.Desktop -c Release -r ${{matrix.os}} --sc true -o ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}} -p:PublishSingleFile=true
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/desktop_app
+          name: LPS.Desktop_${{matrix.os}}
+          path: ${{env.DOTNET_ROOT}}/LPS.Desktop_${{matrix.os}}
