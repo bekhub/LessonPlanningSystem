@@ -182,8 +182,11 @@ public class TimetableService
     {
         foreach (var course in lessonPlan.GeneratedCoursesList.MainCourses) {
             var dbCourse = await _context.Courses.FindAsync(course.Id);
-            dbCourse!.UnpositionedPracticeHours = lessonPlan.NewCoursesTimetable.UnpositionedPracticeHours(course);
-            dbCourse.UnpositionedTheoryHours = lessonPlan.NewCoursesTimetable.UnpositionedTheoryHours(course);
+            var practice = lessonPlan.NewCoursesTimetable.UnpositionedPracticeHours(course);
+            var theory = lessonPlan.NewCoursesTimetable.UnpositionedTheoryHours(course);
+            (practice, theory) = practice + theory == 0 ? (0, 0): (practice, theory);
+            dbCourse!.UnpositionedPracticeHours = practice;
+            dbCourse.UnpositionedTheoryHours = theory;
         }
         await _context.SaveChangesAsync();
     }
