@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using LPS.Desktop.Helpers;
+using LPS.Desktop.Services;
 using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -30,6 +35,7 @@ public class ConfigurationPageViewModel : RoutableViewModel
         RouterViewModel.IsGoBackEnabled = true;
         this.WhenAnyValue(x => x.EducationYearFrom)
             .Subscribe(x => EducationYearTo = x.AddYears(1));
+        Observable.Start(RetrieveConfigAsync, RxApp.TaskpoolScheduler);
         this.WhenActivated(disposable => {
             this.WhenAnyValue(
                     x => x.AutumnEnabled, 
@@ -63,5 +69,25 @@ public class ConfigurationPageViewModel : RoutableViewModel
             MaxNumberOfThreads = NumberOfThreads
         };
         base.OnGoNext();
+    }
+
+    private async Task RetrieveConfigAsync()
+    {
+        try {
+            await DatabaseService.UsingContextAsync(ConfigurationDetails.ConnectionDetails, async context => {
+                var semester = await context.Configs.FirstOrDefaultAsync(x => x.Name == "Semester");
+                if (semester != null) {
+                    AutumnEnabled = semester.Value == "Guz";
+                    SpringEnabled = semester.Value == "Bahar";
+                }
+                var educationalYear = await context.Configs.FirstOrDefaultAsync(x => x.Name == "EducationalYear");
+                if (educationalYear != null) {
+                    var from = educationalYear.Value[..4] + "-01-01";
+                    EducationYearFrom = DateTimeOffset.Parse(from);
+                }
+            });
+        } catch (Exception ex) {
+            Observable.Start(() => MessageBoxHelper.ShowErrorAsync(ex.Message), RxApp.MainThreadScheduler);
+        }
     }
 }

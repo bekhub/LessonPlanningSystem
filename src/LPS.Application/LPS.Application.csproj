@@ -16,4 +16,8 @@
       <ProjectReference Include="..\LPS.PlanGenerators\LPS.PlanGenerators.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Models" />
+    </ItemGroup>
+
 </Project>

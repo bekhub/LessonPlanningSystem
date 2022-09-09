@@ -21,11 +21,11 @@ namespace LPS.Application;
 
 public class TimetableService
 {
-    private readonly TimetableV4Context _context;
+    private readonly TimetableContext _context;
     private readonly IMapper _mapper;
     private readonly PlanConfiguration _configuration;
     
-    public TimetableService(TimetableV4Context context, IMapper mapper, PlanConfiguration configuration)
+    public TimetableService(TimetableContext context, IMapper mapper, PlanConfiguration configuration)
     {
         _context = context;
         _mapper = mapper;
