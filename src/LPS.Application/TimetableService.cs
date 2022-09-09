@@ -21,11 +21,11 @@ namespace LPS.Application;
 
 public class TimetableService
 {
-    private readonly TimetableV4Context _context;
+    private readonly TimetableContext _context;
     private readonly IMapper _mapper;
     private readonly PlanConfiguration _configuration;
     
-    public TimetableService(TimetableV4Context context, IMapper mapper, PlanConfiguration configuration)
+    public TimetableService(TimetableContext context, IMapper mapper, PlanConfiguration configuration)
     {
         _context = context;
         _mapper = mapper;
@@ -182,8 +182,11 @@ public class TimetableService
     {
         foreach (var course in lessonPlan.GeneratedCoursesList.MainCourses) {
             var dbCourse = await _context.Courses.FindAsync(course.Id);
-            dbCourse!.UnpositionedPracticeHours = lessonPlan.NewCoursesTimetable.UnpositionedPracticeHours(course);
-            dbCourse.UnpositionedTheoryHours = lessonPlan.NewCoursesTimetable.UnpositionedTheoryHours(course);
+            var practice = lessonPlan.NewCoursesTimetable.UnpositionedPracticeHours(course);
+            var theory = lessonPlan.NewCoursesTimetable.UnpositionedTheoryHours(course);
+            (practice, theory) = practice + theory == 0 ? (0, 0): (practice, theory);
+            dbCourse!.UnpositionedPracticeHours = practice;
+            dbCourse.UnpositionedTheoryHours = theory;
         }
         await _context.SaveChangesAsync();
     }
