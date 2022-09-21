@@ -11,14 +11,14 @@ public class RouterViewModel : ViewModelBase, IScreen
 {
     [Reactive] public RoutingState Router { get; set; } = new();
     [Reactive] public RoutableViewModel? CurrentViewModel { get; set; }
-    protected ReactiveCommand<Unit, Unit> GoNext { get; set; }
+    protected ReactiveCommand<Unit, Unit> GoNext { get; set; } = null!;
     protected ReactiveCommand<Unit, Unit> GoBack { get; set; }
 
     [Reactive] public bool IsGoNextEnabled { get; set; }
     [Reactive] public bool IsGoBackEnabled { get; set; }
     public ConfigurationDetails ConfigurationDetails { get; set; } = new();
 
-    public RouterViewModel()
+    protected RouterViewModel()
     {
         GoBack = ReactiveCommand.Create(NavigateBack);
     }

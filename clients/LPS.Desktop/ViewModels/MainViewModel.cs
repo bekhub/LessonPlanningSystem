@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Reactive.Linq;
 using Avalonia;
 using FluentAvalonia.Styling;
+using LPS.Desktop.Helpers;
 using ReactiveUI;
 
 namespace LPS.Desktop.ViewModels;
@@ -17,17 +19,22 @@ public class MainViewModel : RouterViewModel
 
     private void HandleGoNext()
     {
-        CurrentViewModel?.OnGoNext();
-        if (CurrentViewModel == null) {
-            NavigateTo(new ConnectionPageViewModel(this));
-            return;
+        try {
+            CurrentViewModel?.OnGoNext();
+            if (CurrentViewModel == null) {
+                NavigateTo(new ConnectionPageViewModel(this));
+                return;
+            }
+            RoutableViewModel next = CurrentViewModel switch {
+                ConnectionPageViewModel => new SelectItemsPageViewModel(this),
+                SelectItemsPageViewModel => new RemoteCoursesPageViewModel(this),
+                RemoteCoursesPageViewModel => new ConfigurationPageViewModel(this),
+                ConfigurationPageViewModel => new TimetableGeneratorViewModel(this),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            this.NavigateTo(next);
+        } catch (Exception ex) {
+            Observable.Start(() => MessageBoxHelper.ShowErrorAsync(ex.Message), RxApp.MainThreadScheduler);
         }
-        RoutableViewModel next = CurrentViewModel switch {
-            ConnectionPageViewModel => new SelectItemsPageViewModel(this),
-            SelectItemsPageViewModel => new ConfigurationPageViewModel(this),
-            ConfigurationPageViewModel => new TimetableGeneratorViewModel(this),
-            _ => throw new ArgumentOutOfRangeException()
-        };
-        this.NavigateTo(next);
     }
 }

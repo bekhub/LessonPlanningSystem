@@ -104,7 +104,7 @@
                 Spacing="20">
                 <Button
                     Command="{Binding GenerateLessonPlan}"
-                    IsEnabled="{Binding !IsDataPulling}"
+                    IsEnabled="{Binding CanGenerate}"
                     Width="180">
                     Generate timetable
                 </Button>

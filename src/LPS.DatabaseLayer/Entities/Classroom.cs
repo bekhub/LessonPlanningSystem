@@ -9,7 +9,7 @@ namespace LPS.DatabaseLayer.Entities;
 [Index(nameof(UserId), Name = "IDX_497D309DA76ED395")]
 [Index(nameof(DepartmentId), Name = "IDX_497D309DAE80F5DF")]
 [Index(nameof(RoomTypeId), Name = "IDX_497D309DB28C944D")]
-public class Classroom
+public partial class Classroom
 {
     [Key]
     [Column("id")]

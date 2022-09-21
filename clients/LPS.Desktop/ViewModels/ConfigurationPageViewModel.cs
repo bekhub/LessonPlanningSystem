@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using LPS.DatabaseLayer;
+using LPS.DatabaseLayer.Entities;
 using LPS.Desktop.Helpers;
 using LPS.Desktop.Services;
 using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.Enums;
-using LPS.PlanGenerators.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -15,10 +18,10 @@ namespace LPS.Desktop.ViewModels;
 
 public class ConfigurationPageViewModel : RoutableViewModel
 {
-    [Reactive] public bool RemoteCoursesChecked { get; set; }
-    [Reactive] public int? SelectedRemoteEducationClassroomId { get; set; }
-    [Reactive] public int? SelectedRemoteEducationWeekday { get; set; }
-    [Reactive] public int? SelectedRemoteEducationHour { get; set; }
+    [Reactive] public List<TimeHour> TimeHours { get; set; }
+    [Reactive] public TimeHour LunchAfterHour { get; set; }
+    [Reactive] public TimeHour HourStart { get; set; }
+    [Reactive] public TimeHour HourEnd { get; set; }
     [Reactive] public bool AutumnEnabled { get; set; }
     [Reactive] public bool SpringEnabled { get; set; }
     [Reactive] public int NumberOfTries { get; set; } = 1;
@@ -35,31 +38,26 @@ public class ConfigurationPageViewModel : RoutableViewModel
         RouterViewModel.IsGoBackEnabled = true;
         this.WhenAnyValue(x => x.EducationYearFrom)
             .Subscribe(x => EducationYearTo = x.AddYears(1));
-        Observable.Start(RetrieveConfigAsync, RxApp.TaskpoolScheduler);
+        Observable.Start(RetrieveDataAsync, RxApp.TaskpoolScheduler);
         this.WhenActivated(disposable => {
             this.WhenAnyValue(
                     x => x.AutumnEnabled, 
                     x => x.SpringEnabled,
-                    x => x.RemoteCoursesChecked,
-                    x => x.SelectedRemoteEducationClassroomId,
-                    x => x.SelectedRemoteEducationWeekday,
-                    x => x.SelectedRemoteEducationHour,
-                    (autumn, spring, remote, classroom, weekday, hour) 
-                        => (autumn || spring) && !remote || classroom is > 0 && weekday != null && hour != null)
+                    x => x.LunchAfterHour,
+                    x => x.HourStart,
+                    x => x.HourEnd,
+                    (autumn, spring, lunchAfterHour, hourStart, hourEnd) 
+                        => (autumn || spring) && lunchAfterHour != null && hourStart != null && hourEnd != null)
                 .Subscribe(x => RouterViewModel.IsGoNextEnabled = x).DisposeWith(disposable);
         });
     }
 
     public override void OnGoNext()
     {
-        ScheduleTime? time = RemoteCoursesChecked 
-            ? new ScheduleTime((Weekdays)(SelectedRemoteEducationWeekday! + 1), SelectedRemoteEducationHour!.Value)
-            : null;
-        RouterViewModel.ConfigurationDetails.PlanConfiguration = new PlanConfiguration {
-            IncludeGeneralMandatoryCourses = false,
-            IncludeRemoteEducationCourses = RemoteCoursesChecked,
-            RemoteEducationLessonTime = time,
-            RemoteEducationClassroomId = RemoteCoursesChecked ? SelectedRemoteEducationClassroomId : null,
+        StaticConfiguration.LunchAfterHour = LunchAfterHour.OrderPosition!.Value;
+        StaticConfiguration.HourStart = HourStart.OrderPosition!.Value;
+        StaticConfiguration.HourEnd = HourEnd.OrderPosition!.Value;
+        RouterViewModel.ConfigurationDetails.PlanConfiguration = RouterViewModel.ConfigurationDetails.PlanConfiguration with {
             Semester = AutumnEnabled ? Semester.Autumn : Semester.Spring,
             EducationalYear = $"{EducationYearFrom.Year}-{EducationYearTo.Year}",
             NumberOfVariants = NumberOfTries,
@@ -71,23 +69,43 @@ public class ConfigurationPageViewModel : RoutableViewModel
         base.OnGoNext();
     }
 
-    private async Task RetrieveConfigAsync()
+    private async Task RetrieveDataAsync()
     {
         try {
             await DatabaseService.UsingContextAsync(ConfigurationDetails.ConnectionDetails, async context => {
-                var semester = await context.Configs.FirstOrDefaultAsync(x => x.Name == "Semester");
-                if (semester != null) {
-                    AutumnEnabled = semester.Value == "Guz";
-                    SpringEnabled = semester.Value == "Bahar";
-                }
-                var educationalYear = await context.Configs.FirstOrDefaultAsync(x => x.Name == "EducationalYear");
-                if (educationalYear != null) {
-                    var from = educationalYear.Value[..4] + "-01-01";
-                    EducationYearFrom = DateTimeOffset.Parse(from);
-                }
+                TimeHours = await context.TimeHours.AsNoTracking().ToListAsync();
+                await RetrieveConfigAsync(context);
             });
         } catch (Exception ex) {
             Observable.Start(() => MessageBoxHelper.ShowErrorAsync(ex.Message), RxApp.MainThreadScheduler);
         }
+    }
+
+    private async Task RetrieveConfigAsync(TimetableContext context)
+    {
+        var semester = await GetConfigValueAsync(context, "Semester");
+        if (semester != null) {
+            AutumnEnabled = semester == "Guz";
+            SpringEnabled = semester == "Bahar";
+        }
+        var educationalYear = await GetConfigValueAsync(context, "EducationalYear");
+        if (educationalYear != null) {
+            var from = educationalYear[..4] + "-01-01";
+            EducationYearFrom = DateTimeOffset.Parse(from);
+        }
+        var lunchAfterHour = await GetConfigValueAsync(context, "LunchAfterHourPosition");
+        var hourStart = await GetConfigValueAsync(context, "HourStartPosition");
+        var hourEnd = await GetConfigValueAsync(context, "HourEndPosition");
+        if (lunchAfterHour != null && hourStart != null && hourEnd != null) {
+            LunchAfterHour = TimeHours.FirstOrDefault(x => x.OrderPosition == Convert.ToInt32(lunchAfterHour));
+            HourStart = TimeHours.FirstOrDefault(x => x.OrderPosition == Convert.ToInt32(hourStart));
+            HourEnd = TimeHours.FirstOrDefault(x => x.OrderPosition == Convert.ToInt32(hourEnd));
+        }
+    }
+
+    private static async Task<string> GetConfigValueAsync(TimetableContext context, string configName)
+    {
+        var config = await context.Configs.AsNoTracking().FirstOrDefaultAsync(x => x.Name == configName);
+        return config?.Value;
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using LPS.Application;
@@ -26,6 +27,7 @@ public class TimetableGeneratorViewModel : RoutableViewModel
     [ObservableAsProperty] public bool IsOriginalSaving { get; }
     [ObservableAsProperty] public bool IsPreviewSaving { get; }
     [ObservableAsProperty] public bool IsProgressActive { get; }
+    [ObservableAsProperty] public bool CanGenerate { get; }
     [ObservableAsProperty] public bool CanSave { get; }
 
     [ObservableAsProperty] public int? TotalFreeHoursOfRooms { get; }
@@ -34,25 +36,26 @@ public class TimetableGeneratorViewModel : RoutableViewModel
     [ObservableAsProperty] public int? TotalSeparatedLessons { get; }
     [ObservableAsProperty] public int? MaxTeachingHours { get; }
 
-    public ReactiveCommand<Unit, Task> GenerateLessonPlan { get; set; }
-    public ReactiveCommand<Unit, Unit> SaveAsOriginal { get; set; }
-    public ReactiveCommand<Unit, Unit> SaveAsPreview { get; set; }
-    
+    public ReactiveCommand<Unit, Task> GenerateLessonPlan { get; set; } = null!;
+    public ReactiveCommand<Unit, Unit> SaveAsOriginal { get; set; } = null!;
+    public ReactiveCommand<Unit, Unit> SaveAsPreview { get; set; } = null!;
+
     public TimetableGeneratorViewModel(RouterViewModel routerViewModel) :
         base(routerViewModel, "timetableGenerator")
     {
         RouterViewModel.IsGoNextEnabled = false;
-        RouterViewModel.IsGoBackEnabled = true;
         CreateObservables();
         CreateCommands();
         PullData();
+        this.WhenActivated(disposable => {
+            this.WhenAny(x => x.IsProgressActive,
+                    active => active.Value)
+                .Subscribe(x => RouterViewModel.IsGoBackEnabled = !x).DisposeWith(disposable);
+        });
     }
 
     private void CreateObservables()
     {
-        this.WhenAnyValue(x => x.GeneratedLessonPlan, x => x.IsPlanGenerating, 
-                (plan, generating) => plan != null && !generating)
-            .ToPropertyEx(this, x => x.CanSave);
         this.WhenAnyValue(x => x.CoursesData, x => x.ClassroomsData, 
                 (courses, rooms) => courses == null || rooms == null)
             .ToPropertyEx(this, x => x.IsDataPulling);
@@ -75,6 +78,12 @@ public class TimetableGeneratorViewModel : RoutableViewModel
                 x => x.IsOriginalSaving, 
                 (generating, pSaving, oSaving) => generating || pSaving || oSaving)
             .ToPropertyEx(this, x => x.IsProgressActive);
+        this.WhenAnyValue(x => x.GeneratedLessonPlan, x => x.IsProgressActive, 
+                (plan, progressActive) => plan != null && !progressActive)
+            .ToPropertyEx(this, x => x.CanSave);
+        this.WhenAnyValue(x => x.IsProgressActive, 
+                progressActive => !progressActive)
+            .ToPropertyEx(this, x => x.CanGenerate);
     }
 
     private void CreateCommands()
