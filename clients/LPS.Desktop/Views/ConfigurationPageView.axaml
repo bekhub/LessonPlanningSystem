@@ -14,55 +14,54 @@
     <Grid
         HorizontalAlignment="Left"
         Margin="20"
+        RowDefinitions="50,50,50,50,50,50,50,50,50,50"
         VerticalAlignment="Top">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
-            <RowDefinition Height="50" />
-        </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <CheckBox Content="Arrange Remote Courses (UE)" IsChecked="{Binding RemoteCoursesChecked}" />
-        </StackPanel>
         <StackPanel
-            Grid.Row="1"
-            IsVisible="{Binding RemoteCoursesChecked}"
-            Orientation="Horizontal">
-            <NumericUpDown
-                Height="30"
-                Minimum="1"
-                Value="{Binding SelectedRemoteEducationClassroomId}" />
+            Grid.Row="0"
+            Orientation="Horizontal"
+            VerticalAlignment="Center">
+            <ComboBox Items="{Binding TimeHours}" SelectedItem="{Binding LunchAfterHour}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
             <TextBlock Margin="10,0" VerticalAlignment="Center">
-                Classroom ID
+                LunchAfterHour
             </TextBlock>
         </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Orientation="Horizontal"
+            VerticalAlignment="Center">
+            <ComboBox Items="{Binding TimeHours}" SelectedItem="{Binding HourStart}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                HourStart
+            </TextBlock>
+        </StackPanel>
+
         <StackPanel
             Grid.Row="2"
-            IsVisible="{Binding RemoteCoursesChecked}"
             Orientation="Horizontal"
-            Spacing="5"
             VerticalAlignment="Center">
-            <ComboBox SelectedIndex="{Binding SelectedRemoteEducationWeekday}">
-                <ComboBoxItem>Monday</ComboBoxItem>
-                <ComboBoxItem>Tuesday</ComboBoxItem>
-                <ComboBoxItem>Wednesday</ComboBoxItem>
-                <ComboBoxItem>Thursday</ComboBoxItem>
-                <ComboBoxItem>Friday</ComboBoxItem>
+            <ComboBox Items="{Binding TimeHours}" SelectedItem="{Binding HourEnd}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
             </ComboBox>
-            <NumericUpDown
-                Height="30"
-                Maximum="11"
-                Minimum="0"
-                Value="{Binding SelectedRemoteEducationHour}" />
             <TextBlock Margin="10,0" VerticalAlignment="Center">
-                Schedule time
+                HourEnd
             </TextBlock>
         </StackPanel>
         <StackPanel Grid.Row="3" Orientation="Horizontal">

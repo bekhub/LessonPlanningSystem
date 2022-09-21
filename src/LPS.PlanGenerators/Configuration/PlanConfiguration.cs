@@ -4,7 +4,7 @@ using LPS.PlanGenerators.ValueObjects;
 
 namespace LPS.PlanGenerators.Configuration;
 
-public class PlanConfiguration
+public record PlanConfiguration
 {
     public bool IncludeGeneralMandatoryCourses { get; init; }
     public bool IncludeRemoteEducationCourses { get; init; }

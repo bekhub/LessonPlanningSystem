@@ -15,17 +15,17 @@ public readonly struct ScheduleTime
     
     public ScheduleTime(Weekdays weekday, int hour)
     {
-        if (hour is < 0 or > 11)
-            throw new ArgumentException("Hour must be greater than or equal to 0 and less than or equal to 12");
+        if (hour is < MinDayHour or > MaxDayHour)
+            throw new ArgumentException($"Hour must be greater than or equal to {MinDayHour} and less than or equal to {MaxDayHour}");
         Weekday = weekday;
         Hour = hour;
     }
 
     static ScheduleTime()
     {
-        WeekScheduleTimes = new Dictionary<(Weekdays, int), ScheduleTime>(Enum.GetValues<Weekdays>().Length * 12);
+        WeekScheduleTimes = new Dictionary<(Weekdays, int), ScheduleTime>(Enum.GetValues<Weekdays>().Length * HoursPerDay);
         for (Weekdays wd = Weekdays.Monday; wd <= Weekdays.Friday; wd++) {
-            for (int h = 0; h <= 11; h++) {
+            for (int h = HourStart; h <= HourEnd; h++) {
                 WeekScheduleTimes.Add((wd, h), new ScheduleTime(wd, h));
             }
         }
@@ -46,12 +46,12 @@ public readonly struct ScheduleTime
         var separatedTimes = 0;
         foreach (var timesByWeekday in times.GroupBy(x => x.Weekday)) {
             var hours = timesByWeekday.Select(x => x.Hour).OrderBy(x => x).ToArray();
-            switch (hours.Length) {
-                case 1:
-                    separatedTimes++; continue;
-                case 2:
-                    separatedTimes += hours[1] - hours[0] == 1 ? 0 : 1; continue;
-            }
+            separatedTimes = hours.Length switch {
+                1 => separatedTimes + 1,
+                2 => separatedTimes + (hours[1] - hours[0] == 1 ? 0 : 1),
+                _ => separatedTimes
+            };
+            if (hours.Length is 1 or 2) continue;
 
             for (var i = 1; i < hours.Length - 1; i++) {
                 if (hours[i] - hours[i - 1] == 1 || hours[i + 1] - hours[i] == 1) continue;
@@ -99,8 +99,8 @@ public readonly struct ScheduleTime
     public bool NotLunchOrEndOfDay(int hoursNeeded)
     {
         return Hour <= LunchAfterHour 
-            ? Hour + hoursNeeded < LunchAfterHour 
-            : Hour + hoursNeeded <= HoursPerDay;
+            ? Hour + hoursNeeded <= LunchAfterHour 
+            : Hour + hoursNeeded < HoursPerDay;
     }
 
     public bool Equals(ScheduleTime other)

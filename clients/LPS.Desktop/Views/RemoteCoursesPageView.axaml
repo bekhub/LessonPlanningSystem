@@ -1,0 +1,67 @@
+﻿<UserControl
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d"
+    x:Class="LPS.Desktop.Views.RemoteCoursesPageView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:LPS.Desktop.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.DataContext>
+        <vm:RemoteCoursesPageViewModel />
+    </Design.DataContext>
+    <Grid
+        HorizontalAlignment="Left"
+        Margin="20"
+        RowDefinitions="50,50,50,300"
+        VerticalAlignment="Top">
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <CheckBox Content="Arrange Remote Courses (UE)" IsChecked="{Binding RemoteCoursesChecked}" />
+        </StackPanel>
+        <StackPanel
+            Grid.Row="1"
+            IsEnabled="{Binding RemoteCoursesChecked}"
+            Orientation="Horizontal"
+            Spacing="5"
+            VerticalAlignment="Center">
+            <ComboBox SelectedIndex="{Binding SelectedWeekday}">
+                <ComboBoxItem>Monday</ComboBoxItem>
+                <ComboBoxItem>Tuesday</ComboBoxItem>
+                <ComboBoxItem>Wednesday</ComboBoxItem>
+                <ComboBoxItem>Thursday</ComboBoxItem>
+                <ComboBoxItem>Friday</ComboBoxItem>
+            </ComboBox>
+            <ComboBox Items="{Binding TimeHours}" SelectedItem="{Binding SelectedTimeHour}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Margin="10,0" VerticalAlignment="Center">
+                Schedule time
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center">
+                Choose Classroom
+            </TextBlock>
+        </StackPanel>
+        <ListBox
+            Background="#16191f"
+            Grid.Row="3"
+            IsEnabled="{Binding RemoteCoursesChecked}"
+            Items="{Binding Path=Classrooms, Mode=TwoWay}"
+            Name="LsbDepartments"
+            SelectedItem="{Binding SelectedClassroom}"
+            SelectionMode="Single, Toggle"
+            Width="590">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding DisplayName}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>
