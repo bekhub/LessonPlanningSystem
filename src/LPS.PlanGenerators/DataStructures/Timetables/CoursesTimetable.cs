@@ -9,7 +9,7 @@ public class CoursesTimetable : ScheduleTimetableDict<int>
     public IReadOnlyList<Course> AllCourses { get; }
     public CoursesTimetable(CoursesData coursesData)
     {
-        AllCourses = coursesData.AllCourseList;
+        AllCourses = coursesData.MainCourseList;
     }
     
     public override void Add(int key, Timetable timetable)

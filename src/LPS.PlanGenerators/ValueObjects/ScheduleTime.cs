@@ -25,7 +25,7 @@ public readonly struct ScheduleTime
     {
         WeekScheduleTimes = new Dictionary<(Weekdays, int), ScheduleTime>(Enum.GetValues<Weekdays>().Length * HoursPerDay);
         for (Weekdays wd = Weekdays.Monday; wd <= Weekdays.Friday; wd++) {
-            for (int h = HourStart; h <= HourEnd; h++) {
+            for (int h = MinDayHour; h <= MaxDayHour; h++) {
                 WeekScheduleTimes.Add((wd, h), new ScheduleTime(wd, h));
             }
         }
@@ -34,7 +34,8 @@ public readonly struct ScheduleTime
     /// <summary>
     /// Gives all hours in weekdays
     /// </summary>
-    public static IEnumerable<ScheduleTime> GetWeekScheduleTimes() => WeekScheduleTimes.Values;
+    public static IEnumerable<ScheduleTime> GetWeekScheduleTimes() => WeekScheduleTimes.Values
+        .Where(x => x.Hour >= HourStart && x.Hour <= HourEnd);
     
     /// <summary>
     /// Returns schedule time by weekday and hour. Should be used to not to allocate extra memory
@@ -100,7 +101,7 @@ public readonly struct ScheduleTime
     {
         return Hour <= LunchAfterHour 
             ? Hour + hoursNeeded <= LunchAfterHour 
-            : Hour + hoursNeeded < HoursPerDay;
+            : Hour + hoursNeeded <= HourEnd;
     }
 
     public bool Equals(ScheduleTime other)

@@ -39,6 +39,14 @@ public class CoursesData
     /// </summary>
     public IReadOnlyDictionary<int, Course> AllCourses => _allCourses;
     public IReadOnlyList<Course> AllCourseList => _allCourses.Values.ToList();
+    /// <summary>
+    /// Department mandatory, Department mandatory LHP, Department elective, Department elective LHP courses
+    /// </summary>
+    public IReadOnlyList<Course> MainCourseList => DepartmentMandatoryCourses.AllCourses
+        .Concat(DepartmentElectiveCourses.AllCourses)
+        .Concat(DepartmentMandatoryCoursesLHP.AllCourses)
+        .Concat(DepartmentElectiveCoursesLHP.AllCourses)
+        .ToList();
 
     public CoursesData()
     {
