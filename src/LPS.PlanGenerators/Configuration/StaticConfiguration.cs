@@ -7,6 +7,6 @@ public static class StaticConfiguration
     public const int MaxDayHour = 11;
     public const int RadiusAroundBuilding = 4;
     public static int LunchAfterHour { get; set; } = 4;
-    public static int HourStart { get; set; } = 0;
-    public static int HourEnd { get; set; } = 11;
+    public static int HourStart { get; set; } = MinDayHour;
+    public static int HourEnd { get; set; } = MaxDayHour;
 }

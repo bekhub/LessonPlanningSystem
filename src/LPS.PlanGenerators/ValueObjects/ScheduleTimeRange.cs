@@ -1,6 +1,4 @@
-﻿using static LPS.PlanGenerators.Configuration.StaticConfiguration;
-
-namespace LPS.PlanGenerators.ValueObjects;
+﻿namespace LPS.PlanGenerators.ValueObjects;
 
 public class ScheduleTimeRange : ValueObject
 {
@@ -17,7 +15,7 @@ public class ScheduleTimeRange : ValueObject
         AllScheduleTimeRanges = new Dictionary<(ScheduleTime, int), ScheduleTimeRange>(8 * weekScheduleTimes.Count);
         for (int duration = 1; duration <= 8; duration++) {
             foreach (var time in weekScheduleTimes) {
-                if (!time.NotLunchOrEndOfDay(duration) || time.Hour + duration > MaxDayHour) continue;
+                if (!time.NotLunchOrEndOfDay(duration)) continue;
                 AllScheduleTimeRanges.Add((time, duration), new ScheduleTimeRange(time, duration));
             }
         }
@@ -43,7 +41,7 @@ public class ScheduleTimeRange : ValueObject
     public static IEnumerable<ScheduleTimeRange> GetWeekScheduleTimeRanges(int duration)
     {
         foreach (var time in ScheduleTime.GetWeekScheduleTimes()) {
-            if (!time.NotLunchOrEndOfDay(duration) || time.Hour + duration > MaxDayHour) continue;
+            if (!time.NotLunchOrEndOfDay(duration)) continue;
             if (AllScheduleTimeRanges.TryGetValue((time, duration), out var timeRange)) {
                 yield return timeRange;
             } else {

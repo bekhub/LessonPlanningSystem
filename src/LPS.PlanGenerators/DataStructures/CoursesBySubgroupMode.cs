@@ -33,6 +33,13 @@ public class CoursesBySubgroupMode
     /// </summary>
     public IReadOnlyList<Course> NormalCourses => _normalCourses;
 
+    public IReadOnlyList<Course> AllCourses => _normalCourses
+        .Concat(_specialCourses)
+        .Concat(_subgroupMode3Courses)
+        .Concat(_subgroupMode4Courses)
+        .Concat(_subgroupMode5N6Courses)
+        .ToList();
+
     public CoursesBySubgroupMode()
     {
         _subgroupMode5N6Courses = new List<Course>();

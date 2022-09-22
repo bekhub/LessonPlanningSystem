@@ -20,7 +20,7 @@ public class BestPlanGenerator
 
     public async Task<GeneratedLessonPlan> GenerateBestLessonPlanAsync()
     {
-        var coursesListTask = Task.Factory.StartNew(ChooseBestLessonPlan, TaskCreationOptions.LongRunning);
+        var coursesListTask = Task.Run(ChooseBestLessonPlan);
         GenerateLessonPlans();
         await coursesListTask;
         if (_bestLessonPlan == null) throw new Exception("Best courses list is null");
@@ -33,21 +33,12 @@ public class BestPlanGenerator
             MaxDegreeOfParallelism = _configuration.MaxNumberOfThreads ?? Environment.ProcessorCount - 1,
         };
         try {
-            if (_configuration.MaxNumberOfThreads is 1) {
-                for (int i = 0; i < _configuration.NumberOfVariants; i++) {
-                    var lessonPlan = RandomPlanGenerator.GenerateLessonPlan(_provider);
-                    var inefficiency = CalculateInefficiency(lessonPlan.TotalUnpositionedLessons, 
-                        lessonPlan.TotalSeparatedLessons, lessonPlan.MaxTeachingHours);
-                    _blockingCollection.Add((inefficiency, lessonPlan));
-                }
-            } else {
-                Parallel.For(0, _configuration.NumberOfVariants, options, _ => {
-                    var lessonPlan = RandomPlanGenerator.GenerateLessonPlan(_provider);
-                    var inefficiency = CalculateInefficiency(lessonPlan.TotalUnpositionedLessons, 
-                        lessonPlan.TotalSeparatedLessons, lessonPlan.MaxTeachingHours);
-                    _blockingCollection.Add((inefficiency, lessonPlan));
-                });
-            }
+            Parallel.For(0, _configuration.NumberOfVariants, options, _ => {
+                var lessonPlan = RandomPlanGenerator.GenerateLessonPlan(_provider);
+                var inefficiency = CalculateInefficiency(lessonPlan.TotalUnpositionedLessons, 
+                    lessonPlan.TotalSeparatedLessons, lessonPlan.MaxTeachingHours);
+                _blockingCollection.Add((inefficiency, lessonPlan));
+            });
         } finally {
             _blockingCollection.CompleteAdding();
         }
