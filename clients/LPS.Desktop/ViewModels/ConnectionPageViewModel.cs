@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,7 +16,7 @@ using Splat;
 
 namespace LPS.Desktop.ViewModels;
 
-public class ConnectionPageViewModel : RoutableViewModel
+public sealed class ConnectionPageViewModel : RoutableViewModel
 {
     [Reactive] public string? Server { get; set; }
     [Reactive] public string? Database { get; set; }

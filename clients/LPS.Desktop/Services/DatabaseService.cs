@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LPS.Desktop.Services;
 
-public class DatabaseService
+public static class DatabaseService
 {
     public static async Task UsingContextAsync(ConnectionDetails details, Func<TimetableContext, Task> action)
     {

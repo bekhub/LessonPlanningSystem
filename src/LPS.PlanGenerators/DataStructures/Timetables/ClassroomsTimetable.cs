@@ -1,10 +1,10 @@
-﻿using LPS.PlanGenerators.Enums;
+using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.ValueObjects;
 
 namespace LPS.PlanGenerators.DataStructures.Timetables;
 
-public class ClassroomsTimetable : ScheduleTimetablesDict<int>
+public sealed class ClassroomsTimetable : ScheduleTimetablesDict<int>
 {
     public ClassroomsData ClassroomsData { get; }
     

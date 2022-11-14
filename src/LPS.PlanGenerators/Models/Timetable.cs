@@ -1,10 +1,10 @@
-﻿#nullable enable
+#nullable enable
 using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.ValueObjects;
 
 namespace LPS.PlanGenerators.Models;
 
-public class Timetable
+public sealed class Timetable
 {
     public int? Id { get; init; }
     public Course Course { get; init; }

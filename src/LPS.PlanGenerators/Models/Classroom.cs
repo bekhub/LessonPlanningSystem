@@ -1,8 +1,8 @@
-﻿using LPS.PlanGenerators.Enums;
+using LPS.PlanGenerators.Enums;
 
 namespace LPS.PlanGenerators.Models;
 
-public class Classroom : Model
+public sealed class Classroom : Model
 {
     public int Capacity { get; init; }
     public RoomType RoomType { get; init; }

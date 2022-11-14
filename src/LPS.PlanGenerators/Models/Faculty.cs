@@ -1,6 +1,6 @@
-﻿namespace LPS.PlanGenerators.Models;
+namespace LPS.PlanGenerators.Models;
 
-public class Faculty : Model
+public sealed class Faculty : Model
 {
     public Building Building { get; init; }
 }

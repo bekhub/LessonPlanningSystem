@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Text;
 using ReactiveUI;
 
 namespace LPS.Desktop.Services;
 
-public class LoggingService : ReactiveObject, ILoggingService
+public sealed class LoggingService : ReactiveObject, ILoggingService
 {
     private readonly StringBuilder _log;
 

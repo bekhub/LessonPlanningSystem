@@ -2,15 +2,15 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>b44783c8-a6ca-48b6-b6d6-4c5e0255ac5d</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
+        <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>

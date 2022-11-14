@@ -3,7 +3,7 @@ using LPS.PlanGenerators.Models;
 
 namespace LPS.PlanGenerators.DataStructures;
 
-public class CoursesData
+public sealed class CoursesData
 {
     private readonly Dictionary<int, Course> _allCourses;
     

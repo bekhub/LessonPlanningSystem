@@ -1,9 +1,9 @@
-﻿using LPS.PlanGenerators.Configuration;
+using LPS.PlanGenerators.Configuration;
 using LPS.PlanGenerators.DataStructures;
 
 namespace LPS.PlanGenerators;
 
-public class GeneratorServiceProvider
+public sealed class GeneratorServiceProvider
 {
     public PlanConfiguration PlanConfiguration { get; }
     public CoursesData CoursesData { get; }

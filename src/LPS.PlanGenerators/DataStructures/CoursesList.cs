@@ -1,8 +1,8 @@
-﻿using LPS.PlanGenerators.Models;
+using LPS.PlanGenerators.Models;
 
 namespace LPS.PlanGenerators.DataStructures;
 
-public class CoursesList
+public sealed class CoursesList
 {
     public IReadOnlyList<Course> RemoteEducationCourses { get; init; }
     public IReadOnlyList<Course> DepartmentMandatoryCourses { get; init; }

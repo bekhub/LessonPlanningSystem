@@ -1,6 +1,6 @@
-﻿namespace LPS.Desktop.ViewModels;
+namespace LPS.Desktop.ViewModels;
 
-public class DialogViewModelBase : ViewModelBase
+public sealed class DialogViewModelBase : ViewModelBase
 {
     public bool Cancel { get; set; }
 

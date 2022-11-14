@@ -4,7 +4,7 @@ using LPS.PlanGenerators.Models;
 
 namespace LPS.PlanGenerators;
 
-public class GeneratedLessonPlan
+public sealed class GeneratedLessonPlan
 {
     public CoursesTimetable NewCoursesTimetable { get; init; }
     public ClassroomsTimetable NewClassroomsTimetable { get; init; }

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace LPS.Desktop.ViewModels;
 
-public class RemoteCoursesPageViewModel : RoutableViewModel
+public sealed class RemoteCoursesPageViewModel : RoutableViewModel
 {
     [Reactive] public List<TimeHour> TimeHours { get; set; }
     [Reactive] public List<Classroom> Classrooms { get; set; }

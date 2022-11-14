@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reactive.Linq;
 using Avalonia;
 using FluentAvalonia.Styling;
@@ -7,7 +7,7 @@ using ReactiveUI;
 
 namespace LPS.Desktop.ViewModels;
 
-public class MainViewModel : RouterViewModel
+public sealed class MainViewModel : RouterViewModel
 {
     public MainViewModel()
     {

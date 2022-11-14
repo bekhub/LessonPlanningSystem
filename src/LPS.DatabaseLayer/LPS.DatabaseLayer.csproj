@@ -1,17 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>39c34fa9-e513-49bf-8415-f4f94b075215</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.1">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.7">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.1" />
+        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.2" />
     </ItemGroup>
 
 </Project>

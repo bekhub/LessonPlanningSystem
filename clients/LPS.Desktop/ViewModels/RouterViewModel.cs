@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Reactive;
 using LPS.Desktop.Models;
