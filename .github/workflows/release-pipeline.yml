@@ -36,7 +36,7 @@ jobs:
             ${{ runner.os }}-nuget-
         
       - name: dotnet publish
-        run: dotnet publish clients/LPS.Desktop -c Release -r ${{matrix.os}} --sc true -o ${{env.DOTNET_ROOT}}\LPS.Desktop_${{matrix.os}} -p:PublishSingleFile=true -p:DebugSymbols=false -p:DebugType=None -p:PublishTrimmed=True -p:TrimMode=CopyUsed
+        run: dotnet publish clients/LPS.Desktop -c Release -r ${{matrix.os}} --sc true -o ${{env.DOTNET_ROOT}}\LPS.Desktop_${{matrix.os}} -p:PublishSingleFile=true -p:DebugSymbols=false -p:DebugType=None
         
       - name: zip publish files
         uses: thedoctor0/zip-release@main
