@@ -1,10 +1,10 @@
-﻿using LPS.PlanGenerators.Enums;
+using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 using LPS.Utils.Extensions;
 
 namespace LPS.PlanGenerators.DataStructures;
 
-public class CoursesBySubgroupMode
+public sealed class CoursesBySubgroupMode
 {
     private readonly List<Course> _subgroupMode5N6Courses;
     private readonly List<Course> _subgroupMode4Courses;

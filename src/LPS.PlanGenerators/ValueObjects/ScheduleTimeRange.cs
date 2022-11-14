@@ -1,6 +1,6 @@
-﻿namespace LPS.PlanGenerators.ValueObjects;
+namespace LPS.PlanGenerators.ValueObjects;
 
-public class ScheduleTimeRange : ValueObject
+public sealed class ScheduleTimeRange : ValueObject
 {
     public ScheduleTime Time { get; }
     public int Duration { get; }

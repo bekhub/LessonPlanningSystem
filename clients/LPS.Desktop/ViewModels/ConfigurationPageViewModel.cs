@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -16,7 +16,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace LPS.Desktop.ViewModels;
 
-public class ConfigurationPageViewModel : RoutableViewModel
+public sealed class ConfigurationPageViewModel : RoutableViewModel
 {
     [Reactive] public List<TimeHour> TimeHours { get; set; }
     [Reactive] public TimeHour LunchAfterHour { get; set; }

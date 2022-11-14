@@ -1,10 +1,10 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 
 namespace LPS.Desktop.Models;
 
 [DataContract]
-public class AppState: IAppState
+public sealed class AppState: IAppState
 {
     [DataMember]
     public ObservableCollection<ConnectionDetails> SavedConnectionDetailsList { get; set; }

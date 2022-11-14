@@ -7,7 +7,7 @@ using ReactiveUI;
 
 namespace LPS.Desktop.Services;
 
-public class NewtonsoftJsonSuspensionDriver<TState> : ISuspensionDriver where TState: class, new()
+public sealed class NewtonsoftJsonSuspensionDriver<TState> : ISuspensionDriver where TState: class, new()
 {
     private readonly string _file;
     private readonly JsonSerializerSettings _settings = new() {

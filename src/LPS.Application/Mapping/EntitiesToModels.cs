@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.ValueObjects;
 using Entities = LPS.DatabaseLayer.Entities;
@@ -6,7 +6,7 @@ using Models = LPS.PlanGenerators.Models;
 
 namespace LPS.Application.Mapping;
 
-public class EntitiesToModels : Profile
+public sealed class EntitiesToModels : Profile
 {
     public EntitiesToModels()
     {

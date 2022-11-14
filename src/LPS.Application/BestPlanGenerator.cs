@@ -1,10 +1,10 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using LPS.PlanGenerators;
 using LPS.PlanGenerators.Configuration;
 
 namespace LPS.Application;
 
-public class BestPlanGenerator
+public sealed class BestPlanGenerator
 {
     private readonly PlanConfiguration _configuration;
     private readonly GeneratorServiceProvider _provider;

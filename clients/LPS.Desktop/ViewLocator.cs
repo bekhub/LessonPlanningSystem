@@ -5,7 +5,7 @@ using LPS.Desktop.ViewModels;
 
 namespace LPS.Desktop;
 
-public class ViewLocator : IDataTemplate
+public sealed class ViewLocator : IDataTemplate
 {
     public IControl Build(object data)
     {

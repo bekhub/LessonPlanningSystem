@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Runtime.Serialization;
 
 namespace LPS.Desktop.Models;
 
 [DataContract]
-public record ConnectionDetails
+public sealed record ConnectionDetails
 {
     [DataMember]
     public string Server { get; }

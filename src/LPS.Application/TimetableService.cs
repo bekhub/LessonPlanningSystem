@@ -19,7 +19,7 @@ using LessonType = LPS.PlanGenerators.Enums.LessonType;
 
 namespace LPS.Application;
 
-public class TimetableService
+public sealed class TimetableService
 {
     private readonly TimetableContext _context;
     private readonly IMapper _mapper;

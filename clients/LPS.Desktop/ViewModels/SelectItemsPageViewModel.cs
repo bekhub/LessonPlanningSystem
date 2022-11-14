@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
@@ -15,7 +15,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace LPS.Desktop.ViewModels;
 
-public class SelectItemsPageViewModel : RoutableViewModel
+public sealed class SelectItemsPageViewModel : RoutableViewModel
 {
     [Reactive] public List<Faculty> Faculties { get; set; }
     [Reactive] public bool AllFacultiesChecked { get; set; }

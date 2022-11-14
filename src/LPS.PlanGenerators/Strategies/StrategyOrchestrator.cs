@@ -1,11 +1,11 @@
-﻿using LPS.PlanGenerators.DataStructures;
+using LPS.PlanGenerators.DataStructures;
 using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.Strategies.Interfaces;
 
 namespace LPS.PlanGenerators.Strategies;
 
-public class StrategyOrchestrator
+public sealed class StrategyOrchestrator
 {
     private readonly OneTeacherOneLabStrategy _oneTeacherOneLabStrategy;
     private readonly OneTeacherManyLabStrategy _oneTeacherManyLabStrategy;

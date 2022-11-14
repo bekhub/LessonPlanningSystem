@@ -1,8 +1,8 @@
-﻿using LPS.PlanGenerators.Enums;
+using LPS.PlanGenerators.Enums;
 
 namespace LPS.PlanGenerators.Models;
 
-public class Teacher : Model
+public sealed class Teacher : Model
 {
     public override int Id => Code;
 

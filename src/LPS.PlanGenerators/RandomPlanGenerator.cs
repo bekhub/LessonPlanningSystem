@@ -8,7 +8,7 @@ using LPS.PlanGenerators.ValueObjects;
 
 namespace LPS.PlanGenerators;
 
-public class RandomPlanGenerator
+public sealed class RandomPlanGenerator
 {
     private readonly TimetableData _timetableData;
     private readonly PlanConfiguration _configuration;

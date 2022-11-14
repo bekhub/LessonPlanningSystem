@@ -1,9 +1,9 @@
-﻿using LPS.PlanGenerators.Models;
+using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.ValueObjects;
 
 namespace LPS.PlanGenerators.DataStructures.Timetables;
 
-public class TeachersTimetable : ScheduleTimetableDict<int>
+public sealed class TeachersTimetable : ScheduleTimetableDict<int>
 {
     /// <summary>
     /// This function calculates the maximum number of hours to teach for a teacher without break during one day.

@@ -1,4 +1,4 @@
-﻿using LPS.PlanGenerators.DataStructures.Extensions;
+using LPS.PlanGenerators.DataStructures.Extensions;
 using LPS.PlanGenerators.DataStructures;
 using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
@@ -7,7 +7,7 @@ using LPS.PlanGenerators.ValueObjects;
 
 namespace LPS.PlanGenerators.Strategies;
 
-public class OneTeacherManyLabStrategy : ILessonPlacingStrategy
+public sealed class OneTeacherManyLabStrategy : ILessonPlacingStrategy
 {
     private readonly TimetableData _timetableData;
     

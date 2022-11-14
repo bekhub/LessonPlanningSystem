@@ -15,7 +15,7 @@ using static LPS.Desktop.Services.DatabaseService;
 
 namespace LPS.Desktop.ViewModels;
 
-public class TimetableGeneratorViewModel : RoutableViewModel
+public sealed class TimetableGeneratorViewModel : RoutableViewModel
 {
     [Reactive] private CoursesData? CoursesData { get; set; }
     [Reactive] private ClassroomsData? ClassroomsData { get; set; }

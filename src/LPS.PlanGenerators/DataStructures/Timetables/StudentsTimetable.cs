@@ -1,10 +1,10 @@
-﻿using LPS.PlanGenerators.Enums;
+using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
 using LPS.PlanGenerators.ValueObjects;
 
 namespace LPS.PlanGenerators.DataStructures.Timetables;
 
-public class StudentsTimetable : ScheduleTimetablesDict<(int DepartmentId, GradeYear gradeYear)>
+public sealed class StudentsTimetable : ScheduleTimetablesDict<(int DepartmentId, GradeYear gradeYear)>
 {
     /// <summary>
     /// Checks if students of the given year level and department are free at the given time

@@ -7,7 +7,7 @@ using LPS.PlanGenerators.ValueObjects;
 
 namespace LPS.PlanGenerators.DataStructures;
 
-public class TimetableData
+public sealed class TimetableData
 {
     private readonly ClassroomsData _classroomsData;
     private readonly IReadOnlyList<Course> _allCourses;

@@ -1,11 +1,11 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using ReactiveUI;
 using Splat;
 
 namespace LPS.Desktop;
 
-public class ConventionalViewLocator : IViewLocator
+public sealed class ConventionalViewLocator : IViewLocator
 {
     public IViewFor? ResolveView<T>(T? viewModel, string? contract = null)
     {

@@ -1,6 +1,6 @@
-﻿namespace LPS.PlanGenerators.Models;
+namespace LPS.PlanGenerators.Models;
 
-public class Building : Model
+public sealed class Building : Model
 {
     public int Distance { get; init; }
 }

@@ -1,4 +1,4 @@
-﻿using LPS.PlanGenerators.DataStructures.Timetables;
+using LPS.PlanGenerators.DataStructures.Timetables;
 using LPS.PlanGenerators.Models;
 
 namespace LPS.PlanGenerators.DataStructures;
@@ -6,7 +6,7 @@ namespace LPS.PlanGenerators.DataStructures;
 /// <summary>
 /// Timetable that pulled from database
 /// </summary>
-public class ExistingTimetable
+public sealed class ExistingTimetable
 {
     /// <summary>
     /// Timetables by course id

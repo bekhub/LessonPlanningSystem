@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using LPS.PlanGenerators.Enums;
 using LPS.PlanGenerators.Models;
@@ -6,7 +6,7 @@ using static LPS.PlanGenerators.Configuration.StaticConfiguration;
 
 namespace LPS.PlanGenerators.DataStructures;
 
-public class ClassroomsData
+public sealed class ClassroomsData
 {
     private readonly Dictionary<int, Classroom> _allClassrooms;
     private IReadOnlyDictionary<(int, Round), IReadOnlyList<Classroom>> _theoryClassrooms;

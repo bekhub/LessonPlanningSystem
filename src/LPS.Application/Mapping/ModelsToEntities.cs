@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using AutoMapper;
 using LPS.PlanGenerators.Configuration;
 using Entities = LPS.DatabaseLayer.Entities;
@@ -6,7 +6,7 @@ using Models = LPS.PlanGenerators.Models;
 
 namespace LPS.Application.Mapping;
 
-public class ModelsToEntities : Profile
+public sealed class ModelsToEntities : Profile
 {
     public ModelsToEntities()
     {
