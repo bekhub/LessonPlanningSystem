@@ -1,7 +1,5 @@
 # Kyrgyz-Turkish Manas University Lesson Plan Generator
 
-![Project Logo](https://yourdomain.com/logo.png) *(If you have a project logo)*
-
 ## Table of Contents
 
 - [Introduction](#introduction)
